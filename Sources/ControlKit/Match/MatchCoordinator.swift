@@ -27,20 +27,23 @@ public final class MatchCoordinator {
         guard !fillable.isEmpty else { return .blocked(.emptyVault) }
         let fillableKeys = Set(fillable.map(\.key))
 
+        let localRanking = local.match(context, fillable: fillableKeys)
+
         // Tier 0 — cache. Instant, offline, and holds the user's own corrections.
+        // The local ranking still runs, cheaply and offline, so a remembered
+        // answer that turns out to be wrong has somewhere to cycle to.
         if let entry = cache.entry(for: context), fillableKeys.contains(entry.key) {
             let result = MatchResult(
                 key: entry.key,
                 confidence: 1.0,
                 source: .cache,
-                alternatives: [],
+                alternatives: localRanking.filter { $0.key != entry.key },
                 looksSensitive: LocalMatcher.looksSensitive(context)
             )
             return gate(result, context: context)
         }
 
         // Tier 1 — deterministic rules.
-        let localRanking = local.match(context, fillable: fillableKeys)
         if let best = localRanking.first, best.score >= MatchThresholds.autoInsert {
             let result = MatchResult(
                 key: best.key,

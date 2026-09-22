@@ -222,7 +222,7 @@ final class FillController {
         guard let last = lastFill,
               last.signature == field.context.signature,
               Date().timeIntervalSince(last.at) < Self.cycleWindow,
-              last.ranked.count > 1
+              !last.ranked.isEmpty
         else { return false }
 
         // Only cycle when the previous insertion is still verifiably there, so a
@@ -231,7 +231,19 @@ final class FillController {
               current.hasSuffix(last.insertedText)
         else { return false }
 
-        let nextIndex = (last.index + 1) % last.ranked.count
+        // Exhausted the plausible candidates — stop guessing and show everything.
+        let nextIndex = last.index + 1
+        guard nextIndex < last.ranked.count else {
+            lastFill = nil
+            presentPicker(
+                field: field,
+                anchor: AX.frame(field.element),
+                ranked: vault.fillableFields.map(\.key),
+                preselected: nil,
+                hint: "Nothing else looked likely — pick one"
+            )
+            return true
+        }
         let nextKey = last.ranked[nextIndex]
         guard let definition = vault.field(for: nextKey) else { return false }
 
@@ -274,11 +286,15 @@ final class FillController {
 
     // MARK: Row construction
 
+    /// What a second press cycles through: only the keys that actually scored for
+    /// this field. Appending the whole vault here was wrong — cycling an email box
+    /// should offer your other email, not your date of birth. Once the plausible
+    /// candidates run out, the full list is one more press away.
     private func ranking(for result: MatchResult) -> [String] {
-        var keys = [result.key] + result.alternatives.map(\.key)
+        var keys = [result.key]
         var seen = Set(keys)
-        for field in vault.fillableFields where seen.insert(field.key).inserted {
-            keys.append(field.key)
+        for alternative in result.alternatives where seen.insert(alternative.key).inserted {
+            keys.append(alternative.key)
         }
         return keys
     }
