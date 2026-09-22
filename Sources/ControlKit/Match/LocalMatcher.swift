@@ -6,12 +6,56 @@ import Foundation
 /// number", "ZIP" and friends are not interesting judgment calls and should never
 /// cost an API round trip. Anything it can't resolve cleanly it scores low on
 /// purpose, so the coordinator escalates to Jev instead of guessing.
+/// Facts about *this* user that make an ambiguous label unambiguous.
+///
+/// "Berkeley email" is only obviously a school address if you know where the
+/// person goes. A fixed keyword list ("school", "university", "edu") cannot know
+/// that, and adding every institution name in the world is not a plan. The
+/// user's own stored values already say it, so the matcher reads them.
+public struct MatchHints: Sendable, Equatable {
+    /// Words that identify this user's institution — from their university name
+    /// and the domain of their school address.
+    public var schoolTokens: Set<String>
+
+    public init(schoolTokens: Set<String> = []) {
+        self.schoolTokens = schoolTokens
+    }
+
+    /// Words too common to identify anything.
+    private static let ignored: Set<String> = [
+        "university", "college", "school", "institute", "of", "the", "at", "and",
+        "com", "edu", "org", "net", "ac", "uk", "ca", "us", "mail", "email",
+    ]
+
+    public init(university: String?, schoolEmail: String?) {
+        var tokens = Set<String>()
+
+        for word in FieldContext.normalize(university ?? "").split(separator: " ") {
+            let token = String(word)
+            if token.count >= 2, !Self.ignored.contains(token) { tokens.insert(token) }
+        }
+
+        if let host = schoolEmail?.split(separator: "@").last {
+            for label in FieldContext.normalize(String(host)).split(separator: " ") {
+                let token = String(label)
+                if token.count >= 3, !Self.ignored.contains(token) { tokens.insert(token) }
+            }
+        }
+
+        schoolTokens = tokens
+    }
+}
+
 public struct LocalMatcher: Sendable {
     public init() {}
 
     /// Ranked candidates, best first. `fillable` restricts results to keys that
     /// actually hold a value.
-    public func match(_ context: FieldContext, fillable: Set<String>) -> [ScoredKey] {
+    public func match(
+        _ context: FieldContext,
+        fillable: Set<String>,
+        hints: MatchHints = MatchHints()
+    ) -> [ScoredKey] {
         var scores: [String: Double] = [:]
 
         func offer(_ key: String, _ score: Double) {
@@ -48,6 +92,7 @@ public struct LocalMatcher: Sendable {
 
         if Self.mentions(own, Self.emailTokens) || Self.mentions(all, Self.emailTokens) {
             let scoped = Self.mentions(own, ["school", "university", "edu", "academic", "campus", "student", "institution"])
+                || Self.mentions(own, Array(hints.schoolTokens))
             let personal = Self.mentions(own, ["personal", "private", "home", "alternate"])
             if scoped { offer("email_school", 0.95) }
             if personal { offer("email_personal", 0.95) }
@@ -86,8 +131,8 @@ public struct LocalMatcher: Sendable {
         /// in surrounding page text should not disqualify a rule that the field's
         /// actual label satisfies.
         func matches(_ haystack: String, vetoedBy veto: String) -> Bool {
-            guard !excluding.contains(where: { veto.contains($0) }) else { return false }
-            return phrases.contains { haystack.contains($0) }
+            guard !excluding.contains(where: { LocalMatcher.contains(veto, $0) }) else { return false }
+            return phrases.contains { LocalMatcher.contains(haystack, $0) }
         }
     }
 
@@ -100,9 +145,18 @@ public struct LocalMatcher: Sendable {
         Rule(key: "family_name", phrases: ["last name", "surname", "family name", "legal last"], confidence: 0.95, excluding: ["user"]),
         Rule(key: "middle_name", phrases: ["middle name", "middle initial"], confidence: 0.95),
         Rule(key: "full_name", phrases: ["full name", "legal name", "your name", "name on file"], confidence: 0.90, excluding: ["user", "first", "last", "middle", "preferred", "card", "company", "school", "organization"]),
+        // A label naming *both* halves wants the whole thing. "Name (First &
+        // Last)" is the single most common way a form asks, and the guard that
+        // stops "First name" matching a full name was vetoing it.
+        Rule(key: "full_name", phrases: ["first last", "first and last", "first name and last name",
+                                         "first middle last", "last first"], confidence: 0.96,
+             excluding: ["user", "card", "company", "organization"]),
         Rule(key: "full_name", phrases: ["name"], confidence: 0.58, excluding: ["user", "first", "last", "middle", "preferred", "go by", "goes by", "card", "company", "school", "university", "organization", "file", "nick", "domain", "event", "product"]),
         Rule(key: "pronouns", phrases: ["pronoun"], confidence: 0.95),
-        Rule(key: "date_of_birth", phrases: ["date of birth", "birth date", "birthdate", "birthday", "dob"], confidence: 0.95),
+        Rule(key: "date_of_birth", phrases: ["date of birth", "birth date", "birthdate", "birthday", "dob"], confidence: 0.95,
+             // A form that splits a date into three boxes labels them "birthDate-month"
+             // and friends. Each part is a fragment, not the date.
+             excluding: ["month", "day", "year", "mm", "dd", "yyyy"]),
 
         // Contact
         Rule(key: "phone_mobile", phrases: ["phone", "mobile number", "cell", "telephone", "contact number"], confidence: 0.92, excluding: ["work phone", "office phone", "emergency"]),
@@ -114,7 +168,8 @@ public struct LocalMatcher: Sendable {
         Rule(key: "degree_type", phrases: ["degree type", "degree level", "type of degree"], confidence: 0.92),
         Rule(key: "grad_year", phrases: ["graduation year", "grad year", "expected graduation", "class year", "year of graduation", "anticipated graduation"], confidence: 0.93),
         Rule(key: "class_standing", phrases: ["class standing", "year in school", "academic year", "current year"], confidence: 0.90),
-        Rule(key: "student_id", phrases: ["student id", "student number", "sid"], confidence: 0.93),
+        Rule(key: "student_id", phrases: ["student id", "student number", "sid"], confidence: 0.93,
+             excluding: ["country", "state", "city", "zip", "postal", "phone", "email", "month", "day", "year"]),
         Rule(key: "gpa", phrases: ["gpa", "grade point"], confidence: 0.95),
 
         // Professional
@@ -164,6 +219,18 @@ public struct LocalMatcher: Sendable {
     }
 
     static func mentions(_ haystack: String, _ needles: [String]) -> Bool {
-        needles.contains { haystack.contains($0) }
+        needles.contains { contains(haystack, $0) }
+    }
+
+    /// Phrase matching that starts at a word boundary.
+    ///
+    /// A plain substring test is wrong in a way that is hard to spot and easy to
+    /// ship: "sid" is inside "re**sid**ential", so a field named
+    /// `residentialFirstName` imported as a student ID. Requiring the phrase to
+    /// *begin* a word fixes that while still matching "zip" inside "zipcode",
+    /// which is a real and common spelling.
+    static func contains(_ haystack: String, _ phrase: String) -> Bool {
+        // The haystack is already normalised to space-separated lowercase words.
+        (" " + haystack).contains(" " + phrase)
     }
 }

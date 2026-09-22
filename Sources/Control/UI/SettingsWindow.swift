@@ -43,6 +43,7 @@ final class SettingsWindowController {
             self.window = window
         }
         vault.refreshFilledKeys()
+        window?.orderFrontRegardless()
         window?.makeKeyAndOrderFront(nil)
     }
 }
@@ -59,6 +60,8 @@ private struct SettingsView: View {
         TabView {
             DetailsTab(vault: vault)
                 .tabItem { Label("Your details", systemImage: "person.text.rectangle") }
+            SnippetsTab(vault: vault)
+                .tabItem { Label("Snippets", systemImage: "text.quote") }
             ShortcutTab(preferences: preferences, onTriggerChanged: onTriggerChanged)
                 .tabItem { Label("Trigger", systemImage: "command") }
             MatchingTab(preferences: preferences)
@@ -114,10 +117,38 @@ private struct AccessBanner: View {
 
 private struct DetailsTab: View {
     @Bindable var vault: VaultStore
+    @State private var importModel: ImportModel?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             AccessBanner()
+            HStack(spacing: 10) {
+                Picker("", selection: Binding(
+                    get: { vault.activeProfileID },
+                    set: { vault.activeProfileID = $0 }
+                )) {
+                    ForEach(VaultProfile.builtIn) { profile in
+                        Label(profile.name, systemImage: profile.symbol).tag(profile.id)
+                    }
+                }
+                .labelsHidden()
+                .frame(width: 150)
+
+                Text("\(vault.filledKeys.count) of \(vault.fields.filter { !$0.isDerived }.count) saved")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Button("Import…") { importModel = ImportModel(vault: vault) }
+            }
+            .sheet(item: $importModel) { model in
+                ImportSheet(model: model) { importModel = nil }
+            }
+
+            if vault.activeProfileID != VaultProfile.defaultID {
+                Text("Anything you leave blank here uses your Personal value. Fill a field in to override it just for this profile.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.tertiary)
+            }
             StorageBanner(vault: vault)
             if let error = vault.lastError {
                 Label(error, systemImage: "exclamationmark.triangle.fill")
@@ -126,7 +157,7 @@ private struct DetailsTab: View {
             }
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    ForEach(VaultCategory.allCases) { category in
+                    ForEach(VaultCategory.allCases.filter { $0 != .snippet }) { category in
                         let fields = vault.fields(in: category).filter { !$0.isDerived }
                         if !fields.isEmpty {
                             VStack(alignment: .leading, spacing: 6) {
@@ -189,6 +220,13 @@ private struct VaultFieldRow: View {
     @State private var unreadable = false
 
     private var isFilled: Bool { vault.filledKeys.contains(field.key) }
+    /// True when the value on screen belongs to the Personal profile rather than
+    /// the one being edited — i.e. it is inherited, and typing here overrides it.
+    private var isInherited: Bool {
+        vault.activeProfileID != VaultProfile.defaultID
+            && !vault.isOverridden(field.key, in: vault.activeProfileID)
+            && isFilled
+    }
 
     private var placeholder: String {
         if unreadable { return "Saved earlier — can't be opened" }
@@ -198,9 +236,18 @@ private struct VaultFieldRow: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            Text(field.label)
-                .font(.system(size: 12))
-                .frame(width: 150, alignment: .leading)
+            HStack(spacing: 4) {
+                Text(field.label)
+                    .font(.system(size: 12))
+                if isInherited {
+                    Image(systemName: "arrow.down.left")
+                        .font(.system(size: 8))
+                        .foregroundStyle(.tertiary)
+                        .help("Inherited from Personal")
+                }
+                Spacer(minLength: 0)
+            }
+            .frame(width: 150, alignment: .leading)
 
             Group {
                 if field.sensitive {
@@ -227,6 +274,13 @@ private struct VaultFieldRow: View {
             .help("Clear")
         }
         .onAppear(perform: load)
+        .onChange(of: vault.activeProfileID) { _, _ in
+            // Switching profile changes what every row shows.
+            loaded = false
+            text = ""
+            unreadable = false
+            load()
+        }
         .onChange(of: text) { _, _ in
             guard loaded else { return }
             save()
@@ -352,10 +406,45 @@ private struct ShortcutTab: View {
 private struct MatchingTab: View {
     @Bindable var preferences: Preferences
     @State private var apiKey = ""
-    @State private var keyLoaded = false
+    @State private var testing = false
+    @State private var status: (ok: Bool, message: String)?
+
+    /// Actually calls Jev. Everything else in this window reports what was
+    /// *intended*; this reports what happened.
+    private func testKey() async {
+        testing = true
+        defer { testing = false }
+        do {
+            try await JevClient(apiKey: preferences.jevAPIKey).checkConnection()
+            status = (true, "Connected — Jev answered.")
+        } catch {
+            status = (false, error.localizedDescription)
+        }
+    }
+
+    private func saveKey() {
+        let trimmed = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        preferences.jevAPIKey = trimmed
+        apiKey = ""
+        status = preferences.jevKeyError.map { (false, $0) }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
+            LaunchAtLoginToggle()
+
+            Divider()
+
+            VStack(alignment: .leading, spacing: 8) {
+                Toggle("Finish what you start typing", isOn: $preferences.inlineSuggestionsEnabled)
+                Text("Begin typing a detail Control knows and it completes the rest. Tab to keep it, carry on typing to ignore it, tap ⌘ twice for a different one. Only ever in labelled form fields — never in spreadsheets, editors, or messages.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.tertiary)
+            }
+
+            Divider()
+
             VStack(alignment: .leading, spacing: 8) {
                 Toggle("Fill straight away when the match is obvious", isOn: $preferences.autoInsertEnabled)
                 Text("Turn this off to confirm every fill before it lands.")
@@ -373,10 +462,23 @@ private struct MatchingTab: View {
                         .frame(width: 70, alignment: .leading)
                     SecureField(preferences.hasJevKey ? "Saved" : "Not set", text: $apiKey)
                         .textFieldStyle(.roundedBorder)
-                        .onSubmit {
-                            preferences.jevAPIKey = apiKey
-                            apiKey = ""
-                        }
+                        .onSubmit(saveKey)
+                    // Commit-on-Return alone is a trap: the field looks filled in
+                    // whether or not anything was stored.
+                    Button("Save", action: saveKey)
+                        .disabled(apiKey.trimmingCharacters(in: .whitespaces).isEmpty)
+                    Button("Test") { Task { await testKey() } }
+                        .disabled(!preferences.hasJevKey || testing)
+                }
+
+                if let status {
+                    Label(status.message, systemImage: status.ok ? "checkmark.circle.fill" : "xmark.circle.fill")
+                        .font(.system(size: 11))
+                        .foregroundStyle(status.ok ? Color.green : Color.orange)
+                } else if preferences.hasJevKey {
+                    Label("A key is saved.", systemImage: "checkmark.circle.fill")
+                        .font(.system(size: 11))
+                        .foregroundStyle(.green)
                 }
                 Text("Control sends the field's label and the names of your saved details — never their values.")
                     .font(.system(size: 11))
@@ -402,6 +504,31 @@ private struct MatchingTab: View {
             }
 
             Spacer()
+        }
+    }
+}
+
+private struct LaunchAtLoginToggle: View {
+    @State private var enabled = LaunchAtLogin.isEnabled
+    @State private var needsApproval = LaunchAtLogin.needsApproval
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Toggle("Start Control when I log in", isOn: Binding(
+                get: { enabled },
+                set: { wanted in
+                    LaunchAtLogin.set(wanted)
+                    // Read the system back rather than trusting the toggle: the
+                    // user can revoke this in System Settings at any time.
+                    enabled = LaunchAtLogin.isEnabled
+                    needsApproval = LaunchAtLogin.needsApproval
+                }
+            ))
+            if needsApproval {
+                Text("Allow Control in System Settings → General → Login Items to finish turning this on.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.orange)
+            }
         }
     }
 }

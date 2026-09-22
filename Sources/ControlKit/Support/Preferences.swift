@@ -8,11 +8,14 @@ import Observation
 public final class Preferences {
     private enum Key {
         static let triggerMode = "triggerMode"
+        static let activeProfile = "activeProfile"
+        static let profileByDomain = "profileByDomain"
         static let hotKeyCode = "hotKeyCode"
         static let hotKeyModifiers = "hotKeyModifiers"
         static let deniedBundleIDs = "deniedBundleIDs"
         static let deniedDomains = "deniedDomains"
         static let jevEnabled = "jevEnabled"
+        static let inlineSuggestions = "inlineSuggestions"
         static let autoInsertEnabled = "autoInsertEnabled"
         static let confirmedCategories = "confirmedCategories"
     }
@@ -30,9 +33,47 @@ public final class Preferences {
             Key.hotKeyCode: 9,               // V
             Key.hotKeyModifiers: 1_310_720,  // NSEvent .control | .command
             Key.jevEnabled: true,
+            Key.inlineSuggestions: true,
             Key.autoInsertEnabled: true,
             Key.confirmedCategories: [VaultCategory.payment.rawValue],
         ])
+    }
+
+    // MARK: Profiles
+
+    public var activeProfileID: String {
+        get { defaults.string(forKey: Key.activeProfile) ?? VaultProfile.defaultID }
+        set { defaults.set(newValue, forKey: Key.activeProfile) }
+    }
+
+    /// Which profile a site last used. Learned rather than configured — the same
+    /// bet the match cache makes, and for the same reason: nobody is going to
+    /// maintain a per-site list by hand, but everybody will pick the right one
+    /// once when it matters.
+    public var profileByDomain: [String: String] {
+        get { defaults.dictionary(forKey: Key.profileByDomain) as? [String: String] ?? [:] }
+        set { defaults.set(newValue, forKey: Key.profileByDomain) }
+    }
+
+    public func profile(for context: FieldContext) -> String? {
+        guard let domain = context.domain?.lowercased() else { return nil }
+        let learned = profileByDomain
+        if let exact = learned[domain] { return exact }
+        // A profile chosen on one part of a university's site applies across it.
+        return learned.first { domain.hasSuffix("." + $0.key) }?.value
+    }
+
+    public func rememberProfile(_ profileID: String, for context: FieldContext) {
+        guard let domain = context.domain?.lowercased() else { return }
+        var learned = profileByDomain
+        learned[domain] = profileID
+        profileByDomain = learned
+    }
+
+    public func forgetProfile(for domain: String) {
+        var learned = profileByDomain
+        learned.removeValue(forKey: domain)
+        profileByDomain = learned
     }
 
     // MARK: Trigger
@@ -60,6 +101,12 @@ public final class Preferences {
     public var autoInsertEnabled: Bool {
         get { defaults.bool(forKey: Key.autoInsertEnabled) }
         set { defaults.set(newValue, forKey: Key.autoInsertEnabled) }
+    }
+
+    /// Complete a field as you type, before the trigger is ever pressed.
+    public var inlineSuggestionsEnabled: Bool {
+        get { defaults.bool(forKey: Key.inlineSuggestions) }
+        set { defaults.set(newValue, forKey: Key.inlineSuggestions) }
     }
 
     /// When false, matching stops at the local rules and never reaches the network.
@@ -99,13 +146,24 @@ public final class Preferences {
 
     // MARK: Jev API key
 
+    /// Non-nil when the last attempt to store a key failed. Swallowing this is
+    /// how a key silently fails to save and everything downstream looks broken
+    /// for reasons that have nothing to do with it.
+    public private(set) var jevKeyError: String?
+
     public var jevAPIKey: String {
         get { (try? Keychain.get(Self.apiKeyAccount)) .flatMap { $0 } ?? "" }
         set {
-            if newValue.isEmpty {
-                try? Keychain.delete(Self.apiKeyAccount)
-            } else {
-                try? Keychain.set(newValue, for: Self.apiKeyAccount, sensitive: false)
+            do {
+                if newValue.isEmpty {
+                    try Keychain.delete(Self.apiKeyAccount)
+                } else {
+                    try Keychain.set(newValue, for: Self.apiKeyAccount, sensitive: false)
+                }
+                jevKeyError = nil
+            } catch {
+                jevKeyError = error.localizedDescription
+                Log.app.error("Could not store the Jev key: \(error.localizedDescription, privacy: .public)")
             }
         }
     }

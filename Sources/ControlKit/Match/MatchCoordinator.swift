@@ -23,11 +23,11 @@ public final class MatchCoordinator {
         if context.isSecureField { return .blocked(.secureField) }
         if preferences.isDenied(context) { return .blocked(.deniedApp) }
 
-        let fillable = vault.fillableFields
+        let fillable = vault.matchableFields
         guard !fillable.isEmpty else { return .blocked(.emptyVault) }
         let fillableKeys = Set(fillable.map(\.key))
 
-        let localRanking = local.match(context, fillable: fillableKeys)
+        let localRanking = local.match(context, fillable: fillableKeys, hints: vault.matchHints)
 
         // Tier 0 — cache. Instant, offline, and holds the user's own corrections.
         // The local ranking still runs, cheaply and offline, so a remembered

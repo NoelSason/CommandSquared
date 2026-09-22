@@ -10,6 +10,8 @@ final class MenuBarController {
     var onOpenSettings: (@MainActor () -> Void)?
     var onOpenInspector: (@MainActor () -> Void)?
     var onGrantAccess: (@MainActor () -> Void)?
+    var onSelectProfile: (@MainActor (String) -> Void)?
+    var activeProfileID: () -> String = { VaultProfile.defaultID }
 
     init(preferences: Preferences) {
         self.preferences = preferences
@@ -54,6 +56,22 @@ final class MenuBarController {
 
         menu.addItem(.separator())
 
+        let profilesHeader = NSMenuItem(title: "Profile", action: nil, keyEquivalent: "")
+        profilesHeader.isEnabled = false
+        menu.addItem(profilesHeader)
+
+        let active = activeProfileID()
+        for profile in VaultProfile.builtIn {
+            let item = NSMenuItem(title: "  " + profile.name, action: #selector(Actions.selectProfile(_:)), keyEquivalent: "")
+            item.target = Actions.shared
+            item.representedObject = profile.id
+            item.state = profile.id == active ? .on : .off
+            item.image = NSImage(systemSymbolName: profile.symbol, accessibilityDescription: nil)
+            menu.addItem(item)
+        }
+
+        menu.addItem(.separator())
+
         let settings = NSMenuItem(title: "Settings…", action: #selector(Actions.settings), keyEquivalent: ",")
         settings.target = Actions.shared
         menu.addItem(settings)
@@ -79,6 +97,10 @@ final class MenuBarController {
         @objc func settings() { controller?.onOpenSettings?() }
         @objc func inspector() { controller?.onOpenInspector?() }
         @objc func grant() { controller?.onGrantAccess?() }
+        @objc func selectProfile(_ sender: NSMenuItem) {
+            guard let id = sender.representedObject as? String else { return }
+            controller?.onSelectProfile?(id)
+        }
     }
 
     @MainActor

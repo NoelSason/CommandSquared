@@ -11,6 +11,8 @@ struct PickerRow: Identifiable, Equatable {
     let preview: String
     let sensitive: Bool
     let score: Double
+    /// Set when the value comes from a different profile than the active one.
+    var inheritedFrom: String?
 
     var id: String { key }
 }
@@ -176,6 +178,14 @@ private struct PickerRowView: View {
                     .lineLimit(1)
             }
             Spacer(minLength: 8)
+            if let inheritedFrom = row.inheritedFrom {
+                Text(inheritedFrom)
+                    .font(.system(size: 9))
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 1)
+                    .background(Capsule().fill(Color.secondary.opacity(0.18)))
+                    .foregroundStyle(.secondary)
+            }
             Text(row.category)
                 .font(.system(size: 10))
                 .foregroundStyle(.tertiary)

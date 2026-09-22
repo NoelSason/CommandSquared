@@ -177,3 +177,17 @@ final class JevDecodingTests: XCTestCase {
         }
     }
 }
+
+extension JevDecodingTests {
+    func testAuthFailureCarriesJevsOwnMessage() {
+        // The real 401 body, recorded from the live endpoint.
+        let body = Data(#"{"code":-1,"message":"Invalid or missing Jev API key","data":null}"#.utf8)
+        XCTAssertThrowsError(try JevClient.parse(body)) { error in
+            guard case let JevError.api(code, message) = error else {
+                return XCTFail("expected JevError.api, got \(error)")
+            }
+            XCTAssertEqual(code, -1)
+            XCTAssertEqual(message, "Invalid or missing Jev API key")
+        }
+    }
+}

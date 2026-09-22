@@ -7,6 +7,7 @@ public enum VaultCategory: String, Codable, CaseIterable, Sendable, Identifiable
     case address
     case professional
     case payment
+    case snippet
 
     public var id: String { rawValue }
 
@@ -18,6 +19,7 @@ public enum VaultCategory: String, Codable, CaseIterable, Sendable, Identifiable
         case .address: "Addresses"
         case .professional: "Professional"
         case .payment: "Payment"
+        case .snippet: "Snippets"
         }
     }
 }
@@ -75,4 +77,10 @@ public struct VaultField: Sendable, Codable, Hashable, Identifiable {
     }
 
     public var isDerived: Bool { derivedFrom?.isEmpty == false }
+
+    /// Snippets hold a template rather than a literal, and are never guessed
+    /// into a field — a paragraph of boilerplate appearing because a label
+    /// looked vaguely right would be worse than useless. They are reachable by
+    /// name in the picker, and nowhere else.
+    public var isSnippet: Bool { category == .snippet }
 }

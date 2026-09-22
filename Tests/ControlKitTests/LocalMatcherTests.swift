@@ -195,3 +195,106 @@ final class LocalMatcherTests: XCTestCase {
         XCTAssertNotEqual(a.signature, c.signature)
     }
 }
+
+extension LocalMatcherTests {
+    /// A plain substring test made `residentialFirstName` import as a student ID,
+    /// because "sid" hides inside "re*sid*ential".
+    func testPhrasesMustBeginAWord() {
+        XCTAssertFalse(LocalMatcher.contains("residential fist name", "sid"))
+        XCTAssertFalse(LocalMatcher.contains("passport", "ssn"))
+        XCTAssertTrue(LocalMatcher.contains("sid", "sid"))
+        XCTAssertTrue(LocalMatcher.contains("student sid number", "sid"))
+    }
+
+    func testAPhraseMayStillEndMidWord() {
+        // "zipcode" is one word in the wild and must still match "zip".
+        XCTAssertTrue(LocalMatcher.contains("zipcode", "zip"))
+        XCTAssertTrue(LocalMatcher.contains("emails", "email"))
+    }
+
+    func testResidentialNameFieldsResolveToNamesNotIDs() {
+        let ranked = matcher.match(context(label: "residential first name"), fillable: allKeys)
+        XCTAssertEqual(ranked.first?.key, "given_name")
+        XCTAssertFalse(ranked.contains { $0.key == "student_id" })
+    }
+}
+
+extension LocalMatcherTests {
+    /// Google Forms' house style, and the shape that produced an empty match.
+    func testALabelNamingBothHalvesWantsTheWholeName() {
+        for label in [
+            "Name (First & Last)",
+            "Name (First and Last)",
+            "First and Last Name",
+            "Name: First Middle Last",
+        ] {
+            let result = top(context(label: label))
+            XCTAssertEqual(result?.key, "full_name", "label: \(label)")
+            XCTAssertGreaterThanOrEqual(result?.score ?? 0, MatchThresholds.autoInsert, "label: \(label)")
+        }
+    }
+
+    func testGoogleFormsTrailingNoiseDoesNotBreakMatching() {
+        // The accessibility label carries "Required question" on the end.
+        let result = top(context(label: "Name (First & Last) Required question"))
+        XCTAssertEqual(result?.key, "full_name")
+    }
+
+    func testEachHalfOnItsOwnStillResolvesToThatHalf() {
+        XCTAssertEqual(top(context(label: "First name"))?.key, "given_name")
+        XCTAssertEqual(top(context(label: "Last name"))?.key, "family_name")
+    }
+}
+
+final class MatchHintsTests: XCTestCase {
+    private let matcher = LocalMatcher()
+    private let allKeys = Set(VaultSchema.builtIn.map(\.key))
+
+    private let hints = MatchHints(
+        university: "University of California, Berkeley",
+        schoolEmail: "noel_sason@berkeley.edu"
+    )
+
+    private func context(label: String) -> FieldContext {
+        FieldContext(appName: "Brave", bundleID: "com.brave.Browser",
+                     domain: "docs.google.com", role: "AXTextField", label: label)
+    }
+
+    private func top(_ label: String, hints: MatchHints) -> String? {
+        matcher.match(context(label: label), fillable: allKeys, hints: hints).first?.key
+    }
+
+    func testTheInstitutionNameIdentifiesASchoolAddress() {
+        // Without hints this is ambiguous and lands on the personal address.
+        XCTAssertEqual(top("Berkeley email", hints: MatchHints()), "email_personal")
+        XCTAssertEqual(top("Berkeley email", hints: hints), "email_school")
+    }
+
+    func testTheEmailDomainAloneIsEnough() {
+        let domainOnly = MatchHints(university: nil, schoolEmail: "someone@berkeley.edu")
+        XCTAssertEqual(top("Berkeley email address", hints: domainOnly), "email_school")
+    }
+
+    func testGenericWordsInTheInstitutionNameAreIgnored() {
+        // "University of California" must not make every "college email" field a
+        // school address by matching the word "university" back to itself.
+        XCTAssertFalse(hints.schoolTokens.contains("university"))
+        XCTAssertFalse(hints.schoolTokens.contains("of"))
+        XCTAssertFalse(hints.schoolTokens.contains("edu"))
+        XCTAssertTrue(hints.schoolTokens.contains("berkeley"))
+    }
+
+    func testAPersonalAddressIsStillPersonal() {
+        XCTAssertEqual(top("Personal email", hints: hints), "email_personal")
+    }
+
+    func testTheBuiltInKeywordsStillWorkWithoutHints() {
+        XCTAssertEqual(top("School email", hints: MatchHints()), "email_school")
+        XCTAssertEqual(top("University email", hints: MatchHints()), "email_school")
+    }
+
+    func testAnEmptyVaultProducesNoHints() {
+        let empty = MatchHints(university: nil, schoolEmail: nil)
+        XCTAssertTrue(empty.schoolTokens.isEmpty)
+    }
+}

@@ -186,10 +186,30 @@ public struct JevClient: Sendable {
         }
 
         if let http = response as? HTTPURLResponse, !(200 ..< 300).contains(http.statusCode) {
+            // Jev explains itself in the body — "Invalid or missing Jev API key"
+            // is far more use than "HTTP 401". Read it before giving up.
+            if let envelope = try? JSONDecoder().decode(JevEnvelope.self, from: data),
+               let message = envelope.message {
+                throw JevError.api(code: envelope.code, message: message)
+            }
             throw JevError.http(http.statusCode)
         }
 
         return try Self.parse(data)
+    }
+
+    /// A minimal round trip, to check a key works before relying on it.
+    public func checkConnection() async throws {
+        _ = try await decide(
+            state: ["field_label": .string("Email address")],
+            questions: [
+                "field": .choice(
+                    instructions: "Which stored personal-data field is this input asking for?",
+                    criteria: ["email_personal": "The user's personal email address",
+                               "no_match": "None of the stored fields fit this input."]
+                ),
+            ]
+        )
     }
 
     /// Split out so tests can exercise it against recorded responses.

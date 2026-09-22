@@ -45,6 +45,7 @@ final class FieldInspectorController: NSObject, NSWindowDelegate {
             window.delegate = self
             self.window = window
         }
+        window?.orderFrontRegardless()
         window?.makeKeyAndOrderFront(nil)
         onVisibilityChanged?(true)
     }

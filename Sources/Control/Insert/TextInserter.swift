@@ -12,67 +12,68 @@ import Foundation
 /// is why they sit *above* the clipboard fallback rather than below it.
 @MainActor
 enum TextInserter {
-    enum Strategy: String, Sendable {
-        case axSelectedText
-        case axValue
-        case unicodeEvents
-        case clipboard
-
-        var description: String {
-            switch self {
-            case .axSelectedText: "accessibility (insert at caret)"
-            case .axValue: "accessibility (set value)"
-            case .unicodeEvents: "synthesized keystrokes"
-            case .clipboard: "clipboard paste"
-            }
-        }
-    }
-
+    /// Carries out an `InsertionPlan`. It decides nothing: which strategies to
+    /// try, whether one landed, and whether escalating is safe are all settled in
+    /// `ControlKit` where they can be tested.
     static func insert(
         _ text: String,
         into element: AXUIElement,
         allowClipboard: Bool
-    ) async -> Strategy? {
+    ) async -> InsertionStrategy? {
         guard !text.isEmpty else { return nil }
 
-        // The hotkey chord is very likely still physically held. Typing or pasting
-        // now would turn every synthesized keystroke into a menu shortcut — ⌃⌘V is
-        // a paste variant in half the apps on the system.
+        // The trigger's own modifiers are very likely still held. Typing now would
+        // turn every synthesized keystroke into a menu shortcut.
         await waitForModifierRelease()
 
         let before = AX.rawValue(element, kAXValueAttribute)
-        var lastAttempt: Strategy?
+        let ladder = InsertionPlan.strategies(
+            fieldIsEmpty: before?.isEmpty ?? true,
+            allowClipboard: allowClipboard
+        )
 
-        // 1. Insert at the caret, preserving whatever is already there.
-        if AX.set(element, kAXSelectedTextAttribute, text as CFTypeRef) {
-            lastAttempt = .axSelectedText
-            if await landed(element, from: before) { return .axSelectedText }
+        for strategy in ladder {
+            // A write from an earlier rung may only just have arrived. Typing on
+            // top of one still in flight is how the value lands twice.
+            guard InsertionPlan.mayEscalate(before: before, current: AX.rawValue(element, kAXValueAttribute)) else {
+                return previousRung(before: strategy, in: ladder)
+            }
+
+            guard await attempt(strategy, text: text, element: element) else { continue }
+            if await landed(element, from: before) { return strategy }
         }
 
-        // 2. Set the whole value — only when the field is empty, since this
-        //    replaces rather than inserts.
-        if before?.isEmpty ?? false, AX.set(element, kAXValueAttribute, text as CFTypeRef) {
-            lastAttempt = .axValue
-            if await landed(element, from: before) { return .axValue }
+        return InsertionPlan.mayEscalate(before: before, current: AX.rawValue(element, kAXValueAttribute))
+            ? nil
+            : ladder.last
+    }
+
+    /// Runs one rung. Returns whether it was worth waiting on the result.
+    private static func attempt(
+        _ strategy: InsertionStrategy,
+        text: String,
+        element: AXUIElement
+    ) async -> Bool {
+        switch strategy {
+        case .axSelectedText:
+            return AX.set(element, kAXSelectedTextAttribute, text as CFTypeRef)
+        case .axValue:
+            return AX.set(element, kAXValueAttribute, text as CFTypeRef)
+        case .unicodeEvents:
+            typeUnicode(text)
+            return true
+        case .clipboard:
+            await pasteViaClipboard(text)
+            return true
         }
+    }
 
-        // Last look before escalating. Chromium applies accessibility writes on
-        // its own schedule, and typing on top of one that is still in flight is
-        // how the same value ends up in the field twice.
-        if let lastAttempt, AX.rawValue(element, kAXValueAttribute) != before {
-            return lastAttempt
-        }
-
-        // 3. Type it.
-        typeUnicode(text)
-        if await landed(element, from: before) { return .unicodeEvents }
-
-        // 4. Clipboard, as a last resort.
-        guard allowClipboard else { return nil }
-        await pasteViaClipboard(text)
-        if await landed(element, from: before) { return .clipboard }
-
-        return nil
+    private static func previousRung(
+        before strategy: InsertionStrategy,
+        in ladder: [InsertionStrategy]
+    ) -> InsertionStrategy? {
+        guard let index = ladder.firstIndex(of: strategy), index > 0 else { return ladder.first }
+        return ladder[index - 1]
     }
 
     // MARK: Verification
@@ -88,7 +89,7 @@ enum TextInserter {
     private static func landed(
         _ element: AXUIElement,
         from before: String?,
-        timeout: Duration = .milliseconds(200)
+        timeout: Duration = InsertionPlan.verificationWindow
     ) async -> Bool {
         // Nothing to compare against — give the write a beat and take its word.
         guard before != nil else {
@@ -98,9 +99,11 @@ enum TextInserter {
 
         let deadline = ContinuousClock.now.advanced(by: timeout)
         while true {
-            if AX.rawValue(element, kAXValueAttribute) != before { return true }
+            if InsertionPlan.landed(before: before, current: AX.rawValue(element, kAXValueAttribute)) {
+                return true
+            }
             guard ContinuousClock.now < deadline else { return false }
-            try? await Task.sleep(for: .milliseconds(6))
+            try? await Task.sleep(for: InsertionPlan.verificationPoll)
         }
     }
 
@@ -114,7 +117,7 @@ enum TextInserter {
 
     // MARK: Synthesized input
 
-    private static func waitForModifierRelease(timeout: Duration = .milliseconds(400)) async {
+    static func waitForModifierRelease(timeout: Duration = InsertionPlan.modifierReleaseTimeout) async {
         let deadline = ContinuousClock.now.advanced(by: timeout)
         while ContinuousClock.now < deadline {
             let held = NSEvent.modifierFlags.intersection([.command, .shift, .option, .control])
@@ -148,6 +151,21 @@ enum TextInserter {
             up.keyboardSetUnicodeString(stringLength: chunk.count, unicodeString: chunk)
             down.post(tap: .cgAnnotatedSessionEventTap)
             up.post(tap: .cgAnnotatedSessionEventTap)
+        }
+    }
+
+    /// Moves the caret back from where it ended up, for `{cursor}`.
+    static func placeCaret(in element: AXUIElement, offsetFromEnd: Int) {
+        guard offsetFromEnd > 0 else { return }
+        var range = CFRange()
+        guard let current = AX.copy(element, kAXSelectedTextRangeAttribute),
+              CFGetTypeID(current) == AXValueGetTypeID(),
+              AXValueGetValue(current as! AXValue, .cfRange, &range)
+        else { return }
+
+        var target = CFRange(location: max(0, range.location - offsetFromEnd), length: 0)
+        if let position = AXValueCreate(.cfRange, &target) {
+            AX.set(element, kAXSelectedTextRangeAttribute, position)
         }
     }
 

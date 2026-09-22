@@ -12,6 +12,18 @@ enum BrowserURLReader {
     private static let webAreaRole = "AXWebArea"
     private static let urlAttribute = "AXURL"
 
+    /// Whether the element sits under page content at all. A browser field that
+    /// does not is the address bar, the find bar, or a dialog — never a form.
+    static func isInsideWebArea(_ element: AXUIElement, levels: Int = 16) -> Bool {
+        var current = element
+        for _ in 0 ..< levels {
+            if AX.string(current, kAXRoleAttribute) == webAreaRole { return true }
+            guard let parent = AX.element(current, kAXParentAttribute) else { return false }
+            current = parent
+        }
+        return false
+    }
+
     static func domain(for element: AXUIElement, app: NSRunningApplication) -> String? {
         if let fromWebArea = walkToWebArea(from: element) { return host(fromWebArea) }
 

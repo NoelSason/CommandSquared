@@ -20,6 +20,19 @@ public final class VaultStore {
     /// system dialog per item.
     public private(set) var unreadableKeys: Set<String> = []
 
+    /// Which set of values is in play. Switching it changes what fills, without
+    /// moving or copying anything — a profile is an overlay, not a copy.
+    public var activeProfileID: String = VaultProfile.defaultID {
+        didSet {
+            guard oldValue != activeProfileID else { return }
+            refreshFilledKeys()
+            prefetch()
+        }
+    }
+
+    /// Every account the Keychain holds, across all profiles.
+    private var storedAccounts: Set<String> = []
+
     private let fileURL: URL
     /// Non-sensitive values, held in memory after the first read. Building the
     /// picker touches every fillable field, and a Keychain read is an XPC round
@@ -37,10 +50,36 @@ public final class VaultStore {
     /// Warms the cache so the first fill of a session is as quick as the rest.
     private func prefetch() {
         for field in fields where !field.sensitive && !field.isDerived && filledKeys.contains(field.key) {
-            if let value = try? Keychain.get(field.key) {
-                valueCache[field.key] = value
+            guard let account = account(providing: field.key) else { continue }
+            if let value = try? Keychain.get(account) {
+                valueCache[account] = value
             }
         }
+    }
+
+    // MARK: Profiles
+
+    /// The account that actually holds this key: the active profile's, or the
+    /// default profile's if the active one does not override it.
+    public func account(providing key: String) -> String? {
+        ProfileKey.lookupOrder(profile: activeProfileID, key: key)
+            .first { storedAccounts.contains($0) }
+    }
+
+    /// Which profile a value is coming from, for keys that resolve at all.
+    /// Shown in the picker when it is not the active one, because inheriting a
+    /// value silently is fine until it is wrong.
+    public func profile(providing key: String) -> String? {
+        account(providing: key).map { ProfileKey.parse($0).profile }
+    }
+
+    public func isOverridden(_ key: String, in profile: String) -> Bool {
+        storedAccounts.contains(ProfileKey.account(profile: profile, key: key))
+    }
+
+    /// Keys this profile defines itself, as opposed to inheriting.
+    public func overriddenKeys(in profile: String) -> Set<String> {
+        Set(storedAccounts.map(ProfileKey.parse).filter { $0.profile == profile }.map(\.key))
     }
 
     public static var defaultFileURL: URL {
@@ -66,6 +105,12 @@ public final class VaultStore {
         var custom = field
         custom.isBuiltIn = false
         fields.append(custom)
+        persistFields()
+    }
+
+    public func renameCustomField(key: String, to label: String) {
+        guard let index = fields.firstIndex(where: { $0.key == key }), !fields[index].isBuiltIn else { return }
+        fields[index].label = label
         persistFields()
     }
 
@@ -108,6 +153,7 @@ public final class VaultStore {
     public func resetAllValues() {
         do {
             try Keychain.deleteAll()
+            storedAccounts = []
             filledKeys = []
             unreadableKeys = []
             valueCache = [:]
@@ -124,15 +170,17 @@ public final class VaultStore {
         guard !field.isDerived else { return }  // derived values are computed, not stored
         do {
             let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+            let account = ProfileKey.account(profile: activeProfileID, key: key)
             if trimmed.isEmpty {
-                try Keychain.delete(key)
-                filledKeys.remove(key)
-                valueCache.removeValue(forKey: key)
+                try Keychain.delete(account)
+                storedAccounts.remove(account)
+                valueCache.removeValue(forKey: account)
             } else {
-                try Keychain.set(trimmed, for: key, sensitive: field.sensitive)
-                filledKeys.insert(key)
-                if !field.sensitive { valueCache[key] = trimmed }
+                try Keychain.set(trimmed, for: account, sensitive: field.sensitive)
+                storedAccounts.insert(account)
+                if !field.sensitive { valueCache[account] = trimmed }
             }
+            recomputeFilledKeys()
             lastError = nil
         } catch {
             lastError = "Couldn't save \(field.label): \(error.localizedDescription)"
@@ -153,17 +201,19 @@ public final class VaultStore {
         guard let field = field(for: key) else { return nil }
         if let parts = field.derivedFrom {
             let resolved = try parts.compactMap { part -> String? in
-                if let cached = valueCache[part] { return cached }
-                return try Keychain.get(part)
+                guard let account = account(providing: part) else { return nil }
+                if let cached = valueCache[account] { return cached }
+                return try Keychain.get(account)
             }
                 .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
                 .filter { !$0.isEmpty }
             return resolved.isEmpty ? nil : resolved.joined(separator: " ")
         }
-        if !field.sensitive, let cached = valueCache[key] { return cached }
+        guard let account = account(providing: key) else { return nil }
+        if !field.sensitive, let cached = valueCache[account] { return cached }
 
-        let value = try Keychain.get(key, prompt: field.sensitive ? authenticationPrompt : nil)
-        if !field.sensitive, let value { valueCache[key] = value }
+        let value = try Keychain.get(account, prompt: field.sensitive ? authenticationPrompt : nil)
+        if !field.sensitive, let value { valueCache[account] = value }
         return value
     }
 
@@ -183,6 +233,21 @@ public final class VaultStore {
     /// Fields the matcher is allowed to propose: only ones that actually hold a
     /// value. An empty field must never be offered, or Jev will confidently pick
     /// a key that resolves to nothing and the fill silently no-ops.
+    /// Built from the user's own values, so an ambiguous label like "Berkeley
+    /// email" can be resolved without a hard-coded list of institutions.
+    public var matchHints: MatchHints {
+        MatchHints(
+            university: try? storedValue(for: "university"),
+            schoolEmail: try? storedValue(for: "email_school")
+        )
+    }
+
+    /// What the matcher is allowed to guess from: everything with a value,
+    /// minus snippets. Snippets are chosen deliberately, never inferred.
+    public var matchableFields: [VaultField] {
+        fillableFields.filter { !$0.isSnippet }
+    }
+
     public var fillableFields: [VaultField] {
         fields.filter { field in
             if let parts = field.derivedFrom {
@@ -194,13 +259,27 @@ public final class VaultStore {
 
     public func refreshFilledKeys() {
         do {
-            filledKeys = try Keychain.storedAccounts()
+            storedAccounts = try Keychain.storedAccounts()
             unreadableKeys = []
             lastError = nil
         } catch {
-            filledKeys = []
+            storedAccounts = []
             lastError = error.localizedDescription
         }
+        recomputeFilledKeys()
+    }
+
+    /// What resolves under the active profile: its own overrides, plus anything
+    /// inherited from the default.
+    private func recomputeFilledKeys() {
+        var keys = Set<String>()
+        for account in storedAccounts {
+            let parsed = ProfileKey.parse(account)
+            if parsed.profile == activeProfileID || parsed.profile == VaultProfile.defaultID {
+                keys.insert(parsed.key)
+            }
+        }
+        filledKeys = keys
     }
 
     // MARK: Persistence

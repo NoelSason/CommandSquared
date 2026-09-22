@@ -313,6 +313,35 @@
   </div>
 </section>
 
+<!-- ───────────── 6b ───────────── -->
+<section>
+  <h2>6b · Hidden fields</h2>
+  <p class="why" aria-hidden="true">The three inputs below are real and focusable, but sized to nothing or parked
+    off-screen — the shape of a form built to harvest an address you never saw it ask for. Tab into them from the
+    field below and trigger Control: it must refuse every one.</p>
+
+  <div class="field">
+    <label for="visible-neighbour">Tab from here into the hidden ones</label>
+    <input id="visible-neighbour" type="text">
+    <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span>this one is normal — then press Tab</div>
+  </div>
+
+  <label for="hidden-zero" style="position:absolute;left:-9999px">Street address</label>
+  <input id="hidden-zero" type="text" aria-label="Street address" style="width:0;height:0;border:0;padding:0">
+
+  <label for="hidden-offscreen" style="position:absolute;left:-9999px">ZIP</label>
+  <input id="hidden-offscreen" type="text" aria-label="ZIP" style="position:absolute;left:-9999px;top:-9999px">
+
+  <label for="hidden-tiny" style="position:absolute;left:-9999px">Phone number</label>
+  <input id="hidden-tiny" type="text" aria-label="Phone number" style="width:1px;height:1px;opacity:0;border:0;padding:0">
+
+  <div class="expect" aria-hidden="true">
+    <span class="tag t-stop">refuse</span>all three: toast reads <b>"That field isn't visible"</b>.
+    Control fills one field at a time, so the usual multi-field version of this attack cannot happen at all —
+    this covers the single-field version.
+  </div>
+</section>
+
 <!-- ───────────── 7 ───────────── -->
 <section>
   <h2>7 · Payment — Touch ID</h2>

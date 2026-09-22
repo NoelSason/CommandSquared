@@ -25,6 +25,8 @@
 	<!-- Menu-bar only: no Dock icon, no main menu, never steals focus. -->
 	<key>LSUIElement</key>
 	<true/>
+	<key>NSContactsUsageDescription</key>
+	<string>Control can fill in your name, email, phone, and address from your own contact card so you don't have to type them.</string>
 	<key>NSAppleEventsUsageDescription</key>
 	<string>Control reads the label of the text field you are focused in so it knows what to fill.</string>
 </dict>

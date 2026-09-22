@@ -76,6 +76,36 @@ enum AX {
         return (error == .success ? value : nil, error)
     }
 
+    /// The highlighted text in a field, if any.
+    static func selectedText(_ element: AXUIElement) -> String? {
+        guard let text = rawValue(element, kAXSelectedTextAttribute), !text.isEmpty else { return nil }
+        return text
+    }
+
+    /// Replaces the current selection, leaving the caret where `cursorOffset`
+    /// asks — measured from the start of the inserted text.
+    @discardableResult
+    static func replaceSelection(
+        _ element: AXUIElement,
+        with text: String,
+        cursorOffset: Int?
+    ) -> Bool {
+        var start = CFRange()
+        if let value = copy(element, kAXSelectedTextRangeAttribute),
+           CFGetTypeID(value) == AXValueGetTypeID() {
+            AXValueGetValue(value as! AXValue, .cfRange, &start)
+        }
+
+        guard set(element, kAXSelectedTextAttribute, text as CFTypeRef) else { return false }
+
+        guard let cursorOffset else { return true }
+        var caret = CFRange(location: start.location + cursorOffset, length: 0)
+        if let position = AXValueCreate(.cfRange, &caret) {
+            set(element, kAXSelectedTextRangeAttribute, position)
+        }
+        return true
+    }
+
     static func attributeNames(_ element: AXUIElement) -> [String] {
         var names: CFArray?
         guard AXUIElementCopyAttributeNames(element, &names) == .success else { return [] }
@@ -132,8 +162,12 @@ extension AX {
               AXValueGetValue(sizeValue as! AXValue, .cgSize, &size)
         else { return nil }
 
-        // AX measures y downward from the top of the primary screen.
-        let primaryHeight = NSScreen.screens.first?.frame.height ?? size.height
+        // AX measures y downward from the top of the *primary* display — the one
+        // whose origin is (0,0). Taking screens.first is a guess that is usually
+        // right and silently wrong when it is not, which puts every panel on the
+        // wrong display.
+        let primary = NSScreen.screens.first { $0.frame.origin == .zero } ?? NSScreen.screens.first
+        let primaryHeight = primary?.frame.height ?? size.height
         return NSRect(
             x: point.x,
             y: primaryHeight - point.y - size.height,

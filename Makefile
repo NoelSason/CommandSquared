@@ -15,7 +15,7 @@ APP          := $(DERIVED_DATA)/Build/Products/Debug/Control.app
 
 XCB := xcodebuild -project $(PROJECT) -scheme $(SCHEME) -derivedDataPath $(DERIVED_DATA)
 
-.PHONY: all generate build test run stop clean logs form
+.PHONY: all generate build test run stop clean logs form install
 
 all: build
 
@@ -35,6 +35,23 @@ run: build stop
 
 stop:
 	-@pkill -x Control 2>/dev/null || true
+
+## Install to /Applications and run from there.
+##
+## Needed for anything TCC-related: System Settings' permission pickers cannot
+## navigate into ~/Library, so an app sitting in DerivedData can never be added
+## to Full Disk Access by hand. A stable, reachable location also keeps the
+## Accessibility grant and Login Item registration pointing at one thing.
+install: build stop
+	@rm -rf "/Applications/Control.app"
+	@cp -R "$(APP)" "/Applications/Control.app"
+	@xattr -cr "/Applications/Control.app" 2>/dev/null || true
+	@codesign --force --sign "Developer ID Application" --options runtime \
+		--entitlements Sources/Control/Resources/Control.entitlements \
+		"/Applications/Control.app" 2>/dev/null || \
+		codesign --force --sign - "/Applications/Control.app"
+	@echo "Installed to /Applications/Control.app"
+	@open "/Applications/Control.app"
 
 ## Serve the manual QA form and open it. Served over http rather than file://
 ## so the page has a real host for domain extraction and cache keying.

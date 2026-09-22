@@ -10,6 +10,8 @@ import SwiftUI
 final class ToastPresenter {
     private var panel: HUDPanel?
     private var dismissTask: Task<Void, Never>?
+    private var activityMonitors: [Any] = []
+    private var appSwitchObserver: NSObjectProtocol?
 
     func show(title: String, detail: String, symbol: String, tone: ToastTone, near anchor: NSRect?, footnote: String? = nil) {
         dismissTask?.cancel()
@@ -27,15 +29,64 @@ final class ToastPresenter {
         panel.orderFrontRegardless()
         self.panel = panel
 
+        watchForActivity()
+
         dismissTask = Task { [weak self] in
-            try? await Task.sleep(for: .milliseconds(1300))
+            try? await Task.sleep(for: .milliseconds(1800))
             guard !Task.isCancelled else { return }
             self?.dismiss()
         }
     }
 
+    /// The toast is a floating window pinned to a screen position, so it does not
+    /// move when the page scrolls and cannot be clicked away — it ignores mouse
+    /// events by design, so clicks reach the field underneath. That makes it the
+    /// toast's own job to get out of the way the moment the user does anything.
+    private func watchForActivity() {
+        stopWatching()
+
+        let dismissOnActivity: (NSEvent) -> Void = { [weak self] _ in
+            MainActor.assumeIsolated { self?.dismiss() }
+        }
+
+        for mask in [NSEvent.EventTypeMask.scrollWheel,
+                     .keyDown,
+                     .leftMouseDown,
+                     .rightMouseDown] {
+            if let monitor = NSEvent.addGlobalMonitorForEvents(matching: mask, handler: dismissOnActivity) {
+                activityMonitors.append(monitor)
+            }
+            // Local too, in case the click lands on one of Control's own windows.
+            if let monitor = NSEvent.addLocalMonitorForEvents(matching: mask, handler: { event in
+                dismissOnActivity(event)
+                return event
+            }) {
+                activityMonitors.append(monitor)
+            }
+        }
+
+        appSwitchObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didActivateApplicationNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.dismiss() }
+        }
+    }
+
+    private func stopWatching() {
+        for monitor in activityMonitors { NSEvent.removeMonitor(monitor) }
+        activityMonitors.removeAll()
+        if let appSwitchObserver {
+            NSWorkspace.shared.notificationCenter.removeObserver(appSwitchObserver)
+        }
+        appSwitchObserver = nil
+    }
+
     func dismiss() {
         dismissTask?.cancel()
+        dismissTask = nil
+        stopWatching()
         panel?.orderOut(nil)
     }
 }

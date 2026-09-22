@@ -42,7 +42,7 @@ enum AXFieldReader {
 
         guard let focused = await focusedElement(for: app) else {
             Log.capture.debug("No focused element in \(app.localizedName ?? "?", privacy: .public)")
-            return .failure(.noFocusedField)
+            return .failure(unreachableEditorReason(for: app) ?? .noFocusedField)
         }
 
         let role = AX.string(focused, kAXRoleAttribute)
@@ -71,9 +71,27 @@ enum AXFieldReader {
             return .failure(.notEditable)
         }
 
+        let bundleID = app.bundleIdentifier ?? "unknown"
+        let insideWebArea = BrowserURLReader.isInsideWebArea(focused)
+
+        // The browser's own address bar is an ordinary text field, and typing a
+        // street address into it helps nobody.
+        if BrowserChrome.isChrome(bundleID: bundleID, insideWebArea: insideWebArea) {
+            return .failure(.browserChrome)
+        }
+
+        // Something the user could not have seen has no business being filled.
+        guard FieldVisibility.isFillable(
+            frame: AX.frame(focused),
+            screens: NSScreen.screens.map(\.frame)
+        ) else {
+            Log.capture.error("Refused a field that is not visible in \(app.localizedName ?? "?", privacy: .public).")
+            return .failure(.hiddenField)
+        }
+
         let context = FieldContext(
             appName: app.localizedName ?? "Unknown",
-            bundleID: app.bundleIdentifier ?? "unknown",
+            bundleID: bundleID,
             domain: BrowserURLReader.domain(for: focused, app: app),
             role: role,
             subrole: subrole,
@@ -85,6 +103,19 @@ enum AXFieldReader {
         )
 
         return .success(FocusedField(element: focused, context: context, app: app))
+    }
+
+    /// Some editors paint their own text and expose nothing to read. Saying so,
+    /// with the fix where one exists, beats "no text field is focused".
+    private static func unreachableEditorReason(for app: NSRunningApplication) -> BlockReason? {
+        let bundleID = app.bundleIdentifier ?? ""
+        let appElement = AXUIElementCreateApplication(app.processIdentifier)
+        let domain = AX.element(appElement, kAXFocusedWindowAttribute)
+            .flatMap { AX.string($0, kAXDocumentAttribute) }
+            .flatMap { URLComponents(string: $0)?.host?.lowercased() }
+
+        guard let advice = CanvasEditors.advice(bundleID: bundleID, domain: domain) else { return nil }
+        return .canvasEditor(product: advice.product, instruction: advice.instruction)
     }
 
     // MARK: Finding focus

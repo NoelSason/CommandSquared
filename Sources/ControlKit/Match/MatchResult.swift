@@ -55,11 +55,14 @@ public enum FillDecision: Sendable, Equatable {
     case blocked(BlockReason)
 }
 
-public enum BlockReason: String, Sendable, Equatable, Error {
+public enum BlockReason: Sendable, Equatable, Error {
     case secureField
     case deniedApp
     case noFocusedField
     case notEditable
+    case hiddenField
+    case browserChrome
+    case canvasEditor(product: String, instruction: String)
     case emptyVault
     case unreadableField
 
@@ -69,6 +72,9 @@ public enum BlockReason: String, Sendable, Equatable, Error {
         case .deniedApp: "Control is turned off for this app or site."
         case .noFocusedField: "No text field is focused."
         case .notEditable: "That isn't a text field Control can fill."
+        case .hiddenField: "That field isn't visible — Control won't fill it."
+        case .browserChrome: "That's the browser's own field, not part of the page."
+        case let .canvasEditor(product, instruction): "\(product): \(instruction)"
         case .emptyVault: "Nothing saved yet — add your details in Control's settings."
         case .unreadableField: "Couldn't read a label for this field."
         }

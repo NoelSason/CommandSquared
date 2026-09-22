@@ -1,3 +1,4 @@
+import ControlKit
 import AppKit
 import SwiftUI
 
@@ -28,54 +29,28 @@ final class HUDPanel: NSPanel {
     override var canBecomeKey: Bool { true }
     override var canBecomeMain: Bool { false }
 
-    enum Placement {
-        /// Above the field. Covers the label of the field just filled, which the
-        /// user is done with — rather than the next field, which they are not.
-        case above
-        /// Below the field, for the picker, which must not hide what it refers to.
-        case below
-    }
-
-    /// Places the panel relative to the field it refers to, nudged back on screen
-    /// when the field is near an edge.
-    func position(near anchor: NSRect?, size: NSSize, placement: Placement = .below) {
-        let screen = NSScreen.screens.first { $0.frame.contains(anchor?.origin ?? .zero) }
-            ?? NSScreen.main
-        guard let visible = screen?.visibleFrame else {
-            setContentSize(size)
-            center()
-            return
-        }
-
+    /// Places the panel relative to the field it refers to, on the display that
+    /// field is actually on. All the geometry lives in `HUDPlacement`.
+    func position(near anchor: NSRect?, size: NSSize, placement: HUDPlacement.Anchoring = .below) {
         setContentSize(size)
 
-        guard let anchor else {
-            let origin = NSPoint(
-                x: visible.midX - size.width / 2,
-                y: visible.midY - size.height / 2
-            )
-            setFrameOrigin(origin)
-            return
-        }
+        let screens = NSScreen.screens
+        let frames = screens.map(\.frame)
+        let chosen = HUDPlacement.screen(
+            for: anchor,
+            screens: frames,
+            mouse: NSEvent.mouseLocation,
+            fallback: NSScreen.main?.frame ?? .zero
+        )
+        // `visibleFrame` excludes the menu bar and Dock, and differs per display.
+        let visible = screens.first { $0.frame == chosen }?.visibleFrame ?? chosen
 
-        let above = anchor.maxY + 6
-        let below = anchor.minY - size.height - 6
-
-        var x = anchor.minX
-        var y: CGFloat
-        switch placement {
-        case .above:
-            y = above
-            if y + size.height > visible.maxY { y = below }
-        case .below:
-            y = below
-            if y < visible.minY { y = above }
-        }
-
-        if x + size.width > visible.maxX { x = visible.maxX - size.width - 8 }
-        if x < visible.minX { x = visible.minX + 8 }
-        y = min(max(y, visible.minY + 8), visible.maxY - size.height - 8)
-        setFrameOrigin(NSPoint(x: x, y: y))
+        setFrameOrigin(HUDPlacement.origin(
+            anchor: anchor,
+            size: size,
+            visible: visible,
+            anchoring: placement
+        ))
     }
 }
 
