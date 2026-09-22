@@ -1,0 +1,8 @@
+.DS_Store
+build/
+*.xcodeproj/
+*.xcworkspace/
+xcuserdata/
+.env
+
+# DerivedData lives at ~/Library/Developer/ControlDerivedData (see Makefile).

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Control — Test Form</title>
+<style>
+  :root {
+    --bg: #fbfbfa; --card: #fff; --ink: #1a1a19; --muted: #6b6b68;
+    --line: #e4e4e1; --accent: #3b5bdb; --ok: #2f7d4f; --warn: #b4690e; --stop: #b42318;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#151514; --card:#1e1e1d; --ink:#eceae5; --muted:#9a9a95;
+            --line:#32322f; --accent:#8da2fb; --ok:#6ac48a; --warn:#e0a458; --stop:#f08c84; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font:15px/1.5 ui-sans-serif,-apple-system,"SF Pro Text",system-ui,sans-serif; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 40px 16px 120px; }
+  header h1 { font-size: 26px; margin: 0 0 6px; letter-spacing: -0.02em; }
+  header p { color: var(--muted); margin: 0 0 8px; }
+  kbd { font:12px ui-monospace,monospace; background:var(--line); border-radius:5px;
+        padding:2px 6px; }
+  section { background: var(--card); border:1px solid var(--line); border-radius:14px;
+            padding: 22px; margin: 22px 0; }
+  section > h2 { font-size:13px; text-transform:uppercase; letter-spacing:.07em;
+                 color:var(--muted); margin:0 0 4px; }
+  section > .why { color:var(--muted); font-size:13px; margin:0 0 18px; }
+  .field { margin-bottom: 16px; }
+  .field > label, .field > .pseudo { display:block; font-size:13px; font-weight:500; margin-bottom:5px; }
+  input, textarea, .ce {
+    width:100%; padding:9px 11px; font:14px inherit; color:var(--ink);
+    background:var(--bg); border:1px solid var(--line); border-radius:8px;
+  }
+  input:focus, textarea:focus, .ce:focus { outline:2px solid var(--accent); outline-offset:1px; }
+  .ce { min-height: 38px; }
+  .expect { font-size:12px; color:var(--muted); margin-top:5px; }
+  .expect b { font-weight:600; color:var(--ink); }
+  .tag { display:inline-block; font-size:10px; font-weight:700; letter-spacing:.05em;
+         text-transform:uppercase; padding:2px 6px; border-radius:4px; margin-right:6px;
+         vertical-align:1px; }
+  .t-auto { background:color-mix(in srgb, var(--ok) 16%, transparent); color:var(--ok); }
+  .t-ask  { background:color-mix(in srgb, var(--warn) 18%, transparent); color:var(--warn); }
+  .t-jev  { background:color-mix(in srgb, var(--accent) 16%, transparent); color:var(--accent); }
+  .t-stop { background:color-mix(in srgb, var(--stop) 15%, transparent); color:var(--stop); }
+  .subhead { font-size:15px; font-weight:600; margin:22px 0 12px; padding-top:18px;
+             border-top:1px solid var(--line); }
+  .subhead:first-of-type { border-top:0; padding-top:0; margin-top:0; }
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width: 560px) { .row { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Control — Test Form</h1>
+  <p>Put the cursor in a field and <kbd>tap ⌘ twice</kbd>. Each field says what should happen.</p>
+  <p style="font-size:13px">
+    <span class="tag t-auto">auto</span> fills silently ·
+    <span class="tag t-ask">asks</span> opens the picker ·
+    <span class="tag t-jev">jev</span> needs tier 3 ·
+    <span class="tag t-stop">refuse</span> must do nothing
+  </p>
+</header>
+
+<!-- ───────────── 1 ───────────── -->
+<section>
+  <h2>1 · Unambiguous labels</h2>
+  <p class="why" aria-hidden="true">Standard <code>&lt;label for&gt;</code>. These resolve on local rules alone — no network, no picker.</p>
+
+  <div class="row">
+    <div class="field">
+      <label for="fn">First name</label>
+      <input id="fn" type="text" autocomplete="given-name">
+      <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span><b>First name</b></div>
+    </div>
+    <div class="field">
+      <label for="ln">Last name</label>
+      <input id="ln" type="text" autocomplete="family-name">
+      <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span><b>Last name</b></div>
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="pn">Preferred first name</label>
+    <input id="pn" type="text">
+    <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span><b>Preferred name</b> — not your legal first name</div>
+  </div>
+
+  <div class="field">
+    <label for="gb">What name do you go by?</label>
+    <input id="gb" type="text">
+    <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span><b>Preferred name</b> — this phrasing was a bug the tests caught</div>
+  </div>
+
+  <div class="row">
+    <div class="field">
+      <label for="dob">Date of birth</label>
+      <input id="dob" type="text" placeholder="MM/DD/YYYY">
+      <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span><b>Date of birth</b>, formatted <code>MM/DD/YYYY</code></div>
+    </div>
+    <div class="field">
+      <label for="gy">Expected graduation year</label>
+      <input id="gy" type="text">
+      <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span><b>Graduation year</b></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="field">
+      <label for="gh">GitHub</label>
+      <input id="gh" type="text">
+      <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span>full <b>GitHub</b> URL</div>
+    </div>
+    <div class="field">
+      <label for="ghu">GitHub username</label>
+      <input id="ghu" type="text">
+      <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span>just the <b>handle</b>, URL stripped</div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────── 2 ───────────── -->
+<section>
+  <h2>2 · Ambiguous — guess, then learn</h2>
+  <p class="why" aria-hidden="true">The rules score these below the auto-insert threshold on purpose. A picker is the correct answer — silently guessing would be worse.</p>
+
+  <div class="field">
+    <label for="em">Email address</label>
+    <input id="em" type="email">
+    <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span><b>Personal email</b> — tap again to swap to school</div>
+  </div>
+
+  <div class="row">
+    <div class="field">
+      <label for="se">School email</label>
+      <input id="se" type="email">
+      <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span><b>School email</b> — the word "school" disambiguates it</div>
+    </div>
+    <div class="field">
+      <label for="pe">Personal email</label>
+      <input id="pe" type="email">
+      <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span><b>Personal email</b></div>
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="nm">Name</label>
+    <input id="nm" type="text">
+    <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span><b>Full name</b> — tap again to cycle</div>
+  </div>
+
+  <div class="field">
+    <label for="un">Username</label>
+    <input id="un" type="text">
+    <div class="expect" aria-hidden="true"><span class="tag t-ask">asks</span>must <b>not</b> offer a name field — "user" vetoes the name rules</div>
+  </div>
+</section>
+
+<!-- ───────────── 3 ───────────── -->
+<section>
+  <h2>3 · Address scoping</h2>
+  <p class="why" aria-hidden="true">Every field below is just "City" or "ZIP". The only thing telling them apart is the heading above them — which is exactly what the nearby-text walk is for.</p>
+
+  <div class="subhead">Permanent address</div>
+  <div class="field">
+    <label for="h1">Street address</label>
+    <input id="h1" type="text">
+    <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span><b>Home street</b></div>
+  </div>
+  <div class="field">
+    <label for="h2">Apt, suite, unit</label>
+    <input id="h2" type="text">
+    <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span><b>Home street line 2</b></div>
+  </div>
+  <div class="row">
+    <div class="field">
+      <label for="h3">City</label>
+      <input id="h3" type="text">
+      <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span><b>Home city</b></div>
+    </div>
+    <div class="field">
+      <label for="h4">ZIP</label>
+      <input id="h4" type="text">
+      <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span><b>Home ZIP</b></div>
+    </div>
+  </div>
+
+  <div class="subhead">Current campus address</div>
+  <div class="field">
+    <label for="c1">Street address</label>
+    <input id="c1" type="text">
+    <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span><b>Campus street</b> — same label, different section</div>
+  </div>
+  <div class="row">
+    <div class="field">
+      <label for="c2">City</label>
+      <input id="c2" type="text">
+      <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span><b>Campus city</b></div>
+    </div>
+    <div class="field">
+      <label for="c3">ZIP</label>
+      <input id="c3" type="text">
+      <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span><b>Campus ZIP</b></div>
+    </div>
+  </div>
+
+  <div class="subhead">No heading at all</div>
+  <div class="field">
+    <label for="u1">City</label>
+    <input id="u1" type="text">
+    <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span><b>Home city</b> — tap again for campus</div>
+  </div>
+</section>
+
+<!-- ───────────── 4 ───────────── -->
+<section>
+  <h2>4 · How the label is attached</h2>
+  <p class="why" aria-hidden="true">Same question, five different markup shapes. This is the section that tells you whether capture works in Chrome — if any of these come back blank in the Field Inspector, that's the bug.</p>
+
+  <div class="field">
+    <label for="m1">Phone number</label>
+    <input id="m1" type="tel" placeholder="(555) 555-5555">
+    <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span><code>&lt;label for&gt;</code> → AXTitleUIElement. Formatted <b>(661) 523-9570</b></div>
+  </div>
+
+  <div class="field">
+    <span class="pseudo">Phone number <em style="color:var(--muted);font-style:normal">(aria-label only, no real label)</em></span>
+    <input type="tel" aria-label="Phone number" placeholder="5555555555">
+    <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span>aria-label → AXDescription. Formatted <b>6615239570</b> — bare digits, matching the placeholder</div>
+  </div>
+
+  <div class="field">
+    <span class="pseudo">No label — placeholder carries it</span>
+    <input type="text" placeholder="Mobile phone">
+    <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span>AXPlaceholderValue is the only signal</div>
+  </div>
+
+  <div class="field">
+    <label>Wrapping label, no <code>for</code> attribute
+      <input type="text" style="margin-top:5px">
+    </label>
+    <div class="expect" aria-hidden="true"><span class="tag t-ask">asks</span>ambiguous text, but the label should still be <b>read</b> — check the inspector</div>
+  </div>
+
+  <div class="field">
+    <span class="pseudo">title attribute only</span>
+    <input type="text" title="LinkedIn profile">
+    <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span><b>LinkedIn</b> — via AXHelp</div>
+  </div>
+
+  <div class="field">
+    <label for="ta">Textarea — your website</label>
+    <textarea id="ta" rows="2"></textarea>
+    <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span><b>Website</b>. Role is AXTextArea, not AXTextField</div>
+  </div>
+
+  <div class="field">
+    <span class="pseudo">contenteditable div (aria-label: "University")</span>
+    <div class="ce" contenteditable="true" role="textbox" aria-label="University"></div>
+    <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span>no real input element — insertion likely falls through to synthesized keystrokes</div>
+  </div>
+</section>
+
+<!-- ───────────── 5 ───────────── -->
+<section>
+  <h2>5 · Jev territory</h2>
+  <p class="why" aria-hidden="true">Phrased the way real applications phrase things. The local rules are meant to miss these — without an API key you should get a picker, with one you should get a confident answer.</p>
+
+  <div class="field">
+    <label for="j1">Which institution are you currently attending?</label>
+    <input id="j1" type="text">
+    <div class="expect" aria-hidden="true"><span class="tag t-jev">jev</span><b>University</b></div>
+  </div>
+  <div class="field">
+    <label for="j2">How can we best reach you?</label>
+    <input id="j2" type="text">
+    <div class="expect" aria-hidden="true"><span class="tag t-jev">jev</span><b>Mobile phone</b> or an email — either is defensible</div>
+  </div>
+  <div class="field">
+    <label for="j3">What are you studying?</label>
+    <input id="j3" type="text">
+    <div class="expect" aria-hidden="true"><span class="tag t-jev">jev</span><b>Major</b></div>
+  </div>
+  <div class="field">
+    <label for="j4">Where can we see your work?</label>
+    <input id="j4" type="text">
+    <div class="expect" aria-hidden="true"><span class="tag t-jev">jev</span><b>GitHub</b> or <b>Website</b></div>
+  </div>
+  <div class="field">
+    <label for="j5">Handle</label>
+    <input id="j5" type="text">
+    <div class="expect" aria-hidden="true"><span class="tag t-jev">jev</span>one word, no context — a good test of whether it says <b>no_match</b></div>
+  </div>
+</section>
+
+<!-- ───────────── 6 ───────────── -->
+<section>
+  <h2>6 · Must be refused</h2>
+  <p class="why" aria-hidden="true">Password fields are blocked before anything is read — no capture, no matching, no request.</p>
+
+  <div class="field">
+    <label for="pw">Password</label>
+    <input id="pw" type="password">
+    <div class="expect" aria-hidden="true"><span class="tag t-stop">refuse</span>toast: <b>"Control never fills password fields."</b> Nothing typed. The Field Inspector should show subrole <code>AXSecureTextField</code></div>
+  </div>
+
+  <div class="field">
+    <label for="pw2">Confirm password</label>
+    <input id="pw2" type="password">
+    <div class="expect" aria-hidden="true"><span class="tag t-stop">refuse</span>same</div>
+  </div>
+</section>
+
+<!-- ───────────── 7 ───────────── -->
+<section>
+  <h2>7 · Payment — Touch ID</h2>
+  <p class="why" aria-hidden="true">Only relevant once you've saved card details. Every one of these must confirm and demand Touch ID, however confident the match is. Clipboard fallback is disabled here.</p>
+
+  <div class="subhead">Billing address</div>
+  <div class="row">
+    <div class="field">
+      <label for="b1">City</label>
+      <input id="b1" type="text">
+      <div class="expect" aria-hidden="true"><span class="tag t-ask">asks</span><b>Billing city</b> — third "City" on this page, scoped by heading</div>
+    </div>
+    <div class="field">
+      <label for="b2">ZIP</label>
+      <input id="b2" type="text">
+      <div class="expect" aria-hidden="true"><span class="tag t-ask">asks</span><b>Billing ZIP</b></div>
+    </div>
+  </div>
+
+  <div class="subhead">Card</div>
+  <div class="field">
+    <label for="cc">Card number</label>
+    <input id="cc" type="text" placeholder="1234 5678 9012 3456" autocomplete="cc-number">
+    <div class="expect" aria-hidden="true"><span class="tag t-ask">asks</span>confirm + Touch ID. Grouped in fours, because the placeholder is</div>
+  </div>
+  <div class="row">
+    <div class="field">
+      <label for="ce">Expiration</label>
+      <input id="ce" type="text" placeholder="MM/YY">
+      <div class="expect" aria-hidden="true"><span class="tag t-ask">asks</span>confirm + Touch ID. Two-digit year</div>
+    </div>
+    <div class="field">
+      <label for="cv">CVV</label>
+      <input id="cv" type="text" inputmode="numeric">
+      <div class="expect" aria-hidden="true"><span class="tag t-ask">asks</span>confirm + Touch ID</div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────── 8 ───────────── -->
+<section>
+  <h2>8 · Repeat-press cycling</h2>
+  <p class="why" aria-hidden="true">Fill this, then press <kbd>⌘⌘</kbd> again within five seconds. It should backspace what it inserted and swap in the next candidate — and remember your landing spot for next time.</p>
+  <div class="field">
+    <label for="cy">Email address</label>
+    <input id="cy" type="email">
+    <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span>fills one, then tap again to swap — the swap is remembered</div>
+  </div>
+</section>
+
+</div>
+</body>
+</html>
