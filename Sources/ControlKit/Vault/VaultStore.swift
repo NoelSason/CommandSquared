@@ -234,7 +234,10 @@ public final class VaultStore {
         guard let account = account(providing: key) else { return nil }
         if !field.sensitive, let cached = valueCache[account] { return cached }
 
-        let value = try Keychain.get(account, prompt: field.sensitive ? authenticationPrompt : nil)
+        // A sensitive read always asks, whoever calls: a value saved without
+        // macOS's own lock (see `Keychain`) would otherwise read silently.
+        let prompt = field.sensitive ? (authenticationPrompt ?? "use your \(field.label.lowercased())") : nil
+        let value = try Keychain.get(account, prompt: prompt)
         if !field.sensitive, let value { valueCache[account] = value }
         return value
     }

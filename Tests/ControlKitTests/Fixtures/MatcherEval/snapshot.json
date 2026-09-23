@@ -298,8 +298,7 @@
       "score" : 0.6
     },
     "browser.address-ui-widgets-landmark" : {
-      "key" : "home_street_1",
-      "score" : 0.6
+      "score" : 0
     },
     "browser.address1" : {
       "key" : "home_street_1",
@@ -324,8 +323,8 @@
       "score" : 0
     },
     "browser.appEducation.colleges[0].city" : {
-      "key" : "university",
-      "score" : 0.88
+      "key" : "home_city",
+      "score" : 0.6
     },
     "browser.appEducation.colleges[0].endYYYY" : {
       "key" : "grad_year",
@@ -1013,8 +1012,7 @@
       "score" : 0.9
     },
     "browser.fullAddress" : {
-      "key" : "home_street_1",
-      "score" : 0.6
+      "score" : 0
     },
     "browser.fullName" : {
       "key" : "full_name",
@@ -1409,8 +1407,7 @@
       "score" : 0.93
     },
     "browser.phoneCountry" : {
-      "key" : "home_country",
-      "score" : 0.6
+      "score" : 0
     },
     "browser.phoneNumber" : {
       "key" : "phone_mobile",
@@ -2685,7 +2682,7 @@
     },
     "chromium-i18n.007_i18n_ko.firstname+id" : {
       "key" : "given_name",
-      "score" : 0.87
+      "score" : 0.479
     },
     "chromium-i18n.007_i18n_ko.fn2" : {
       "score" : 0
@@ -3055,7 +3052,7 @@
     },
     "chromium-i18n.098_register_epson.com.mx.emailLogin+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium-i18n.098_register_epson.com.mx.emailRegistro" : {
       "key" : "email_personal",
@@ -3063,7 +3060,7 @@
     },
     "chromium-i18n.098_register_epson.com.mx.emailRegistro+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium-i18n.098_register_epson.com.mx.fechaCompra" : {
       "score" : 0
@@ -3102,7 +3099,7 @@
     },
     "chromium-i18n.152_garbarino_document_number_not_cc.firstName+id" : {
       "key" : "given_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium-i18n.152_garbarino_document_number_not_cc.id_value" : {
       "score" : 0
@@ -3115,14 +3112,14 @@
     },
     "chromium-i18n.152_garbarino_document_number_not_cc.lastName+id" : {
       "key" : "family_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium-i18n.152_garbarino_document_number_not_cc.phone" : {
       "score" : 0
     },
     "chromium-i18n.152_garbarino_document_number_not_cc.phone+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium-i18n.154_fmm-es_inm.gob.mx.apellidosTutor" : {
       "score" : 0
@@ -3137,10 +3134,12 @@
       "score" : 0
     },
     "chromium-i18n.154_fmm-es_inm.gob.mx.confirmacionCorreoElectronico" : {
-      "score" : 0
+      "key" : "email_personal",
+      "score" : 0.72
     },
     "chromium-i18n.154_fmm-es_inm.gob.mx.confirmacionCorreoElectronico+id" : {
-      "score" : 0
+      "key" : "email_personal",
+      "score" : 0.72
     },
     "chromium-i18n.154_fmm-es_inm.gob.mx.confirmarFechaExpedicion" : {
       "score" : 0
@@ -3161,10 +3160,12 @@
       "score" : 0
     },
     "chromium-i18n.154_fmm-es_inm.gob.mx.correoElectronico" : {
-      "score" : 0
+      "key" : "email_personal",
+      "score" : 0.72
     },
     "chromium-i18n.154_fmm-es_inm.gob.mx.correoElectronico+id" : {
-      "score" : 0
+      "key" : "email_personal",
+      "score" : 0.72
     },
     "chromium-i18n.154_fmm-es_inm.gob.mx.direccionResidencia" : {
       "score" : 0
@@ -3263,10 +3264,12 @@
       "score" : 0
     },
     "chromium-i18n.155_fmm-ja_inm.gob.mx.confirmacionCorreoElectronico" : {
-      "score" : 0
+      "key" : "email_personal",
+      "score" : 0.72
     },
     "chromium-i18n.155_fmm-ja_inm.gob.mx.confirmacionCorreoElectronico+id" : {
-      "score" : 0
+      "key" : "email_personal",
+      "score" : 0.72
     },
     "chromium-i18n.155_fmm-ja_inm.gob.mx.confirmarFechaExpedicion" : {
       "score" : 0
@@ -3279,7 +3282,7 @@
     },
     "chromium-i18n.155_fmm-ja_inm.gob.mx.confirmarFechaExpiracion+id" : {
       "key" : "card_exp",
-      "score" : 0.89
+      "score" : 0.49
     },
     "chromium-i18n.155_fmm-ja_inm.gob.mx.confirmarNumeroDocumento" : {
       "score" : 0
@@ -3288,10 +3291,12 @@
       "score" : 0
     },
     "chromium-i18n.155_fmm-ja_inm.gob.mx.correoElectronico" : {
-      "score" : 0
+      "key" : "email_personal",
+      "score" : 0.72
     },
     "chromium-i18n.155_fmm-ja_inm.gob.mx.correoElectronico+id" : {
-      "score" : 0
+      "key" : "email_personal",
+      "score" : 0.72
     },
     "chromium-i18n.155_fmm-ja_inm.gob.mx.direccionResidencia" : {
       "score" : 0
@@ -3316,7 +3321,7 @@
     },
     "chromium-i18n.155_fmm-ja_inm.gob.mx.fechaExpiracion+id" : {
       "key" : "card_exp",
-      "score" : 0.89
+      "score" : 0.49
     },
     "chromium-i18n.155_fmm-ja_inm.gob.mx.fechaLlegada" : {
       "score" : 0
@@ -3427,14 +3432,14 @@
     },
     "chromium-i18n.159_bug_966406_transavia.com.retrieveBookingByLastname.LastName+id" : {
       "key" : "family_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium-i18n.159_bug_966406_transavia.com.retrieveBookingByLastname.RecordLocator" : {
       "score" : 0
     },
     "chromium-i18n.159_bug_966406_transavia.com.retrieveBookingByLastname.RecordLocator+id" : {
       "key" : "family_name",
-      "score" : 0.87
+      "score" : 0.479
     },
     "chromium-i18n.159_bug_966406_transavia.com.terms" : {
       "score" : 0
@@ -3549,14 +3554,14 @@
     },
     "chromium-i18n.167_helity.es.SignupForm[card_number]+id" : {
       "key" : "card_number",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium-i18n.167_helity.es.SignupForm[email]" : {
       "score" : 0
     },
     "chromium-i18n.167_helity.es.SignupForm[email]+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium-i18n.167_helity.es.SignupForm[name]" : {
       "score" : 0
@@ -3569,21 +3574,21 @@
     },
     "chromium-i18n.167_helity.es.SignupForm[phone]+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium-i18n.167_helity.es.SignupForm[second_surname]" : {
       "score" : 0
     },
     "chromium-i18n.167_helity.es.SignupForm[second_surname]+id" : {
       "key" : "family_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium-i18n.167_helity.es.SignupForm[surname]" : {
       "score" : 0
     },
     "chromium-i18n.167_helity.es.SignupForm[surname]+id" : {
       "key" : "family_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium-i18n.168_i18n_hi.ct" : {
       "score" : 0
@@ -3632,21 +3637,21 @@
     },
     "chromium-i18n.169_dominos_de.Customer.Postcode+id" : {
       "key" : "home_postal",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium-i18n.169_dominos_de.Customer.Street" : {
       "score" : 0
     },
     "chromium-i18n.169_dominos_de.Customer.Street+id" : {
       "key" : "home_street_1",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium-i18n.169_dominos_de.Customer.StreetNo" : {
       "score" : 0
     },
     "chromium-i18n.169_dominos_de.Customer.StreetNo+id" : {
       "key" : "home_street_1",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium-i18n.170_i18n_ru_structured_address_1.ct" : {
       "score" : 0
@@ -3802,36 +3807,32 @@
       "score" : 0
     },
     "chromium-i18n.175_id_address_alfacart.com.txtAddAddressNewAddress+id" : {
-      "key" : "home_street_1",
-      "score" : 0.6
+      "score" : 0
     },
     "chromium-i18n.175_id_address_alfacart.com.txtAddressNewAddress" : {
       "score" : 0
     },
     "chromium-i18n.175_id_address_alfacart.com.txtAddressNewAddress+id" : {
-      "key" : "home_street_1",
-      "score" : 0.6
+      "score" : 0
     },
     "chromium-i18n.175_id_address_alfacart.com.txtHandphoneNewAddress" : {
       "score" : 0
     },
     "chromium-i18n.175_id_address_alfacart.com.txtHandphoneNewAddress+id" : {
-      "key" : "home_street_1",
-      "score" : 0.6
+      "score" : 0
     },
     "chromium-i18n.175_id_address_alfacart.com.txtNameNewAddress" : {
       "score" : 0
     },
     "chromium-i18n.175_id_address_alfacart.com.txtNameNewAddress+id" : {
-      "key" : "home_street_1",
-      "score" : 0.6
+      "score" : 0
     },
     "chromium-i18n.175_id_address_alfacart.com.txtPostalCodeNewAddress" : {
       "score" : 0
     },
     "chromium-i18n.175_id_address_alfacart.com.txtPostalCodeNewAddress+id" : {
       "key" : "home_postal",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium-i18n.176_id_payment_shopee.co.id.r001" : {
       "score" : 0
@@ -4047,15 +4048,14 @@
       "score" : 0
     },
     "chromium-repro.012_autocomplete_attribute_advanced.2.address+id" : {
-      "key" : "home_street_1",
-      "score" : 0.6
+      "score" : 0
     },
     "chromium-repro.012_autocomplete_attribute_advanced.2.email" : {
       "score" : 0
     },
     "chromium-repro.012_autocomplete_attribute_advanced.2.email+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium-repro.012_autocomplete_attribute_advanced.2.name" : {
       "score" : 0
@@ -4067,15 +4067,14 @@
       "score" : 0
     },
     "chromium-repro.012_autocomplete_attribute_advanced.3.address+id" : {
-      "key" : "home_street_1",
-      "score" : 0.6
+      "score" : 0
     },
     "chromium-repro.012_autocomplete_attribute_advanced.3.email" : {
       "score" : 0
     },
     "chromium-repro.012_autocomplete_attribute_advanced.3.email+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium-repro.012_autocomplete_attribute_advanced.3.name" : {
       "score" : 0
@@ -4088,21 +4087,21 @@
     },
     "chromium-repro.012_autocomplete_attribute_advanced.4.city+id" : {
       "key" : "home_city",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium-repro.012_autocomplete_attribute_advanced.4.email" : {
       "score" : 0
     },
     "chromium-repro.012_autocomplete_attribute_advanced.4.email+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium-repro.012_autocomplete_attribute_advanced.4.phone" : {
       "score" : 0
     },
     "chromium-repro.012_autocomplete_attribute_advanced.4.phone+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium-repro.013_autocomplete_attribute_basic.a1" : {
       "score" : 0
@@ -4391,14 +4390,14 @@
     },
     "chromium-repro.015_autocomplete_attribute_malicious.city+id" : {
       "key" : "home_city",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium-repro.015_autocomplete_attribute_malicious.name" : {
       "score" : 0
     },
     "chromium-repro.015_autocomplete_attribute_malicious.name+id" : {
       "key" : "full_name",
-      "score" : 0.87
+      "score" : 0.479
     },
     "chromium-repro.016_misc_phones.areacode1" : {
       "score" : 0
@@ -4448,7 +4447,7 @@
     },
     "chromium-repro.016_misc_phones.phone1+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium-repro.016_misc_phones.state" : {
       "key" : "home_state",
@@ -4463,14 +4462,14 @@
     },
     "chromium-repro.078_crbug_40687.payment[cc_expmo]+id" : {
       "key" : "card_exp",
-      "score" : 0.93
+      "score" : 0.512
     },
     "chromium-repro.078_crbug_40687.payment[cc_expyr]" : {
       "score" : 0
     },
     "chromium-repro.078_crbug_40687.payment[cc_expyr]+id" : {
       "key" : "card_exp",
-      "score" : 0.93
+      "score" : 0.512
     },
     "chromium-repro.078_crbug_40687.payment[cc_number]" : {
       "key" : "card_number",
@@ -4478,7 +4477,7 @@
     },
     "chromium-repro.078_crbug_40687.payment[cc_number]+id" : {
       "key" : "card_number",
-      "score" : 0.89
+      "score" : 0.523
     },
     "chromium-repro.078_crbug_40687.payment[sigpanel]" : {
       "key" : "card_cvv",
@@ -4494,7 +4493,7 @@
     },
     "chromium-repro.078_crbug_40687.user[billing][address_first]+id" : {
       "key" : "billing_street_1",
-      "score" : 0.92
+      "score" : 0.506
     },
     "chromium-repro.078_crbug_40687.user[billing][address_second]" : {
       "score" : 0
@@ -4508,7 +4507,7 @@
     },
     "chromium-repro.078_crbug_40687.user[billing][city]+id" : {
       "key" : "billing_city",
-      "score" : 0.92
+      "score" : 0.506
     },
     "chromium-repro.078_crbug_40687.user[billing][firstname]" : {
       "key" : "given_name",
@@ -4516,7 +4515,7 @@
     },
     "chromium-repro.078_crbug_40687.user[billing][firstname]+id" : {
       "key" : "given_name",
-      "score" : 0.87
+      "score" : 0.523
     },
     "chromium-repro.078_crbug_40687.user[billing][lastname]" : {
       "key" : "family_name",
@@ -4524,7 +4523,7 @@
     },
     "chromium-repro.078_crbug_40687.user[billing][lastname]+id" : {
       "key" : "family_name",
-      "score" : 0.87
+      "score" : 0.523
     },
     "chromium-repro.078_crbug_40687.user[billing][zip]" : {
       "key" : "billing_postal",
@@ -4532,7 +4531,7 @@
     },
     "chromium-repro.078_crbug_40687.user[billing][zip]+id" : {
       "key" : "billing_postal",
-      "score" : 0.92
+      "score" : 0.506
     },
     "chromium-repro.078_crbug_40687.user[email]" : {
       "key" : "email_personal",
@@ -4540,7 +4539,7 @@
     },
     "chromium-repro.078_crbug_40687.user[email]+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium-repro.078_crbug_40687.user[email_confirm]" : {
       "key" : "email_personal",
@@ -4548,7 +4547,7 @@
     },
     "chromium-repro.078_crbug_40687.user[email_confirm]+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium-repro.078_crbug_40687.user[phone_first]" : {
       "key" : "phone_mobile",
@@ -4556,15 +4555,13 @@
     },
     "chromium-repro.078_crbug_40687.user[phone_first]+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium-repro.079_crbug_52198.cityOrTownOfBirth" : {
-      "key" : "home_city",
-      "score" : 0.6
+      "score" : 0
     },
     "chromium-repro.079_crbug_52198.cityOrTownOfBirth+id" : {
-      "key" : "home_city",
-      "score" : 0.6
+      "score" : 0
     },
     "chromium-repro.079_crbug_52198.emailAddress" : {
       "key" : "email_personal",
@@ -4791,29 +4788,29 @@
     },
     "chromium-repro.083_crbug_87517.CC_Addr2+id" : {
       "key" : "home_street_2",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium-repro.083_crbug_87517.CC_City" : {
       "key" : "home_postal",
       "score" : 0.33
     },
     "chromium-repro.083_crbug_87517.CC_City+id" : {
-      "key" : "home_city",
-      "score" : 0.6
+      "key" : "home_postal",
+      "score" : 0.33
     },
     "chromium-repro.083_crbug_87517.CC_State" : {
       "score" : 0
     },
     "chromium-repro.083_crbug_87517.CC_State+id" : {
       "key" : "home_state",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium-repro.083_crbug_87517.CC_Zip" : {
       "score" : 0
     },
     "chromium-repro.083_crbug_87517.CC_Zip+id" : {
       "key" : "home_postal",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium-repro.083_crbug_87517.Comments" : {
       "score" : 0
@@ -5035,7 +5032,7 @@
     },
     "chromium-repro.088_crbug_98338.cardNumber+id" : {
       "key" : "card_number",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium-repro.088_crbug_98338.giftCardNumber2" : {
       "score" : 0
@@ -5230,7 +5227,7 @@
     },
     "chromium-repro.091_crbug_433703.city+id" : {
       "key" : "home_city",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium-repro.099_checkout_address2lines.addressLineOne" : {
       "key" : "home_street_1",
@@ -5253,7 +5250,7 @@
       "score" : 0.6
     },
     "chromium-repro.119_bug_465571.address.address2+id" : {
-      "key" : "home_street_2",
+      "key" : "home_street_1",
       "score" : 0.6
     },
     "chromium-repro.119_bug_465571.address.city" : {
@@ -5305,7 +5302,7 @@
     },
     "chromium-repro.121_bug_454366.hist_state+id" : {
       "key" : "home_state",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium-repro.121_bug_454366.sbdp" : {
       "score" : 0
@@ -5552,8 +5549,8 @@
       "score" : 0.33
     },
     "chromium-repro.127_bug_463986.city+id" : {
-      "key" : "home_city",
-      "score" : 0.6
+      "key" : "home_postal",
+      "score" : 0.33
     },
     "chromium-repro.127_bug_463986.codeABI" : {
       "score" : 0
@@ -5597,7 +5594,7 @@
     },
     "chromium-repro.127_bug_463986.familyName+id" : {
       "key" : "family_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium-repro.127_bug_463986.givenName" : {
       "key" : "given_name",
@@ -5605,7 +5602,7 @@
     },
     "chromium-repro.127_bug_463986.givenName+id" : {
       "key" : "given_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium-repro.127_bug_463986.identificationValue" : {
       "score" : 0
@@ -5637,7 +5634,7 @@
     },
     "chromium-repro.127_bug_463986.street+id" : {
       "key" : "home_street_1",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium-repro.127_bug_463986.userAccountId" : {
       "score" : 0
@@ -5657,7 +5654,7 @@
     },
     "chromium-repro.127_bug_463986.zip+id" : {
       "key" : "home_postal",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium-repro.128_bug_464002.paymentMethodForm.cardNumber" : {
       "key" : "card_number",
@@ -5788,7 +5785,7 @@
     },
     "chromium-repro.131_bug_465587./bodybuilding/commerce/order/purchase/CardPaymentInfoFormHandler.billingInfo.creditCard.billingAddress.firstName+id" : {
       "key" : "given_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium-repro.131_bug_465587./bodybuilding/commerce/order/purchase/CardPaymentInfoFormHandler.billingInfo.creditCard.billingAddress.lastName" : {
       "key" : "family_name",
@@ -5796,7 +5793,7 @@
     },
     "chromium-repro.131_bug_465587./bodybuilding/commerce/order/purchase/CardPaymentInfoFormHandler.billingInfo.creditCard.billingAddress.lastName+id" : {
       "key" : "family_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium-repro.131_bug_465587./bodybuilding/commerce/order/purchase/CardPaymentInfoFormHandler.billingInfo.creditCard.billingAddress.phoneNumber" : {
       "key" : "phone_mobile",
@@ -5804,7 +5801,7 @@
     },
     "chromium-repro.131_bug_465587./bodybuilding/commerce/order/purchase/CardPaymentInfoFormHandler.billingInfo.creditCard.billingAddress.phoneNumber+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium-repro.131_bug_465587./bodybuilding/commerce/order/purchase/CardPaymentInfoFormHandler.billingInfo.creditCard.billingAddress.postalCode" : {
       "key" : "billing_postal",
@@ -5812,7 +5809,7 @@
     },
     "chromium-repro.131_bug_465587./bodybuilding/commerce/order/purchase/CardPaymentInfoFormHandler.billingInfo.creditCard.billingAddress.postalCode+id" : {
       "key" : "billing_postal",
-      "score" : 0.92
+      "score" : 0.506
     },
     "chromium-repro.131_bug_465587./bodybuilding/commerce/order/purchase/CardPaymentInfoFormHandler.billingInfo.creditCard.billingAddress.state" : {
       "key" : "billing_state",
@@ -5820,7 +5817,7 @@
     },
     "chromium-repro.131_bug_465587./bodybuilding/commerce/order/purchase/CardPaymentInfoFormHandler.billingInfo.creditCard.billingAddress.state+id" : {
       "key" : "billing_state",
-      "score" : 0.92
+      "score" : 0.506
     },
     "chromium-repro.131_bug_465587.cardholder" : {
       "key" : "card_name",
@@ -5828,7 +5825,7 @@
     },
     "chromium-repro.131_bug_465587.cardholder+id" : {
       "key" : "card_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium-repro.131_bug_465587.cardnumber" : {
       "key" : "card_number",
@@ -5836,7 +5833,7 @@
     },
     "chromium-repro.131_bug_465587.cardnumber+id" : {
       "key" : "card_number",
-      "score" : 0.89
+      "score" : 0.523
     },
     "chromium-repro.131_bug_465587.formhandler" : {
       "score" : 0
@@ -5904,7 +5901,7 @@
     },
     "chromium-repro.134_bug_471748.cvv2+id" : {
       "key" : "card_cvv",
-      "score" : 0.95
+      "score" : 0.89
     },
     "chromium-repro.134_bug_471748.expdate" : {
       "key" : "card_exp",
@@ -5955,23 +5952,23 @@
     },
     "chromium-repro.136_bug_497850.ctl01$ctl00$MainContentRegion$MainRegion$ctl00$ipcPayment$txtCcCvc+id" : {
       "key" : "card_cvv",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium-repro.136_bug_497850.ctl01$ctl00$MainContentRegion$MainRegion$ctl00$ipcPayment$txtCcHolder" : {
       "key" : "card_name",
       "score" : 0.523
     },
     "chromium-repro.136_bug_497850.ctl01$ctl00$MainContentRegion$MainRegion$ctl00$ipcPayment$txtCcHolder+id" : {
-      "key" : "billing_state",
-      "score" : 0.92
+      "key" : "card_name",
+      "score" : 0.523
     },
     "chromium-repro.136_bug_497850.ctl01$ctl00$MainContentRegion$MainRegion$ctl00$ipcPayment$txtCcNumber" : {
       "key" : "card_number",
       "score" : 0.523
     },
     "chromium-repro.136_bug_497850.ctl01$ctl00$MainContentRegion$MainRegion$ctl00$ipcPayment$txtCcNumber+id" : {
-      "key" : "billing_state",
-      "score" : 0.92
+      "key" : "card_number",
+      "score" : 0.523
     },
     "chromium-repro.137_bug_555010.cardName" : {
       "key" : "family_name",
@@ -6327,14 +6324,14 @@
     },
     "chromium.018_checkout_ae.com.address2+id" : {
       "key" : "home_street_2",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.018_checkout_ae.com.billingPhone" : {
       "score" : 0
     },
     "chromium.018_checkout_ae.com.billingPhone+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.018_checkout_ae.com.ccNumber" : {
       "key" : "card_number",
@@ -6366,7 +6363,7 @@
     },
     "chromium.018_checkout_ae.com.confirmEmail+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium.018_checkout_ae.com.email" : {
       "score" : 0
@@ -6413,7 +6410,7 @@
     },
     "chromium.018_checkout_ae.com.username+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium.018_checkout_ae.com.zip" : {
       "key" : "home_postal",
@@ -6424,7 +6421,7 @@
     },
     "chromium.018_checkout_ae.com.zip#2+id" : {
       "key" : "home_postal",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.018_checkout_ae.com.zip+id" : {
       "key" : "home_postal",
@@ -6568,7 +6565,7 @@
     },
     "chromium.020_checkout_cafepress.com.BillCity+id" : {
       "key" : "billing_city",
-      "score" : 0.92
+      "score" : 0.506
     },
     "chromium.020_checkout_cafepress.com.BillEmail" : {
       "key" : "email_personal",
@@ -6576,7 +6573,7 @@
     },
     "chromium.020_checkout_cafepress.com.BillEmail+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium.020_checkout_cafepress.com.BillName" : {
       "key" : "full_name",
@@ -6584,7 +6581,7 @@
     },
     "chromium.020_checkout_cafepress.com.BillName+id" : {
       "key" : "full_name",
-      "score" : 0.87
+      "score" : 0.479
     },
     "chromium.020_checkout_cafepress.com.BillPhone" : {
       "key" : "phone_mobile",
@@ -6592,7 +6589,7 @@
     },
     "chromium.020_checkout_cafepress.com.BillPhone+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.020_checkout_cafepress.com.BillStateOther" : {
       "key" : "billing_state",
@@ -6600,7 +6597,7 @@
     },
     "chromium.020_checkout_cafepress.com.BillStateOther+id" : {
       "key" : "billing_state",
-      "score" : 0.92
+      "score" : 0.506
     },
     "chromium.020_checkout_cafepress.com.BillStreet1" : {
       "key" : "billing_street_1",
@@ -6608,7 +6605,7 @@
     },
     "chromium.020_checkout_cafepress.com.BillStreet1+id" : {
       "key" : "billing_street_1",
-      "score" : 0.92
+      "score" : 0.506
     },
     "chromium.020_checkout_cafepress.com.BillStreet2" : {
       "key" : "billing_street_1",
@@ -6623,7 +6620,7 @@
     },
     "chromium.020_checkout_cafepress.com.BillZip+id" : {
       "key" : "billing_postal",
-      "score" : 0.92
+      "score" : 0.506
     },
     "chromium.020_checkout_cafepress.com.GiftMessage" : {
       "score" : 0
@@ -6637,14 +6634,14 @@
     },
     "chromium.020_checkout_cafepress.com.ShipCity+id" : {
       "key" : "home_city",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.020_checkout_cafepress.com.ShipName" : {
       "score" : 0
     },
     "chromium.020_checkout_cafepress.com.ShipName+id" : {
       "key" : "full_name",
-      "score" : 0.87
+      "score" : 0.479
     },
     "chromium.020_checkout_cafepress.com.ShipStateOther" : {
       "key" : "home_state",
@@ -6652,7 +6649,7 @@
     },
     "chromium.020_checkout_cafepress.com.ShipStateOther+id" : {
       "key" : "home_state",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.020_checkout_cafepress.com.ShipStreet1" : {
       "key" : "home_street_1",
@@ -6660,7 +6657,7 @@
     },
     "chromium.020_checkout_cafepress.com.ShipStreet1+id" : {
       "key" : "home_street_1",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.020_checkout_cafepress.com.ShipStreet2" : {
       "key" : "home_street_1",
@@ -6668,7 +6665,7 @@
     },
     "chromium.020_checkout_cafepress.com.ShipStreet2+id" : {
       "key" : "home_street_2",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.020_checkout_cafepress.com.ShipZip" : {
       "key" : "home_postal",
@@ -6676,7 +6673,7 @@
     },
     "chromium.020_checkout_cafepress.com.ShipZip+id" : {
       "key" : "home_postal",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.020_checkout_cafepress.com.countdown" : {
       "score" : 0
@@ -6761,7 +6758,7 @@
     },
     "chromium.022_checkout_crutchfield.com.ctl00$ctl00$MainContentPlaceHolder$MainContentPlaceHolder$address1+id" : {
       "key" : "billing_street_1",
-      "score" : 0.92
+      "score" : 0.506
     },
     "chromium.022_checkout_crutchfield.com.ctl00$ctl00$MainContentPlaceHolder$MainContentPlaceHolder$address2" : {
       "key" : "current_org",
@@ -6785,7 +6782,7 @@
     },
     "chromium.022_checkout_crutchfield.com.ctl00$ctl00$MainContentPlaceHolder$MainContentPlaceHolder$city+id" : {
       "key" : "billing_city",
-      "score" : 0.92
+      "score" : 0.506
     },
     "chromium.022_checkout_crutchfield.com.ctl00$ctl00$MainContentPlaceHolder$MainContentPlaceHolder$customerID" : {
       "score" : 0
@@ -6799,7 +6796,7 @@
     },
     "chromium.022_checkout_crutchfield.com.ctl00$ctl00$MainContentPlaceHolder$MainContentPlaceHolder$email2+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium.022_checkout_crutchfield.com.ctl00$ctl00$MainContentPlaceHolder$MainContentPlaceHolder$firstname" : {
       "key" : "given_name",
@@ -6807,7 +6804,7 @@
     },
     "chromium.022_checkout_crutchfield.com.ctl00$ctl00$MainContentPlaceHolder$MainContentPlaceHolder$firstname+id" : {
       "key" : "given_name",
-      "score" : 0.87
+      "score" : 0.523
     },
     "chromium.022_checkout_crutchfield.com.ctl00$ctl00$MainContentPlaceHolder$MainContentPlaceHolder$lastname" : {
       "key" : "family_name",
@@ -6815,7 +6812,7 @@
     },
     "chromium.022_checkout_crutchfield.com.ctl00$ctl00$MainContentPlaceHolder$MainContentPlaceHolder$lastname+id" : {
       "key" : "family_name",
-      "score" : 0.87
+      "score" : 0.523
     },
     "chromium.022_checkout_crutchfield.com.ctl00$ctl00$MainContentPlaceHolder$MainContentPlaceHolder$mi" : {
       "key" : "middle_name",
@@ -6823,7 +6820,7 @@
     },
     "chromium.022_checkout_crutchfield.com.ctl00$ctl00$MainContentPlaceHolder$MainContentPlaceHolder$mi+id" : {
       "key" : "middle_name",
-      "score" : 0.87
+      "score" : 0.479
     },
     "chromium.022_checkout_crutchfield.com.ctl00$ctl00$MainContentPlaceHolder$MainContentPlaceHolder$shippingAddress1" : {
       "key" : "home_street_1",
@@ -6831,15 +6828,15 @@
     },
     "chromium.022_checkout_crutchfield.com.ctl00$ctl00$MainContentPlaceHolder$MainContentPlaceHolder$shippingAddress1+id" : {
       "key" : "home_street_1",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.022_checkout_crutchfield.com.ctl00$ctl00$MainContentPlaceHolder$MainContentPlaceHolder$shippingAddress2" : {
       "key" : "current_org",
       "score" : 0.5
     },
     "chromium.022_checkout_crutchfield.com.ctl00$ctl00$MainContentPlaceHolder$MainContentPlaceHolder$shippingAddress2+id" : {
-      "key" : "home_street_2",
-      "score" : 0.6
+      "key" : "current_org",
+      "score" : 0.5
     },
     "chromium.022_checkout_crutchfield.com.ctl00$ctl00$MainContentPlaceHolder$MainContentPlaceHolder$shippingCity" : {
       "key" : "home_city",
@@ -6847,7 +6844,7 @@
     },
     "chromium.022_checkout_crutchfield.com.ctl00$ctl00$MainContentPlaceHolder$MainContentPlaceHolder$shippingCity+id" : {
       "key" : "home_city",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.022_checkout_crutchfield.com.ctl00$ctl00$MainContentPlaceHolder$MainContentPlaceHolder$shippingFirstname" : {
       "key" : "given_name",
@@ -6855,7 +6852,7 @@
     },
     "chromium.022_checkout_crutchfield.com.ctl00$ctl00$MainContentPlaceHolder$MainContentPlaceHolder$shippingFirstname+id" : {
       "key" : "given_name",
-      "score" : 0.87
+      "score" : 0.523
     },
     "chromium.022_checkout_crutchfield.com.ctl00$ctl00$MainContentPlaceHolder$MainContentPlaceHolder$shippingLastname" : {
       "key" : "family_name",
@@ -6863,7 +6860,7 @@
     },
     "chromium.022_checkout_crutchfield.com.ctl00$ctl00$MainContentPlaceHolder$MainContentPlaceHolder$shippingLastname+id" : {
       "key" : "family_name",
-      "score" : 0.87
+      "score" : 0.523
     },
     "chromium.022_checkout_crutchfield.com.ctl00$ctl00$MainContentPlaceHolder$MainContentPlaceHolder$shippingMi" : {
       "key" : "middle_name",
@@ -6871,7 +6868,7 @@
     },
     "chromium.022_checkout_crutchfield.com.ctl00$ctl00$MainContentPlaceHolder$MainContentPlaceHolder$shippingMi+id" : {
       "key" : "middle_name",
-      "score" : 0.87
+      "score" : 0.479
     },
     "chromium.022_checkout_crutchfield.com.ctl00$ctl00$MainContentPlaceHolder$MainContentPlaceHolder$shippingPhone" : {
       "key" : "phone_mobile",
@@ -6879,7 +6876,7 @@
     },
     "chromium.022_checkout_crutchfield.com.ctl00$ctl00$MainContentPlaceHolder$MainContentPlaceHolder$shippingPhone+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.022_checkout_crutchfield.com.ctl00$ctl00$MainContentPlaceHolder$MainContentPlaceHolder$shippingZip" : {
       "key" : "home_postal",
@@ -6887,7 +6884,7 @@
     },
     "chromium.022_checkout_crutchfield.com.ctl00$ctl00$MainContentPlaceHolder$MainContentPlaceHolder$shippingZip+id" : {
       "key" : "home_postal",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.022_checkout_crutchfield.com.ctl00$ctl00$MainContentPlaceHolder$MainContentPlaceHolder$zip" : {
       "key" : "billing_postal",
@@ -6895,7 +6892,7 @@
     },
     "chromium.022_checkout_crutchfield.com.ctl00$ctl00$MainContentPlaceHolder$MainContentPlaceHolder$zip+id" : {
       "key" : "billing_postal",
-      "score" : 0.92
+      "score" : 0.506
     },
     "chromium.023_checkout_gamestop.com.ctl00$ctl00$ctl00$BaseContentPlaceHolder$cHeader$searchtext" : {
       "score" : 0
@@ -6965,7 +6962,7 @@
     },
     "chromium.023_checkout_gamestop.com.ctl00$ctl00$ctl00$BaseContentPlaceHolder$mainContentPlaceHolder$MainContentPlaceHolder$AddressDetails$AddressDetails$txtEmailAddress+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium.023_checkout_gamestop.com.ctl00$ctl00$ctl00$BaseContentPlaceHolder$mainContentPlaceHolder$MainContentPlaceHolder$AddressDetails$AddressDetails$txtEmailAddressConfirm" : {
       "key" : "email_personal",
@@ -6973,7 +6970,7 @@
     },
     "chromium.023_checkout_gamestop.com.ctl00$ctl00$ctl00$BaseContentPlaceHolder$mainContentPlaceHolder$MainContentPlaceHolder$AddressDetails$AddressDetails$txtEmailAddressConfirm+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium.023_checkout_gamestop.com.ctl00$ctl00$ctl00$BaseContentPlaceHolder$mainContentPlaceHolder$MainContentPlaceHolder$aspShippingAddress$popAddressSelection$AddressDetails1$textAddressLine1" : {
       "key" : "home_street_1",
@@ -7037,7 +7034,7 @@
     },
     "chromium.024_checkout_homedepot.com.address1_1+id" : {
       "key" : "home_street_1",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.024_checkout_homedepot.com.address2_1" : {
       "key" : "home_street_2",
@@ -7045,7 +7042,7 @@
     },
     "chromium.024_checkout_homedepot.com.address2_1+id" : {
       "key" : "home_street_2",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.024_checkout_homedepot.com.altfieldphone1_1" : {
       "score" : 0
@@ -7071,7 +7068,7 @@
     },
     "chromium.024_checkout_homedepot.com.city_1+id" : {
       "key" : "home_city",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.024_checkout_homedepot.com.emailInput" : {
       "key" : "home_street_1",
@@ -7107,7 +7104,7 @@
     },
     "chromium.024_checkout_homedepot.com.firstName_1+id" : {
       "key" : "given_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.024_checkout_homedepot.com.lastName_1" : {
       "key" : "family_name",
@@ -7115,7 +7112,7 @@
     },
     "chromium.024_checkout_homedepot.com.lastName_1+id" : {
       "key" : "family_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.024_checkout_homedepot.com.zipCode_1" : {
       "key" : "home_postal",
@@ -7123,14 +7120,14 @@
     },
     "chromium.024_checkout_homedepot.com.zipCode_1+id" : {
       "key" : "home_postal",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.025_checkout_hsn.com.Body$BillingAddress$_Alt1Phone" : {
       "score" : 0
     },
     "chromium.025_checkout_hsn.com.Body$BillingAddress$_Alt1Phone+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.506
     },
     "chromium.025_checkout_hsn.com.Body$BillingAddress$_PrimaryPhone" : {
       "key" : "phone_mobile",
@@ -7138,7 +7135,7 @@
     },
     "chromium.025_checkout_hsn.com.Body$BillingAddress$_PrimaryPhone+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.025_checkout_hsn.com.Body$BillingAddress$_address1" : {
       "key" : "home_street_1",
@@ -7146,7 +7143,7 @@
     },
     "chromium.025_checkout_hsn.com.Body$BillingAddress$_address1+id" : {
       "key" : "billing_street_1",
-      "score" : 0.92
+      "score" : 0.506
     },
     "chromium.025_checkout_hsn.com.Body$BillingAddress$_address2" : {
       "key" : "home_street_2",
@@ -7161,7 +7158,7 @@
     },
     "chromium.025_checkout_hsn.com.Body$BillingAddress$_city+id" : {
       "key" : "billing_city",
-      "score" : 0.92
+      "score" : 0.506
     },
     "chromium.025_checkout_hsn.com.Body$BillingAddress$_firstName" : {
       "key" : "given_name",
@@ -7169,7 +7166,7 @@
     },
     "chromium.025_checkout_hsn.com.Body$BillingAddress$_firstName+id" : {
       "key" : "given_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.025_checkout_hsn.com.Body$BillingAddress$_lastName" : {
       "key" : "family_name",
@@ -7177,7 +7174,7 @@
     },
     "chromium.025_checkout_hsn.com.Body$BillingAddress$_lastName+id" : {
       "key" : "family_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.025_checkout_hsn.com.Body$BillingAddress$_zipcode" : {
       "key" : "home_postal",
@@ -7185,7 +7182,7 @@
     },
     "chromium.025_checkout_hsn.com.Body$BillingAddress$_zipcode+id" : {
       "key" : "billing_postal",
-      "score" : 0.92
+      "score" : 0.506
     },
     "chromium.025_checkout_hsn.com.Body$CCNameOnCard" : {
       "key" : "card_name",
@@ -7193,7 +7190,7 @@
     },
     "chromium.025_checkout_hsn.com.Body$CCNameOnCard+id" : {
       "key" : "card_name",
-      "score" : 0.89
+      "score" : 0.523
     },
     "chromium.025_checkout_hsn.com.Body$CCNumber" : {
       "key" : "card_number",
@@ -7201,7 +7198,7 @@
     },
     "chromium.025_checkout_hsn.com.Body$CCNumber+id" : {
       "key" : "card_number",
-      "score" : 0.89
+      "score" : 0.523
     },
     "chromium.025_checkout_hsn.com.Body$NewEmailAddress2" : {
       "key" : "email_personal",
@@ -7209,7 +7206,7 @@
     },
     "chromium.025_checkout_hsn.com.Body$NewEmailAddress2+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium.025_checkout_hsn.com.Body$NewPasswordHint" : {
       "score" : 0
@@ -7223,7 +7220,7 @@
     },
     "chromium.025_checkout_hsn.com.Body$ShippingAddress$_address1+id" : {
       "key" : "home_street_1",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.025_checkout_hsn.com.Body$ShippingAddress$_address2" : {
       "key" : "home_street_2",
@@ -7231,7 +7228,7 @@
     },
     "chromium.025_checkout_hsn.com.Body$ShippingAddress$_address2+id" : {
       "key" : "home_street_2",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.025_checkout_hsn.com.Body$ShippingAddress$_city" : {
       "key" : "home_city",
@@ -7239,7 +7236,7 @@
     },
     "chromium.025_checkout_hsn.com.Body$ShippingAddress$_city+id" : {
       "key" : "home_city",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.025_checkout_hsn.com.Body$ShippingAddress$_firstName" : {
       "key" : "given_name",
@@ -7247,7 +7244,7 @@
     },
     "chromium.025_checkout_hsn.com.Body$ShippingAddress$_firstName+id" : {
       "key" : "given_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.025_checkout_hsn.com.Body$ShippingAddress$_lastName" : {
       "key" : "family_name",
@@ -7255,7 +7252,7 @@
     },
     "chromium.025_checkout_hsn.com.Body$ShippingAddress$_lastName+id" : {
       "key" : "family_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.025_checkout_hsn.com.Body$ShippingAddress$_telephone" : {
       "key" : "phone_mobile",
@@ -7263,7 +7260,7 @@
     },
     "chromium.025_checkout_hsn.com.Body$ShippingAddress$_telephone+id" : {
       "key" : "phone_mobile",
-      "score" : 0.92
+      "score" : 0.511
     },
     "chromium.025_checkout_hsn.com.Body$ShippingAddress$_zipcode" : {
       "key" : "home_postal",
@@ -7271,7 +7268,7 @@
     },
     "chromium.025_checkout_hsn.com.Body$ShippingAddress$_zipcode+id" : {
       "key" : "home_postal",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.026_checkout_ikea.com.address1" : {
       "key" : "home_street_1",
@@ -7279,7 +7276,7 @@
     },
     "chromium.026_checkout_ikea.com.address1+id" : {
       "key" : "home_street_1",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.026_checkout_ikea.com.address2" : {
       "key" : "home_street_2",
@@ -7287,7 +7284,7 @@
     },
     "chromium.026_checkout_ikea.com.address2+id" : {
       "key" : "home_street_2",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.026_checkout_ikea.com.email1" : {
       "key" : "email_personal",
@@ -7295,7 +7292,7 @@
     },
     "chromium.026_checkout_ikea.com.email1+id" : {
       "key" : "email_personal",
-      "score" : 0.95
+      "score" : 0.396
     },
     "chromium.026_checkout_ikea.com.email1retype" : {
       "key" : "email_personal",
@@ -7303,7 +7300,7 @@
     },
     "chromium.026_checkout_ikea.com.email1retype+id" : {
       "key" : "email_personal",
-      "score" : 0.95
+      "score" : 0.396
     },
     "chromium.026_checkout_ikea.com.fax1" : {
       "score" : 0
@@ -7322,28 +7319,28 @@
     },
     "chromium.026_checkout_ikea.com.phone1+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.026_checkout_ikea.com.phone1ext" : {
       "score" : 0
     },
     "chromium.026_checkout_ikea.com.phone1ext+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.026_checkout_ikea.com.phone2" : {
       "score" : 0
     },
     "chromium.026_checkout_ikea.com.phone2+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.026_checkout_ikea.com.phone2ext" : {
       "score" : 0
     },
     "chromium.026_checkout_ikea.com.phone2ext+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.026_checkout_ikea.com.zipCode" : {
       "key" : "home_postal",
@@ -7351,7 +7348,7 @@
     },
     "chromium.026_checkout_ikea.com.zipCode+id" : {
       "key" : "home_postal",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.027_checkout_jcrew.com.ADDRESS<>address1" : {
       "key" : "home_street_1",
@@ -7359,7 +7356,7 @@
     },
     "chromium.027_checkout_jcrew.com.ADDRESS<>address1+id" : {
       "key" : "home_street_1",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.027_checkout_jcrew.com.ADDRESS<>address2" : {
       "key" : "home_street_2",
@@ -7367,7 +7364,7 @@
     },
     "chromium.027_checkout_jcrew.com.ADDRESS<>address2+id" : {
       "key" : "home_street_2",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.027_checkout_jcrew.com.ADDRESS<>address3" : {
       "key" : "current_org",
@@ -7379,7 +7376,7 @@
     },
     "chromium.027_checkout_jcrew.com.ADDRESS<>city+id" : {
       "key" : "home_city",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.027_checkout_jcrew.com.ADDRESS<>firstName" : {
       "key" : "given_name",
@@ -7387,7 +7384,7 @@
     },
     "chromium.027_checkout_jcrew.com.ADDRESS<>firstName+id" : {
       "key" : "given_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.027_checkout_jcrew.com.ADDRESS<>lastName" : {
       "key" : "family_name",
@@ -7395,7 +7392,7 @@
     },
     "chromium.027_checkout_jcrew.com.ADDRESS<>lastName+id" : {
       "key" : "family_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.027_checkout_jcrew.com.ADDRESS<>phone" : {
       "key" : "phone_mobile",
@@ -7403,7 +7400,7 @@
     },
     "chromium.027_checkout_jcrew.com.ADDRESS<>phone+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.027_checkout_jcrew.com.ADDRESS<>postal" : {
       "key" : "home_postal",
@@ -7411,7 +7408,7 @@
     },
     "chromium.027_checkout_jcrew.com.ADDRESS<>postal+id" : {
       "key" : "home_postal",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.027_checkout_jcrew.com.anonPasswordHint" : {
       "score" : 0
@@ -7425,7 +7422,7 @@
     },
     "chromium.027_checkout_jcrew.com.emailID+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium.027_checkout_jcrew.com.searchTerm" : {
       "score" : 0
@@ -7439,7 +7436,7 @@
     },
     "chromium.028_checkout_jr.com.billingAddress.address1+id" : {
       "key" : "billing_street_1",
-      "score" : 0.92
+      "score" : 0.506
     },
     "chromium.028_checkout_jr.com.billingAddress.address2" : {
       "key" : "billing_street_1",
@@ -7454,7 +7451,7 @@
     },
     "chromium.028_checkout_jr.com.billingAddress.city+id" : {
       "key" : "billing_city",
-      "score" : 0.92
+      "score" : 0.506
     },
     "chromium.028_checkout_jr.com.billingAddress.firstName" : {
       "key" : "given_name",
@@ -7462,7 +7459,7 @@
     },
     "chromium.028_checkout_jr.com.billingAddress.firstName+id" : {
       "key" : "given_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.028_checkout_jr.com.billingAddress.lastName" : {
       "key" : "family_name",
@@ -7470,7 +7467,7 @@
     },
     "chromium.028_checkout_jr.com.billingAddress.lastName+id" : {
       "key" : "family_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.028_checkout_jr.com.billingAddress.phoneNumber" : {
       "key" : "phone_mobile",
@@ -7478,7 +7475,7 @@
     },
     "chromium.028_checkout_jr.com.billingAddress.phoneNumber+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.028_checkout_jr.com.billingAddress.postalCode" : {
       "key" : "billing_postal",
@@ -7486,7 +7483,7 @@
     },
     "chromium.028_checkout_jr.com.billingAddress.postalCode+id" : {
       "key" : "billing_postal",
-      "score" : 0.92
+      "score" : 0.506
     },
     "chromium.028_checkout_jr.com.customOrderHeader.giftEmailAddress" : {
       "key" : "email_personal",
@@ -7494,7 +7491,7 @@
     },
     "chromium.028_checkout_jr.com.customOrderHeader.giftEmailAddress+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium.028_checkout_jr.com.customOrderHeader.giftFromName" : {
       "score" : 0
@@ -7526,7 +7523,7 @@
     },
     "chromium.028_checkout_jr.com.customer.emailAddress+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium.028_checkout_jr.com.shippingAddress.address1" : {
       "key" : "home_street_1",
@@ -7534,7 +7531,7 @@
     },
     "chromium.028_checkout_jr.com.shippingAddress.address1+id" : {
       "key" : "home_street_1",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.028_checkout_jr.com.shippingAddress.address2" : {
       "key" : "home_street_1",
@@ -7542,7 +7539,7 @@
     },
     "chromium.028_checkout_jr.com.shippingAddress.address2+id" : {
       "key" : "home_street_2",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.028_checkout_jr.com.shippingAddress.city" : {
       "key" : "home_city",
@@ -7550,7 +7547,7 @@
     },
     "chromium.028_checkout_jr.com.shippingAddress.city+id" : {
       "key" : "home_city",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.028_checkout_jr.com.shippingAddress.firstName" : {
       "key" : "given_name",
@@ -7558,7 +7555,7 @@
     },
     "chromium.028_checkout_jr.com.shippingAddress.firstName+id" : {
       "key" : "given_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.028_checkout_jr.com.shippingAddress.lastName" : {
       "key" : "family_name",
@@ -7566,7 +7563,7 @@
     },
     "chromium.028_checkout_jr.com.shippingAddress.lastName+id" : {
       "key" : "family_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.028_checkout_jr.com.shippingAddress.phoneNumber" : {
       "key" : "phone_mobile",
@@ -7574,7 +7571,7 @@
     },
     "chromium.028_checkout_jr.com.shippingAddress.phoneNumber+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.028_checkout_jr.com.shippingAddress.postalCode" : {
       "key" : "home_postal",
@@ -7582,7 +7579,7 @@
     },
     "chromium.028_checkout_jr.com.shippingAddress.postalCode+id" : {
       "key" : "home_postal",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.029_checkout_kohls.com.BILL_PHONE<>areacode" : {
       "score" : 0
@@ -7777,12 +7774,10 @@
       "score" : 0.91
     },
     "chromium.030_checkout_lowes.com.addressField2" : {
-      "key" : "home_street_1",
-      "score" : 0.6
+      "score" : 0
     },
     "chromium.030_checkout_lowes.com.addressField2+id" : {
-      "key" : "home_street_1",
-      "score" : 0.6
+      "score" : 0
     },
     "chromium.030_checkout_lowes.com.billphone1" : {
       "key" : "phone_mobile",
@@ -7798,7 +7793,7 @@
     },
     "chromium.030_checkout_lowes.com.billphone2+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.030_checkout_lowes.com.billphone3" : {
       "key" : "phone_mobile",
@@ -7806,14 +7801,14 @@
     },
     "chromium.030_checkout_lowes.com.billphone3+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.030_checkout_lowes.com.country" : {
       "score" : 0
     },
     "chromium.030_checkout_lowes.com.country+id" : {
       "key" : "home_country",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.030_checkout_lowes.com.email1" : {
       "key" : "email_personal",
@@ -7821,7 +7816,7 @@
     },
     "chromium.030_checkout_lowes.com.email1+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium.030_checkout_lowes.com.save-address" : {
       "score" : 0
@@ -7831,8 +7826,8 @@
       "score" : 0.511
     },
     "chromium.030_checkout_lowes.com.selfAddress+id" : {
-      "key" : "billing_street_1",
-      "score" : 0.92
+      "key" : "phone_mobile",
+      "score" : 0.511
     },
     "chromium.030_checkout_lowes.com.zipCode" : {
       "key" : "home_postal",
@@ -7852,7 +7847,7 @@
     },
     "chromium.031_checkout_macys.com.currentShipment.shipmentAddress.address2+id" : {
       "key" : "home_street_2",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.031_checkout_macys.com.currentShipment.shipmentAddress.city" : {
       "key" : "home_city",
@@ -7867,21 +7862,24 @@
       "score" : 0.93
     },
     "chromium.031_checkout_macys.com.currentShipment.shipmentAddress.dayPhone.areaCode+id" : {
-      "score" : 0
+      "key" : "phone_mobile",
+      "score" : 0.93
     },
     "chromium.031_checkout_macys.com.currentShipment.shipmentAddress.dayPhone.exchangeNbr" : {
       "key" : "phone_mobile",
       "score" : 0.511
     },
     "chromium.031_checkout_macys.com.currentShipment.shipmentAddress.dayPhone.exchangeNbr+id" : {
-      "score" : 0
+      "key" : "phone_mobile",
+      "score" : 0.511
     },
     "chromium.031_checkout_macys.com.currentShipment.shipmentAddress.dayPhone.subscriberNbr" : {
       "key" : "phone_mobile",
       "score" : 0.511
     },
     "chromium.031_checkout_macys.com.currentShipment.shipmentAddress.dayPhone.subscriberNbr+id" : {
-      "score" : 0
+      "key" : "phone_mobile",
+      "score" : 0.511
     },
     "chromium.031_checkout_macys.com.currentShipment.shipmentAddress.firstName" : {
       "key" : "given_name",
@@ -7952,7 +7950,7 @@
     },
     "chromium.032_checkout_nordstrom.com.ctl00$mainContentPlaceHolder$billingAddressForm$middleInitial+id" : {
       "key" : "middle_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.032_checkout_nordstrom.com.ctl00$mainContentPlaceHolder$billingAddressForm$zipCode" : {
       "key" : "home_postal",
@@ -8000,7 +7998,7 @@
     },
     "chromium.032_checkout_nordstrom.com.ctl00$mainContentPlaceHolder$shippingAddressForm$address2+id" : {
       "key" : "home_street_2",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.032_checkout_nordstrom.com.ctl00$mainContentPlaceHolder$shippingAddressForm$city" : {
       "key" : "home_city",
@@ -8032,7 +8030,7 @@
     },
     "chromium.032_checkout_nordstrom.com.ctl00$mainContentPlaceHolder$shippingAddressForm$middleInitial+id" : {
       "key" : "middle_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.032_checkout_nordstrom.com.ctl00$mainContentPlaceHolder$shippingAddressForm$zipCode" : {
       "key" : "home_postal",
@@ -8132,23 +8130,24 @@
       "score" : 0.6
     },
     "chromium.034_checkout_overstock.com.BillingAddress1+id" : {
-      "key" : "billing_street_1",
-      "score" : 0.92
+      "key" : "home_street_1",
+      "score" : 0.6
     },
     "chromium.034_checkout_overstock.com.BillingAddress2" : {
       "key" : "home_street_2",
       "score" : 0.6
     },
     "chromium.034_checkout_overstock.com.BillingAddress2+id" : {
-      "score" : 0
+      "key" : "home_street_2",
+      "score" : 0.6
     },
     "chromium.034_checkout_overstock.com.BillingCity" : {
       "key" : "home_city",
       "score" : 0.6
     },
     "chromium.034_checkout_overstock.com.BillingCity+id" : {
-      "key" : "billing_city",
-      "score" : 0.92
+      "key" : "home_city",
+      "score" : 0.6
     },
     "chromium.034_checkout_overstock.com.BillingDaytimePhone" : {
       "key" : "phone_mobile",
@@ -8187,8 +8186,8 @@
       "score" : 0.6
     },
     "chromium.034_checkout_overstock.com.BillingZipCode+id" : {
-      "key" : "billing_postal",
-      "score" : 0.92
+      "key" : "home_postal",
+      "score" : 0.6
     },
     "chromium.034_checkout_overstock.com.CC_number" : {
       "key" : "card_number",
@@ -8362,7 +8361,7 @@
     },
     "chromium.035_checkout_petco.com.ctl00$ctl00$cphBody$cphBody$txtSA_Address1+id" : {
       "key" : "home_street_1",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.035_checkout_petco.com.ctl00$ctl00$cphBody$cphBody$txtSA_Address2" : {
       "key" : "home_street_2",
@@ -8370,7 +8369,7 @@
     },
     "chromium.035_checkout_petco.com.ctl00$ctl00$cphBody$cphBody$txtSA_Address2+id" : {
       "key" : "home_street_2",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.035_checkout_petco.com.ctl00$ctl00$cphBody$cphBody$txtSA_City" : {
       "key" : "home_city",
@@ -8378,7 +8377,7 @@
     },
     "chromium.035_checkout_petco.com.ctl00$ctl00$cphBody$cphBody$txtSA_City+id" : {
       "key" : "home_city",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.035_checkout_petco.com.ctl00$ctl00$cphBody$cphBody$txtSA_FirstName" : {
       "key" : "given_name",
@@ -8386,7 +8385,7 @@
     },
     "chromium.035_checkout_petco.com.ctl00$ctl00$cphBody$cphBody$txtSA_FirstName+id" : {
       "key" : "given_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.035_checkout_petco.com.ctl00$ctl00$cphBody$cphBody$txtSA_LastName" : {
       "key" : "family_name",
@@ -8394,7 +8393,7 @@
     },
     "chromium.035_checkout_petco.com.ctl00$ctl00$cphBody$cphBody$txtSA_LastName+id" : {
       "key" : "family_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.035_checkout_petco.com.ctl00$ctl00$cphBody$cphBody$txtSA_Phone1" : {
       "key" : "phone_mobile",
@@ -8402,7 +8401,7 @@
     },
     "chromium.035_checkout_petco.com.ctl00$ctl00$cphBody$cphBody$txtSA_Phone1+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.035_checkout_petco.com.ctl00$ctl00$cphBody$cphBody$txtSA_Phone2" : {
       "key" : "home_postal",
@@ -8410,7 +8409,7 @@
     },
     "chromium.035_checkout_petco.com.ctl00$ctl00$cphBody$cphBody$txtSA_Phone2+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.035_checkout_petco.com.ctl00$ctl00$cphBody$cphBody$txtSA_Phone3" : {
       "key" : "home_postal",
@@ -8418,13 +8417,14 @@
     },
     "chromium.035_checkout_petco.com.ctl00$ctl00$cphBody$cphBody$txtSA_Phone3+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.035_checkout_petco.com.ctl00$ctl00$cphBody$cphBody$txtSA_PhoneExt" : {
       "score" : 0
     },
     "chromium.035_checkout_petco.com.ctl00$ctl00$cphBody$cphBody$txtSA_PhoneExt+id" : {
-      "score" : 0
+      "key" : "phone_mobile",
+      "score" : 0.511
     },
     "chromium.035_checkout_petco.com.ctl00$ctl00$cphBody$cphBody$txtSA_Zip" : {
       "key" : "home_postal",
@@ -8432,7 +8432,7 @@
     },
     "chromium.035_checkout_petco.com.ctl00$ctl00$cphBody$cphBody$txtSA_Zip+id" : {
       "key" : "home_postal",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.035_checkout_petco.com.txtEmail" : {
       "key" : "email_personal",
@@ -8490,7 +8490,7 @@
     },
     "chromium.036_checkout_petsmart.com.billPhone+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.92
     },
     "chromium.036_checkout_petsmart.com.billZip" : {
       "key" : "billing_postal",
@@ -8520,7 +8520,7 @@
     },
     "chromium.037_checkout_qvc.com.BilltoAddress1+id" : {
       "key" : "billing_street_1",
-      "score" : 0.92
+      "score" : 0.506
     },
     "chromium.037_checkout_qvc.com.BilltoAddress2" : {
       "score" : 0
@@ -8534,7 +8534,7 @@
     },
     "chromium.037_checkout_qvc.com.BilltoCity+id" : {
       "key" : "billing_city",
-      "score" : 0.92
+      "score" : 0.506
     },
     "chromium.037_checkout_qvc.com.BilltoFirstName" : {
       "key" : "given_name",
@@ -8542,28 +8542,31 @@
     },
     "chromium.037_checkout_qvc.com.BilltoFirstName+id" : {
       "key" : "given_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.037_checkout_qvc.com.BilltoHpArea" : {
       "key" : "phone_mobile",
       "score" : 0.511
     },
     "chromium.037_checkout_qvc.com.BilltoHpArea+id" : {
-      "score" : 0
+      "key" : "phone_mobile",
+      "score" : 0.511
     },
     "chromium.037_checkout_qvc.com.BilltoHpExchange" : {
       "key" : "phone_mobile",
       "score" : 0.511
     },
     "chromium.037_checkout_qvc.com.BilltoHpExchange+id" : {
-      "score" : 0
+      "key" : "phone_mobile",
+      "score" : 0.511
     },
     "chromium.037_checkout_qvc.com.BilltoHpExt" : {
       "key" : "phone_mobile",
       "score" : 0.511
     },
     "chromium.037_checkout_qvc.com.BilltoHpExt+id" : {
-      "score" : 0
+      "key" : "phone_mobile",
+      "score" : 0.511
     },
     "chromium.037_checkout_qvc.com.BilltoLastName" : {
       "key" : "family_name",
@@ -8571,7 +8574,7 @@
     },
     "chromium.037_checkout_qvc.com.BilltoLastName+id" : {
       "key" : "family_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.037_checkout_qvc.com.BilltoWpArea" : {
       "score" : 0
@@ -8597,7 +8600,7 @@
     },
     "chromium.037_checkout_qvc.com.BilltoZipCode+id" : {
       "key" : "billing_postal",
-      "score" : 0.92
+      "score" : 0.506
     },
     "chromium.037_checkout_qvc.com.EmailAddress" : {
       "key" : "email_personal",
@@ -8605,7 +8608,7 @@
     },
     "chromium.037_checkout_qvc.com.EmailAddress+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium.037_checkout_qvc.com.EmailAddressVerify" : {
       "key" : "email_personal",
@@ -8613,7 +8616,7 @@
     },
     "chromium.037_checkout_qvc.com.EmailAddressVerify+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium.037_checkout_qvc.com.ShiptoAddress1" : {
       "key" : "home_street_1",
@@ -8621,7 +8624,7 @@
     },
     "chromium.037_checkout_qvc.com.ShiptoAddress1+id" : {
       "key" : "home_street_1",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.037_checkout_qvc.com.ShiptoAddress2" : {
       "key" : "home_street_2",
@@ -8629,7 +8632,7 @@
     },
     "chromium.037_checkout_qvc.com.ShiptoAddress2+id" : {
       "key" : "home_street_2",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.037_checkout_qvc.com.ShiptoCity" : {
       "key" : "home_city",
@@ -8637,14 +8640,14 @@
     },
     "chromium.037_checkout_qvc.com.ShiptoCity+id" : {
       "key" : "home_city",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.037_checkout_qvc.com.ShiptoFirstName" : {
       "score" : 0
     },
     "chromium.037_checkout_qvc.com.ShiptoFirstName+id" : {
       "key" : "given_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.037_checkout_qvc.com.ShiptoZipCode" : {
       "key" : "home_postal",
@@ -8652,7 +8655,7 @@
     },
     "chromium.037_checkout_qvc.com.ShiptoZipCode+id" : {
       "key" : "home_postal",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.038_checkout_sears.com.KmartSpuSpecialInstr" : {
       "key" : "billing_street_1",
@@ -8720,7 +8723,7 @@
     },
     "chromium.038_checkout_sears.com.shipping_city+id" : {
       "key" : "home_city",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.038_checkout_sears.com.shipping_day1" : {
       "key" : "phone_mobile",
@@ -8758,7 +8761,7 @@
     },
     "chromium.038_checkout_sears.com.shipping_zipCode+id" : {
       "key" : "home_postal",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.038_checkout_sears.com.zipCode" : {
       "key" : "billing_postal",
@@ -8789,14 +8792,14 @@
     },
     "chromium.040_checkout_urbanoutfitters.com.altBillingPhone+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.506
     },
     "chromium.040_checkout_urbanoutfitters.com.altShippingPhone" : {
       "score" : 0
     },
     "chromium.040_checkout_urbanoutfitters.com.altShippingPhone+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.506
     },
     "chromium.040_checkout_urbanoutfitters.com.billingAddress" : {
       "key" : "billing_street_1",
@@ -8804,7 +8807,7 @@
     },
     "chromium.040_checkout_urbanoutfitters.com.billingAddress+id" : {
       "key" : "billing_street_1",
-      "score" : 0.92
+      "score" : 0.506
     },
     "chromium.040_checkout_urbanoutfitters.com.billingAddress2" : {
       "score" : 0
@@ -8818,7 +8821,7 @@
     },
     "chromium.040_checkout_urbanoutfitters.com.billingCity+id" : {
       "key" : "billing_city",
-      "score" : 0.92
+      "score" : 0.506
     },
     "chromium.040_checkout_urbanoutfitters.com.billingFirstName" : {
       "key" : "given_name",
@@ -8826,7 +8829,7 @@
     },
     "chromium.040_checkout_urbanoutfitters.com.billingFirstName+id" : {
       "key" : "given_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.040_checkout_urbanoutfitters.com.billingLastName" : {
       "key" : "family_name",
@@ -8834,7 +8837,7 @@
     },
     "chromium.040_checkout_urbanoutfitters.com.billingLastName+id" : {
       "key" : "family_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.040_checkout_urbanoutfitters.com.billingPhone" : {
       "key" : "phone_mobile",
@@ -8842,7 +8845,7 @@
     },
     "chromium.040_checkout_urbanoutfitters.com.billingPhone+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.040_checkout_urbanoutfitters.com.billingPostalCode" : {
       "key" : "billing_postal",
@@ -8850,7 +8853,7 @@
     },
     "chromium.040_checkout_urbanoutfitters.com.billingPostalCode+id" : {
       "key" : "billing_postal",
-      "score" : 0.92
+      "score" : 0.506
     },
     "chromium.040_checkout_urbanoutfitters.com.giftCardNumberFromBalance" : {
       "score" : 0
@@ -8876,7 +8879,7 @@
     },
     "chromium.040_checkout_urbanoutfitters.com.payment_acctnum+id" : {
       "key" : "card_number",
-      "score" : 0.89
+      "score" : 0.523
     },
     "chromium.040_checkout_urbanoutfitters.com.payment_cidnew" : {
       "key" : "card_cvv",
@@ -8892,7 +8895,7 @@
     },
     "chromium.040_checkout_urbanoutfitters.com.shippingAddress+id" : {
       "key" : "home_street_1",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.040_checkout_urbanoutfitters.com.shippingAddress2" : {
       "key" : "home_street_2",
@@ -8900,7 +8903,7 @@
     },
     "chromium.040_checkout_urbanoutfitters.com.shippingAddress2+id" : {
       "key" : "home_street_2",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.040_checkout_urbanoutfitters.com.shippingCity" : {
       "key" : "home_city",
@@ -8908,7 +8911,7 @@
     },
     "chromium.040_checkout_urbanoutfitters.com.shippingCity+id" : {
       "key" : "home_city",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.040_checkout_urbanoutfitters.com.shippingFirstName" : {
       "key" : "given_name",
@@ -8916,7 +8919,7 @@
     },
     "chromium.040_checkout_urbanoutfitters.com.shippingFirstName+id" : {
       "key" : "given_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.040_checkout_urbanoutfitters.com.shippingLastName" : {
       "key" : "family_name",
@@ -8924,7 +8927,7 @@
     },
     "chromium.040_checkout_urbanoutfitters.com.shippingLastName+id" : {
       "key" : "family_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.040_checkout_urbanoutfitters.com.shippingPhone" : {
       "key" : "phone_mobile",
@@ -8932,7 +8935,7 @@
     },
     "chromium.040_checkout_urbanoutfitters.com.shippingPhone+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.040_checkout_urbanoutfitters.com.shippingPostalCode" : {
       "key" : "home_postal",
@@ -8940,7 +8943,7 @@
     },
     "chromium.040_checkout_urbanoutfitters.com.shippingPostalCode+id" : {
       "key" : "home_postal",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.041_checkout_vitacost.com.ucMasterFrame$ctl02$objAddForm$txtAddress" : {
       "key" : "home_street_1",
@@ -8948,7 +8951,7 @@
     },
     "chromium.041_checkout_vitacost.com.ucMasterFrame$ctl02$objAddForm$txtAddress+id" : {
       "key" : "home_street_1",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.041_checkout_vitacost.com.ucMasterFrame$ctl02$objAddForm$txtAddress2" : {
       "key" : "home_street_2",
@@ -8956,7 +8959,7 @@
     },
     "chromium.041_checkout_vitacost.com.ucMasterFrame$ctl02$objAddForm$txtAddress2+id" : {
       "key" : "home_street_2",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.041_checkout_vitacost.com.ucMasterFrame$ctl02$objAddForm$txtCity" : {
       "key" : "home_city",
@@ -8964,7 +8967,7 @@
     },
     "chromium.041_checkout_vitacost.com.ucMasterFrame$ctl02$objAddForm$txtCity+id" : {
       "key" : "home_city",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.041_checkout_vitacost.com.ucMasterFrame$ctl02$objAddForm$txtCompany" : {
       "key" : "current_org",
@@ -8972,7 +8975,7 @@
     },
     "chromium.041_checkout_vitacost.com.ucMasterFrame$ctl02$objAddForm$txtCompany+id" : {
       "key" : "current_org",
-      "score" : 0.91
+      "score" : 0.5
     },
     "chromium.041_checkout_vitacost.com.ucMasterFrame$ctl02$objAddForm$txtFirstName" : {
       "key" : "given_name",
@@ -8980,7 +8983,7 @@
     },
     "chromium.041_checkout_vitacost.com.ucMasterFrame$ctl02$objAddForm$txtFirstName+id" : {
       "key" : "given_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.041_checkout_vitacost.com.ucMasterFrame$ctl02$objAddForm$txtLastName" : {
       "key" : "family_name",
@@ -8988,7 +8991,7 @@
     },
     "chromium.041_checkout_vitacost.com.ucMasterFrame$ctl02$objAddForm$txtLastName+id" : {
       "key" : "family_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.041_checkout_vitacost.com.ucMasterFrame$ctl02$objAddForm$txtPhone" : {
       "key" : "phone_mobile",
@@ -8996,7 +8999,7 @@
     },
     "chromium.041_checkout_vitacost.com.ucMasterFrame$ctl02$objAddForm$txtPhone+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.041_checkout_vitacost.com.ucMasterFrame$ctl02$objAddForm$txtZip" : {
       "key" : "home_postal",
@@ -9004,7 +9007,7 @@
     },
     "chromium.041_checkout_vitacost.com.ucMasterFrame$ctl02$objAddForm$txtZip+id" : {
       "key" : "home_postal",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.042_checkout_williams-sonoma.com.shipTos[0].address.addrLine1" : {
       "key" : "home_street_1",
@@ -9050,8 +9053,7 @@
       "score" : 0
     },
     "chromium.042_checkout_williams-sonoma.com.shipTos[0].address.eveningPhone+id" : {
-      "key" : "home_street_1",
-      "score" : 0.6
+      "score" : 0
     },
     "chromium.042_checkout_williams-sonoma.com.shipTos[0].address.fullName" : {
       "key" : "full_name",
@@ -9128,14 +9130,16 @@
       "score" : 0.523
     },
     "chromium.045_register_aol.com.{actionForm.dobDay}+id" : {
-      "score" : 0
+      "key" : "date_of_birth",
+      "score" : 0.523
     },
     "chromium.045_register_aol.com.{actionForm.dobYear}" : {
       "key" : "date_of_birth",
       "score" : 0.523
     },
     "chromium.045_register_aol.com.{actionForm.dobYear}+id" : {
-      "score" : 0
+      "key" : "date_of_birth",
+      "score" : 0.523
     },
     "chromium.045_register_aol.com.{actionForm.firstName}" : {
       "key" : "given_name",
@@ -9211,14 +9215,15 @@
     },
     "chromium.047_register_continental.com.ctl00$ContentInfo$Address$address2$txtAddress2+id" : {
       "key" : "home_street_2",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.047_register_continental.com.ctl00$ContentInfo$Address$address3$txtAddress2" : {
       "key" : "home_street_1",
       "score" : 0.33
     },
     "chromium.047_register_continental.com.ctl00$ContentInfo$Address$address3$txtAddress2+id" : {
-      "score" : 0
+      "key" : "home_street_2",
+      "score" : 0.33
     },
     "chromium.047_register_continental.com.ctl00$ContentInfo$Address$city$txtCity" : {
       "key" : "home_city",
@@ -9254,7 +9259,8 @@
       "score" : 0
     },
     "chromium.047_register_continental.com.ctl00$ContentInfo$BusinessPhone$txtExt$txtPhoneExt+id" : {
-      "score" : 0
+      "key" : "current_org",
+      "score" : 0.5
     },
     "chromium.047_register_continental.com.ctl00$ContentInfo$BusinessPhone$txtNumber$txtPhone" : {
       "score" : 0
@@ -9497,7 +9503,7 @@
     },
     "chromium.050_register_ecomm.dell.com.address$ctl00$address$addressValidator$_EditView$city+id" : {
       "key" : "home_city",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.050_register_ecomm.dell.com.address$ctl00$address$addressValidator$_EditView$line1" : {
       "key" : "home_street_1",
@@ -9505,7 +9511,7 @@
     },
     "chromium.050_register_ecomm.dell.com.address$ctl00$address$addressValidator$_EditView$line1+id" : {
       "key" : "home_street_1",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.050_register_ecomm.dell.com.address$ctl00$address$addressValidator$_EditView$line2" : {
       "key" : "home_street_1",
@@ -9513,7 +9519,7 @@
     },
     "chromium.050_register_ecomm.dell.com.address$ctl00$address$addressValidator$_EditView$line2+id" : {
       "key" : "home_street_2",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.050_register_ecomm.dell.com.address$ctl00$address$addressValidator$_EditView$postal_code" : {
       "key" : "home_postal",
@@ -9521,14 +9527,14 @@
     },
     "chromium.050_register_ecomm.dell.com.address$ctl00$address$addressValidator$_EditView$postal_code+id" : {
       "key" : "home_postal",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.050_register_ecomm.dell.com.address$ctl00$address$addressValidator$_EditView$postal_code2" : {
       "score" : 0
     },
     "chromium.050_register_ecomm.dell.com.address$ctl00$address$addressValidator$_EditView$postal_code2+id" : {
       "key" : "home_postal",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.050_register_ecomm.dell.com.email$ctl07" : {
       "key" : "email_personal",
@@ -9540,7 +9546,7 @@
     },
     "chromium.050_register_ecomm.dell.com.name$ctl00$name$_EditView$first+id" : {
       "key" : "given_name",
-      "score" : 0.87
+      "score" : 0.523
     },
     "chromium.050_register_ecomm.dell.com.name$ctl00$name$_EditView$last" : {
       "key" : "family_name",
@@ -9548,7 +9554,7 @@
     },
     "chromium.050_register_ecomm.dell.com.name$ctl00$name$_EditView$last+id" : {
       "key" : "family_name",
-      "score" : 0.87
+      "score" : 0.523
     },
     "chromium.050_register_ecomm.dell.com.name$ctl00$name$_EditView$mi" : {
       "key" : "middle_name",
@@ -9556,7 +9562,7 @@
     },
     "chromium.050_register_ecomm.dell.com.name$ctl00$name$_EditView$mi+id" : {
       "key" : "middle_name",
-      "score" : 0.87
+      "score" : 0.479
     },
     "chromium.051_register_epson.com.EMAIL_ADDRESS" : {
       "key" : "email_personal",
@@ -9590,14 +9596,14 @@
     },
     "chromium.052_register_google.com.Birthday+id" : {
       "key" : "date_of_birth",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.052_register_google.com.Email" : {
       "score" : 0
     },
     "chromium.052_register_google.com.Email+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium.052_register_google.com.FirstName" : {
       "key" : "given_name",
@@ -9605,7 +9611,7 @@
     },
     "chromium.052_register_google.com.FirstName+id" : {
       "key" : "given_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.052_register_google.com.IdentityAnswer" : {
       "score" : 0
@@ -9619,7 +9625,7 @@
     },
     "chromium.052_register_google.com.LastName+id" : {
       "key" : "family_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.052_register_google.com.SecondaryEmail" : {
       "key" : "email_personal",
@@ -9627,7 +9633,7 @@
     },
     "chromium.052_register_google.com.SecondaryEmail+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium.052_register_google.com.newaccountcaptcha" : {
       "score" : 0
@@ -9702,7 +9708,7 @@
     },
     "chromium.053_register_gymboree.com.LOYALTY_ADDRESS<>postal+id" : {
       "key" : "home_postal",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.053_register_gymboree.com.SEARCH_INPUT<>searchFor" : {
       "score" : 0
@@ -9939,14 +9945,16 @@
       "score" : 0.523
     },
     "chromium.058_register_livejournal.com.Widget[CreateAccount]_bday_dd+id" : {
-      "score" : 0
+      "key" : "date_of_birth",
+      "score" : 0.523
     },
     "chromium.058_register_livejournal.com.Widget[CreateAccount]_bday_yyyy" : {
       "key" : "date_of_birth",
       "score" : 0.523
     },
     "chromium.058_register_livejournal.com.Widget[CreateAccount]_bday_yyyy+id" : {
-      "score" : 0
+      "key" : "date_of_birth",
+      "score" : 0.523
     },
     "chromium.058_register_livejournal.com.Widget[CreateAccount]_email" : {
       "key" : "email_personal",
@@ -9954,7 +9962,7 @@
     },
     "chromium.058_register_livejournal.com.Widget[CreateAccount]_email+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium.058_register_livejournal.com.Widget[CreateAccount]_user" : {
       "score" : 0
@@ -10340,14 +10348,14 @@
     },
     "chromium.062_register_newegg.com.ShippingPhone_tel2+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.062_register_newegg.com.ShippingPhone_tel3" : {
       "score" : 0
     },
     "chromium.062_register_newegg.com.ShippingPhone_tel3+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.062_register_newegg.com.TrackingNumber" : {
       "score" : 0
@@ -10441,7 +10449,7 @@
     },
     "chromium.063_register_officedepot.com.addrsForm[0].phoneNumber2+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.063_register_officedepot.com.addrsForm[0].phoneNumber3" : {
       "key" : "phone_mobile",
@@ -10449,14 +10457,14 @@
     },
     "chromium.063_register_officedepot.com.addrsForm[0].phoneNumber3+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.063_register_officedepot.com.addrsForm[0].phoneNumber4" : {
       "score" : 0
     },
     "chromium.063_register_officedepot.com.addrsForm[0].phoneNumber4+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.063_register_officedepot.com.addrsForm[0].postalCode1" : {
       "key" : "billing_postal",
@@ -10487,7 +10495,7 @@
     },
     "chromium.063_register_officedepot.com.addrsForm[2].address2+id" : {
       "key" : "home_street_2",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.063_register_officedepot.com.addrsForm[2].city" : {
       "key" : "home_city",
@@ -10543,7 +10551,7 @@
     },
     "chromium.063_register_officedepot.com.addrsForm[2].phoneNumber2+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.063_register_officedepot.com.addrsForm[2].phoneNumber3" : {
       "key" : "phone_mobile",
@@ -10551,14 +10559,14 @@
     },
     "chromium.063_register_officedepot.com.addrsForm[2].phoneNumber3+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.063_register_officedepot.com.addrsForm[2].phoneNumber4" : {
       "score" : 0
     },
     "chromium.063_register_officedepot.com.addrsForm[2].phoneNumber4+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.063_register_officedepot.com.addrsForm[2].postalCode1" : {
       "key" : "home_postal",
@@ -10592,7 +10600,7 @@
     },
     "chromium.063_register_officedepot.com.zip+id" : {
       "key" : "home_postal",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.064_register_officemax.com./atg/userprofiling/ProfileFormHandler.confirmEmailAddress" : {
       "key" : "email_personal",
@@ -10600,7 +10608,7 @@
     },
     "chromium.064_register_officemax.com./atg/userprofiling/ProfileFormHandler.confirmEmailAddress+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium.064_register_officemax.com./atg/userprofiling/ProfileFormHandler.value.firstName" : {
       "key" : "given_name",
@@ -10608,7 +10616,7 @@
     },
     "chromium.064_register_officemax.com./atg/userprofiling/ProfileFormHandler.value.firstName+id" : {
       "key" : "given_name",
-      "score" : 0.87
+      "score" : 0.523
     },
     "chromium.064_register_officemax.com./atg/userprofiling/ProfileFormHandler.value.lastName" : {
       "key" : "family_name",
@@ -10616,7 +10624,7 @@
     },
     "chromium.064_register_officemax.com./atg/userprofiling/ProfileFormHandler.value.lastName+id" : {
       "key" : "family_name",
-      "score" : 0.87
+      "score" : 0.523
     },
     "chromium.064_register_officemax.com./atg/userprofiling/ProfileFormHandler.value.login" : {
       "key" : "email_personal",
@@ -10624,7 +10632,7 @@
     },
     "chromium.064_register_officemax.com./atg/userprofiling/ProfileFormHandler.value.login+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium.064_register_officemax.com./atg/userprofiling/ProfileFormHandler.value.maxPerks" : {
       "score" : 0
@@ -10638,7 +10646,7 @@
     },
     "chromium.064_register_officemax.com./atg/userprofiling/ProfileFormHandler.value.zip+id" : {
       "key" : "home_postal",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.065_register_pyramidcollection.com.C2" : {
       "key" : "home_city",
@@ -10781,7 +10789,7 @@
     },
     "chromium.065_register_pyramidcollection.com.email+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium.066_register_rediff.com.75cd7feb6ce926e1efbb8b96c0fb71c0" : {
       "score" : 0
@@ -10805,7 +10813,8 @@
       "score" : 0.72
     },
     "chromium.067_register_rei.com.EmailAddress+id" : {
-      "score" : 0
+      "key" : "email_personal",
+      "score" : 0.72
     },
     "chromium.067_register_rei.com.middleName" : {
       "key" : "middle_name",
@@ -10821,7 +10830,7 @@
     },
     "chromium.067_register_rei.com.zipCode+id" : {
       "key" : "home_postal",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.068_register_rocketlawyer.com.ctl00$ctl00$ctl00$SiteMasterBody$ContentPlaceHolder1$ContentPlaceHolder1$txtConfirmUserName" : {
       "key" : "email_personal",
@@ -10837,7 +10846,7 @@
     },
     "chromium.068_register_rocketlawyer.com.ctl00$ctl00$ctl00$SiteMasterBody$ContentPlaceHolder1$ContentPlaceHolder1$txtFirstName+id" : {
       "key" : "given_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.068_register_rocketlawyer.com.ctl00$ctl00$ctl00$SiteMasterBody$ContentPlaceHolder1$ContentPlaceHolder1$txtLastName" : {
       "key" : "family_name",
@@ -10845,7 +10854,7 @@
     },
     "chromium.068_register_rocketlawyer.com.ctl00$ctl00$ctl00$SiteMasterBody$ContentPlaceHolder1$ContentPlaceHolder1$txtLastName+id" : {
       "key" : "family_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.068_register_rocketlawyer.com.ctl00$ctl00$ctl00$SiteMasterBody$ContentPlaceHolder1$ContentPlaceHolder1$txtUserName" : {
       "key" : "email_personal",
@@ -10866,7 +10875,7 @@
     },
     "chromium.069_register_signup.clicksor.com.address+id" : {
       "key" : "home_street_1",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.069_register_signup.clicksor.com.city" : {
       "key" : "home_city",
@@ -10874,7 +10883,7 @@
     },
     "chromium.069_register_signup.clicksor.com.city+id" : {
       "key" : "home_city",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.069_register_signup.clicksor.com.company" : {
       "key" : "current_org",
@@ -10882,7 +10891,7 @@
     },
     "chromium.069_register_signup.clicksor.com.company+id" : {
       "key" : "current_org",
-      "score" : 0.91
+      "score" : 0.5
     },
     "chromium.069_register_signup.clicksor.com.email1" : {
       "key" : "email_personal",
@@ -10906,7 +10915,7 @@
     },
     "chromium.069_register_signup.clicksor.com.name+id" : {
       "key" : "full_name",
-      "score" : 0.87
+      "score" : 0.479
     },
     "chromium.069_register_signup.clicksor.com.phone" : {
       "key" : "phone_mobile",
@@ -10914,7 +10923,7 @@
     },
     "chromium.069_register_signup.clicksor.com.phone+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.069_register_signup.clicksor.com.province" : {
       "key" : "home_state",
@@ -10922,7 +10931,7 @@
     },
     "chromium.069_register_signup.clicksor.com.province+id" : {
       "key" : "home_state",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.069_register_signup.clicksor.com.securityCode" : {
       "key" : "card_cvv",
@@ -10934,7 +10943,7 @@
     },
     "chromium.069_register_signup.clicksor.com.website+id" : {
       "key" : "website_url",
-      "score" : 0.88
+      "score" : 0.484
     },
     "chromium.069_register_signup.clicksor.com.zipCode" : {
       "key" : "home_postal",
@@ -10942,7 +10951,7 @@
     },
     "chromium.069_register_signup.clicksor.com.zipCode+id" : {
       "key" : "home_postal",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.071_register_sourceforge.net.X129ZdMbfixhIflk8_zHDFWB72qk" : {
       "key" : "email_personal",
@@ -10984,7 +10993,7 @@
     },
     "chromium.072_register_supershuttle.com.ctl00$cphLeft$InnerLogin1$txtEmailAddress+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium.072_register_supershuttle.com.ctl00$cphRight$Registration1$txtCellPhone" : {
       "key" : "phone_mobile",
@@ -10992,14 +11001,15 @@
     },
     "chromium.072_register_supershuttle.com.ctl00$cphRight$Registration1$txtCellPhone+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.072_register_supershuttle.com.ctl00$cphRight$Registration1$txtCountryCode" : {
       "key" : "phone_mobile",
       "score" : 0.511
     },
     "chromium.072_register_supershuttle.com.ctl00$cphRight$Registration1$txtCountryCode+id" : {
-      "score" : 0
+      "key" : "phone_mobile",
+      "score" : 0.511
     },
     "chromium.072_register_supershuttle.com.ctl00$cphRight$Registration1$txtEmailAddress" : {
       "key" : "email_personal",
@@ -11007,7 +11017,7 @@
     },
     "chromium.072_register_supershuttle.com.ctl00$cphRight$Registration1$txtEmailAddress+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium.072_register_supershuttle.com.ctl00$cphRight$Registration1$txtFirstName" : {
       "key" : "given_name",
@@ -11015,7 +11025,7 @@
     },
     "chromium.072_register_supershuttle.com.ctl00$cphRight$Registration1$txtFirstName+id" : {
       "key" : "given_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.072_register_supershuttle.com.ctl00$cphRight$Registration1$txtIntPhoneNumber" : {
       "key" : "phone_mobile",
@@ -11023,7 +11033,7 @@
     },
     "chromium.072_register_supershuttle.com.ctl00$cphRight$Registration1$txtIntPhoneNumber+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.072_register_supershuttle.com.ctl00$cphRight$Registration1$txtLastName" : {
       "key" : "family_name",
@@ -11031,7 +11041,7 @@
     },
     "chromium.072_register_supershuttle.com.ctl00$cphRight$Registration1$txtLastName+id" : {
       "key" : "family_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.073_register_target.com.email" : {
       "key" : "email_personal",
@@ -11068,7 +11078,8 @@
       "score" : 0.9
     },
     "chromium.073_register_target.com.userName+id" : {
-      "score" : 0
+      "key" : "full_name",
+      "score" : 0.9
     },
     "chromium.074_register_threadless.com.create_username" : {
       "score" : 0
@@ -11112,7 +11123,7 @@
     },
     "chromium.075_register_trueblue.jetblue.com.accountData.confirmEmail+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium.075_register_trueblue.jetblue.com.accountData.email" : {
       "key" : "email_personal",
@@ -11120,7 +11131,7 @@
     },
     "chromium.075_register_trueblue.jetblue.com.accountData.email+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium.075_register_trueblue.jetblue.com.accountData.entrollmentCode" : {
       "score" : 0
@@ -11160,7 +11171,7 @@
     },
     "chromium.076_register_uhaul.com._ctl0:cphMainBody:txtCompany+id" : {
       "key" : "current_org",
-      "score" : 0.91
+      "score" : 0.5
     },
     "chromium.076_register_uhaul.com._ctl0:cphMainBody:txtEmail" : {
       "key" : "email_personal",
@@ -11168,7 +11179,7 @@
     },
     "chromium.076_register_uhaul.com._ctl0:cphMainBody:txtEmail+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium.076_register_uhaul.com._ctl0:cphMainBody:txtEmail0" : {
       "key" : "email_personal",
@@ -11176,7 +11187,7 @@
     },
     "chromium.076_register_uhaul.com._ctl0:cphMainBody:txtEmail0+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium.076_register_uhaul.com._ctl0:cphMainBody:txtEntity" : {
       "score" : 0
@@ -11198,7 +11209,7 @@
     },
     "chromium.076_register_uhaul.com._ctl0:cphMainBody:txtPhone+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.076_register_uhaul.com._ctl0:cphMainBody:txtVendNo" : {
       "score" : 0
@@ -11593,12 +11604,10 @@
       "score" : 0.6
     },
     "chromium.096_llbean.INTLCounty" : {
-      "key" : "home_state",
-      "score" : 0.6
+      "score" : 0
     },
     "chromium.096_llbean.INTLCounty+id" : {
-      "key" : "home_state",
-      "score" : 0.6
+      "score" : 0
     },
     "chromium.096_llbean.INTLPostal" : {
       "key" : "home_postal",
@@ -11708,7 +11717,7 @@
     },
     "chromium.097_register_alaskaair.com.FormUserControl$_contactInformation$_phoneNumber$_phoneNumberTextBox+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.097_register_alaskaair.com.FormUserControl$_guardianInformation$_email$_emailAddressTextBox" : {
       "score" : 0
@@ -11741,7 +11750,7 @@
       "score" : 0.6
     },
     "chromium.097_register_alaskaair.com.FormUserControl$_mailingAddress$_addr2+id" : {
-      "key" : "home_street_2",
+      "key" : "home_street_1",
       "score" : 0.6
     },
     "chromium.097_register_alaskaair.com.FormUserControl$_mailingAddress$_city" : {
@@ -11782,7 +11791,7 @@
     },
     "chromium.097_register_alaskaair.com.FormUserControl$_personalIdentification$_firstName$_name+id" : {
       "key" : "given_name",
-      "score" : 0.87
+      "score" : 0.95
     },
     "chromium.097_register_alaskaair.com.FormUserControl$_personalIdentification$_lastName$_name" : {
       "key" : "family_name",
@@ -11790,7 +11799,7 @@
     },
     "chromium.097_register_alaskaair.com.FormUserControl$_personalIdentification$_lastName$_name+id" : {
       "key" : "family_name",
-      "score" : 0.87
+      "score" : 0.95
     },
     "chromium.097_register_alaskaair.com.FormUserControl$_personalIdentification$_middleName$_middleName" : {
       "key" : "middle_name",
@@ -11829,12 +11838,10 @@
       "score" : 0.6
     },
     "chromium.100_checkout_costco.com.addressFormInlineAddressNickName" : {
-      "key" : "university",
-      "score" : 0.88
+      "score" : 0
     },
     "chromium.100_checkout_costco.com.addressFormInlineAddressNickName+id" : {
-      "key" : "university",
-      "score" : 0.88
+      "score" : 0
     },
     "chromium.100_checkout_costco.com.addressFormInlineCity" : {
       "key" : "home_city",
@@ -11882,7 +11889,7 @@
     },
     "chromium.100_checkout_costco.com.addressFormInlineMiddleInitial+id" : {
       "key" : "middle_name",
-      "score" : 0.95
+      "score" : 0.87
     },
     "chromium.100_checkout_costco.com.addressFormInlinePhoneNumber" : {
       "key" : "phone_mobile",
@@ -12092,21 +12099,22 @@
     },
     "chromium.103_checkout_peapod.com.cardNum+id" : {
       "key" : "card_number",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.103_checkout_peapod.com.cid" : {
       "score" : 0
     },
     "chromium.103_checkout_peapod.com.cid+id" : {
       "key" : "card_cvv",
-      "score" : 0.89
+      "score" : 0.49
     },
     "chromium.104_checkout_m_kohls.com.bill-addr-lookup" : {
       "key" : "home_street_1",
       "score" : 0.33
     },
     "chromium.104_checkout_m_kohls.com.bill-addr-lookup+id" : {
-      "score" : 0
+      "key" : "home_street_1",
+      "score" : 0.33
     },
     "chromium.104_checkout_m_kohls.com.billing_city" : {
       "key" : "home_city",
@@ -12161,7 +12169,7 @@
     },
     "chromium.104_checkout_m_kohls.com.billing_zipcode+id" : {
       "key" : "billing_postal",
-      "score" : 0.92
+      "score" : 0.506
     },
     "chromium.104_checkout_m_kohls.com.creditCardID" : {
       "score" : 0
@@ -12275,8 +12283,7 @@
       "score" : 0
     },
     "chromium.106_checkout_m_amazon.com.enterAddressTaxId+id" : {
-      "key" : "home_street_1",
-      "score" : 0.6
+      "score" : 0
     },
     "chromium.106_checkout_m_amazon.com.name" : {
       "key" : "card_name",
@@ -12315,8 +12322,8 @@
       "score" : 0.91
     },
     "chromium.107_checkout_m_apple.com.payment-credit-user-address-companyName+id" : {
-      "key" : "billing_street_1",
-      "score" : 0.92
+      "key" : "current_org",
+      "score" : 0.91
     },
     "chromium.107_checkout_m_apple.com.payment-credit-user-address-daytimePhone" : {
       "key" : "phone_mobile",
@@ -12330,8 +12337,7 @@
       "score" : 0
     },
     "chromium.107_checkout_m_apple.com.payment-credit-user-address-daytimePhoneAreaCode+id" : {
-      "key" : "billing_street_1",
-      "score" : 0.92
+      "score" : 0
     },
     "chromium.107_checkout_m_apple.com.payment-credit-user-address-emailAddress" : {
       "key" : "email_personal",
@@ -12345,31 +12351,29 @@
       "score" : 0
     },
     "chromium.107_checkout_m_apple.com.payment-credit-user-address-eveningPhone+id" : {
-      "key" : "billing_street_1",
-      "score" : 0.92
+      "score" : 0
     },
     "chromium.107_checkout_m_apple.com.payment-credit-user-address-eveningPhoneAreaCode" : {
       "score" : 0
     },
     "chromium.107_checkout_m_apple.com.payment-credit-user-address-eveningPhoneAreaCode+id" : {
-      "key" : "billing_street_1",
-      "score" : 0.92
+      "score" : 0
     },
     "chromium.107_checkout_m_apple.com.payment-credit-user-address-firstName" : {
       "key" : "given_name",
       "score" : 0.95
     },
     "chromium.107_checkout_m_apple.com.payment-credit-user-address-firstName+id" : {
-      "key" : "billing_street_1",
-      "score" : 0.92
+      "key" : "given_name",
+      "score" : 0.95
     },
     "chromium.107_checkout_m_apple.com.payment-credit-user-address-lastName" : {
       "key" : "family_name",
       "score" : 0.95
     },
     "chromium.107_checkout_m_apple.com.payment-credit-user-address-lastName+id" : {
-      "key" : "billing_street_1",
-      "score" : 0.92
+      "key" : "family_name",
+      "score" : 0.95
     },
     "chromium.107_checkout_m_apple.com.payment-credit-user-address-postalCode" : {
       "key" : "billing_postal",
@@ -12415,7 +12419,7 @@
     },
     "chromium.108_checkout_m_gap.com.shippingAddressFieldGroup1-shippingAddressLine2+id" : {
       "key" : "home_street_2",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.108_checkout_m_gap.com.shippingAddressFieldGroup1-shippingCity" : {
       "key" : "home_city",
@@ -12740,14 +12744,14 @@
     },
     "chromium.110_checkout_harryanddavid.com.address2+id" : {
       "key" : "home_street_2",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.110_checkout_harryanddavid.com.businessTitle" : {
       "score" : 0
     },
     "chromium.110_checkout_harryanddavid.com.businessTitle+id" : {
       "key" : "current_org",
-      "score" : 0.91
+      "score" : 0.5
     },
     "chromium.110_checkout_harryanddavid.com.clearTextAccount" : {
       "key" : "card_number",
@@ -12763,7 +12767,7 @@
     },
     "chromium.110_checkout_harryanddavid.com.email1+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium.110_checkout_harryanddavid.com.logonId" : {
       "key" : "email_personal",
@@ -12785,7 +12789,7 @@
     },
     "chromium.110_checkout_harryanddavid.com.organizationName+id" : {
       "key" : "current_org",
-      "score" : 0.91
+      "score" : 0.5
     },
     "chromium.110_checkout_harryanddavid.com.phone1" : {
       "key" : "phone_mobile",
@@ -12793,14 +12797,14 @@
     },
     "chromium.110_checkout_harryanddavid.com.phone1+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.110_checkout_harryanddavid.com.phone2" : {
       "score" : 0
     },
     "chromium.110_checkout_harryanddavid.com.phone2+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.110_checkout_harryanddavid.com.r001" : {
       "score" : 0
@@ -12867,7 +12871,7 @@
     },
     "chromium.110_checkout_harryanddavid.com.zipCode+id" : {
       "key" : "home_postal",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.111_checkout_virgin_america.com.cardholderName" : {
       "key" : "card_name",
@@ -12909,12 +12913,10 @@
       "score" : 0.6
     },
     "chromium.112_checkout_m_llbean.com._1_INTLCounty" : {
-      "key" : "home_state",
-      "score" : 0.6
+      "score" : 0
     },
     "chromium.112_checkout_m_llbean.com._1_INTLCounty+id" : {
-      "key" : "home_state",
-      "score" : 0.6
+      "score" : 0
     },
     "chromium.112_checkout_m_llbean.com._1_INTLPostal" : {
       "key" : "home_postal",
@@ -12990,14 +12992,15 @@
     },
     "chromium.112_checkout_m_llbean.com._1_intlPhone1+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.112_checkout_m_llbean.com._1_intlPhone1Prefix" : {
       "key" : "phone_mobile",
       "score" : 0.511
     },
     "chromium.112_checkout_m_llbean.com._1_intlPhone1Prefix+id" : {
-      "score" : 0
+      "key" : "phone_mobile",
+      "score" : 0.511
     },
     "chromium.112_checkout_m_llbean.com._1_lastName" : {
       "key" : "family_name",
@@ -13029,7 +13032,7 @@
     },
     "chromium.112_checkout_m_llbean.com._1_phone1+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.112_checkout_m_llbean.com._1_zipCode" : {
       "key" : "home_postal",
@@ -13114,7 +13117,7 @@
     },
     "chromium.114_cc_checkout_wayfair.com.credit_card[card_holder_name]+id" : {
       "key" : "card_name",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.114_cc_checkout_wayfair.com.credit_card[card_number]" : {
       "key" : "card_number",
@@ -13122,14 +13125,14 @@
     },
     "chromium.114_cc_checkout_wayfair.com.credit_card[card_number]+id" : {
       "key" : "card_number",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.114_cc_checkout_wayfair.com.credit_card[security_code]" : {
       "score" : 0
     },
     "chromium.114_cc_checkout_wayfair.com.credit_card[security_code]+id" : {
       "key" : "card_cvv",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.115_checkout_walgreens.com.addcity" : {
       "key" : "home_city",
@@ -13467,7 +13470,7 @@
     },
     "chromium.138_cc_checkout_united.com.AlipayCardHolderName+id" : {
       "key" : "card_name",
-      "score" : 0.95
+      "score" : 0.89
     },
     "chromium.138_cc_checkout_united.com.AlipayCity" : {
       "key" : "billing_city",
@@ -13603,7 +13606,7 @@
     },
     "chromium.138_cc_checkout_united.com.CreditCardViewModels[0].CardHolderName+id" : {
       "key" : "card_name",
-      "score" : 0.95
+      "score" : 0.89
     },
     "chromium.138_cc_checkout_united.com.CreditCardViewModels[0].CardNumber" : {
       "key" : "card_number",
@@ -13618,24 +13621,24 @@
       "score" : 0.6
     },
     "chromium.138_cc_checkout_united.com.CreditCardViewModels[0].City+id" : {
-      "key" : "billing_city",
-      "score" : 0.92
+      "key" : "home_city",
+      "score" : 0.6
     },
     "chromium.138_cc_checkout_united.com.CreditCardViewModels[0].PostalCode" : {
       "key" : "home_postal",
       "score" : 0.6
     },
     "chromium.138_cc_checkout_united.com.CreditCardViewModels[0].PostalCode+id" : {
-      "key" : "billing_postal",
-      "score" : 0.92
+      "key" : "home_postal",
+      "score" : 0.6
     },
     "chromium.138_cc_checkout_united.com.CreditCardViewModels[0].StateCode" : {
       "key" : "home_state",
       "score" : 0.6
     },
     "chromium.138_cc_checkout_united.com.CreditCardViewModels[0].StateCode+id" : {
-      "key" : "billing_state",
-      "score" : 0.92
+      "key" : "home_state",
+      "score" : 0.6
     },
     "chromium.138_cc_checkout_united.com.PayPalBillingAddress" : {
       "key" : "billing_street_1",
@@ -13683,7 +13686,7 @@
     },
     "chromium.140_checkout_nike.com.address1Field+id" : {
       "key" : "home_street_1",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.140_checkout_nike.com.address2Field" : {
       "score" : 0
@@ -13693,12 +13696,12 @@
       "score" : 0.5
     },
     "chromium.140_checkout_nike.com.address2Field#2+id" : {
-      "key" : "home_street_2",
-      "score" : 0.6
+      "key" : "current_org",
+      "score" : 0.5
     },
     "chromium.140_checkout_nike.com.address2Field+id" : {
       "key" : "home_street_2",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.140_checkout_nike.com.postalCodeField" : {
       "key" : "home_postal",
@@ -13706,7 +13709,7 @@
     },
     "chromium.140_checkout_nike.com.postalCodeField+id" : {
       "key" : "home_postal",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.140_checkout_nike.com.reqEmail" : {
       "key" : "email_personal",
@@ -13714,7 +13717,7 @@
     },
     "chromium.140_checkout_nike.com.reqEmail+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium.141_checkout_cc_keurig.com.card_accountNumber" : {
       "key" : "card_number",
@@ -13784,7 +13787,7 @@
     },
     "chromium.143_cc_checkout_efollet.com.cardNumber_CC+id" : {
       "key" : "card_number",
-      "score" : 0.95
+      "score" : 0.523
     },
     "chromium.143_cc_checkout_efollet.com.cardPin_CC" : {
       "key" : "card_cvv",
@@ -13813,8 +13816,8 @@
       "score" : 0.512
     },
     "chromium.144_cc_checkout_m_jcp.com.c-v-v-guest+id" : {
-      "key" : "card_cvv",
-      "score" : 0.89
+      "key" : "card_exp",
+      "score" : 0.512
     },
     "chromium.144_cc_checkout_m_jcp.com.card-number-guest" : {
       "key" : "card_number",
@@ -13890,7 +13893,7 @@
     },
     "chromium.145_hal-india.com.ctl00$ContentPlaceHolder1$txtEmail+id" : {
       "key" : "email_personal",
-      "score" : 0.72
+      "score" : 0.396
     },
     "chromium.145_hal-india.com.ctl00$ContentPlaceHolder1$txtName" : {
       "key" : "full_name",
@@ -13912,7 +13915,7 @@
     },
     "chromium.146_checkout_store.scholastic.com.addressLine1+id" : {
       "key" : "home_street_1",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.146_checkout_store.scholastic.com.addressLine2" : {
       "key" : "home_street_2",
@@ -13920,7 +13923,7 @@
     },
     "chromium.146_checkout_store.scholastic.com.addressLine2+id" : {
       "key" : "home_street_2",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.146_checkout_store.scholastic.com.label" : {
       "key" : "home_street_1",
@@ -13936,7 +13939,7 @@
     },
     "chromium.146_checkout_store.scholastic.com.phoneAreaCode+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.146_checkout_store.scholastic.com.phoneExchange" : {
       "key" : "phone_mobile",
@@ -13944,7 +13947,7 @@
     },
     "chromium.146_checkout_store.scholastic.com.phoneExchange+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.146_checkout_store.scholastic.com.phoneNumber" : {
       "key" : "phone_mobile",
@@ -13952,7 +13955,7 @@
     },
     "chromium.146_checkout_store.scholastic.com.phoneNumber+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.511
     },
     "chromium.146_checkout_store.scholastic.com.zipcode" : {
       "key" : "home_postal",
@@ -13960,7 +13963,7 @@
     },
     "chromium.146_checkout_store.scholastic.com.zipcode+id" : {
       "key" : "home_postal",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.147_panera.custhelp.com_app_ask.Contact.CustomFields.c.panera_my_panera_number" : {
       "key" : "card_number",
@@ -14093,8 +14096,8 @@
       "score" : 0.91
     },
     "chromium.148_payment_dickblick.com.BillingAddressCompanyName+id" : {
-      "key" : "billing_street_1",
-      "score" : 0.92
+      "key" : "current_org",
+      "score" : 0.91
     },
     "chromium.148_payment_dickblick.com.BillingAddressFirstName" : {
       "key" : "given_name",
@@ -14162,7 +14165,7 @@
     },
     "chromium.148_payment_dickblick.com.ContactDaytimePhoneNumber+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.92
     },
     "chromium.148_payment_dickblick.com.ContactEmailAddress" : {
       "key" : "email_personal",
@@ -14178,7 +14181,7 @@
     },
     "chromium.148_payment_dickblick.com.ContactEveningPhoneNumber+id" : {
       "key" : "phone_mobile",
-      "score" : 0.93
+      "score" : 0.92
     },
     "chromium.148_payment_dickblick.com.CouponCode" : {
       "score" : 0
@@ -14217,19 +14220,19 @@
       "score" : 0
     },
     "chromium.150_checkout_venus.com_search_field.ctl00$Body1$txtPasswordEmail" : {
-      "key" : "full_name",
-      "score" : 0.87
+      "key" : "email_personal",
+      "score" : 0.72
     },
     "chromium.150_checkout_venus.com_search_field.ctl00$Body1$txtPasswordEmail+id" : {
-      "key" : "full_name",
-      "score" : 0.87
+      "key" : "email_personal",
+      "score" : 0.72
     },
     "chromium.150_checkout_venus.com_search_field.ctl00$Body1$ucShippingAddress$txtAddress1" : {
       "score" : 0
     },
     "chromium.150_checkout_venus.com_search_field.ctl00$Body1$ucShippingAddress$txtAddress1+id" : {
       "key" : "home_street_1",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.150_checkout_venus.com_search_field.ctl00$Body1$ucShippingAddress$txtAddress2" : {
       "key" : "home_street_1",
@@ -14237,14 +14240,14 @@
     },
     "chromium.150_checkout_venus.com_search_field.ctl00$Body1$ucShippingAddress$txtAddress2+id" : {
       "key" : "home_street_2",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.150_checkout_venus.com_search_field.ctl00$Body1$ucShippingAddress$txtCity" : {
       "score" : 0
     },
     "chromium.150_checkout_venus.com_search_field.ctl00$Body1$ucShippingAddress$txtCity+id" : {
       "key" : "home_city",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.150_checkout_venus.com_search_field.ctl00$Body1$ucShippingAddress$txtDayPhone" : {
       "key" : "phone_mobile",
@@ -14267,8 +14270,8 @@
       "score" : 0.523
     },
     "chromium.150_checkout_venus.com_search_field.ctl00$Body1$ucShippingAddress$txtLastName+id" : {
-      "key" : "family_name",
-      "score" : 0.95
+      "key" : "given_name",
+      "score" : 0.523
     },
     "chromium.150_checkout_venus.com_search_field.ctl00$Body1$ucShippingAddress$txtZip" : {
       "key" : "home_postal",
@@ -14276,7 +14279,7 @@
     },
     "chromium.150_checkout_venus.com_search_field.ctl00$Body1$ucShippingAddress$txtZip+id" : {
       "key" : "home_postal",
-      "score" : 0.6
+      "score" : 0.33
     },
     "chromium.150_checkout_venus.com_search_field.ctl00$searchterm" : {
       "score" : 0
@@ -14567,8 +14570,8 @@
       "score" : 0.6
     },
     "chromium.156_buyAlbum_bandcamp.com_price.postcode+id" : {
-      "key" : "email_personal",
-      "score" : 0.72
+      "key" : "home_postal",
+      "score" : 0.6
     },
     "chromium.156_buyAlbum_bandcamp.com_price.purchase-note-input" : {
       "score" : 0
@@ -15145,8 +15148,7 @@
       "score" : 0
     },
     "hand.neg-county" : {
-      "key" : "home_state",
-      "score" : 0.6
+      "score" : 0
     },
     "hand.neg-event-name" : {
       "score" : 0
@@ -15286,8 +15288,7 @@
       "score" : 0.6
     },
     "hand.wd-country-phone-code" : {
-      "key" : "home_country",
-      "score" : 0.6
+      "score" : 0
     },
     "hand.wd-email-address" : {
       "key" : "email_personal",
@@ -15456,6 +15457,16 @@
     "regression.name.Description" : {
       "score" : 0
     },
+    "regression.name.SITE_URL" : {
+      "score" : 0
+    },
+    "regression.name.additionalGuests.0.firstName" : {
+      "score" : 0
+    },
+    "regression.name.appEducation.colleges[0].endYYYY" : {
+      "key" : "grad_year",
+      "score" : 0.93
+    },
     "regression.name.birthDate-day" : {
       "score" : 0
     },
@@ -15465,9 +15476,23 @@
     "regression.name.birthDate-year" : {
       "score" : 0
     },
+    "regression.name.candidateName" : {
+      "key" : "full_name",
+      "score" : 0.9
+    },
+    "regression.name.currentUser.instagramLink" : {
+      "score" : 0
+    },
     "regression.name.dateOfBirth" : {
       "key" : "date_of_birth",
       "score" : 0.95
+    },
+    "regression.name.destination-url" : {
+      "score" : 0
+    },
+    "regression.name.education-35--lastYearAttended-dateSectionYear-input" : {
+      "key" : "grad_year",
+      "score" : 0.93
     },
     "regression.name.email" : {
       "key" : "email_personal",
@@ -15481,13 +15506,42 @@
       "key" : "given_name",
       "score" : 0.95
     },
+    "regression.name.frontierPassengers[0].Name.First" : {
+      "key" : "given_name",
+      "score" : 0.87
+    },
+    "regression.name.frontierPassengers[1].Name.First" : {
+      "score" : 0
+    },
+    "regression.name.knownTravelerNumber" : {
+      "key" : "known_traveler_number",
+      "score" : 0.95
+    },
     "regression.name.lastNameInput" : {
       "key" : "family_name",
       "score" : 0.95
     },
+    "regression.name.legal.legalAcknowledgmentName" : {
+      "key" : "full_name",
+      "score" : 0.9
+    },
+    "regression.name.oauth_application[url]" : {
+      "score" : 0
+    },
+    "regression.name.personal.profileLinks[1].link" : {
+      "key" : "linkedin_url",
+      "score" : 0.45
+    },
     "regression.name.phone" : {
       "key" : "phone_mobile",
       "score" : 0.93
+    },
+    "regression.name.platformUrls.0.url" : {
+      "key" : "linkedin_url",
+      "score" : 0.45
+    },
+    "regression.name.privacyPolicyUrl" : {
+      "score" : 0
     },
     "regression.name.project-name" : {
       "score" : 0
@@ -15505,6 +15559,25 @@
     },
     "regression.name.subdomain" : {
       "score" : 0
+    },
+    "regression.name.travelers[0].ktn" : {
+      "key" : "known_traveler_number",
+      "score" : 0.95
+    },
+    "regression.name.travelers[1].knownTravelerNumber" : {
+      "score" : 0
+    },
+    "regression.name.tripPreferencesRequests[0].carTripPreferencesRequest.driverName" : {
+      "key" : "full_name",
+      "score" : 0.9
+    },
+    "regression.name.urls[0]" : {
+      "key" : "linkedin_url",
+      "score" : 0.45
+    },
+    "regression.name.user[profile_social_accounts][][url]" : {
+      "key" : "linkedin_url",
+      "score" : 0.45
     },
     "regression.permanent-zip" : {
       "key" : "home_postal",
@@ -15525,6 +15598,183 @@
     "regression.preferred-name" : {
       "key" : "preferred_name",
       "score" : 0.95
+    },
+    "regression.r2-address-line-3" : {
+      "score" : 0
+    },
+    "regression.r2-address-nickname" : {
+      "score" : 0
+    },
+    "regression.r2-address-under-billing" : {
+      "key" : "billing_street_1",
+      "score" : 0.92
+    },
+    "regression.r2-alternate-email" : {
+      "key" : "email_personal",
+      "score" : 0.95
+    },
+    "regression.r2-alternate-phone" : {
+      "score" : 0
+    },
+    "regression.r2-applicant-name" : {
+      "key" : "full_name",
+      "score" : 0.9
+    },
+    "regression.r2-business-name" : {
+      "key" : "current_org",
+      "score" : 0.91
+    },
+    "regression.r2-candidate-first-name" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "regression.r2-card-exp-mm-yy" : {
+      "key" : "card_exp",
+      "score" : 0.93
+    },
+    "regression.r2-city-of-birth" : {
+      "score" : 0
+    },
+    "regression.r2-college-or-university" : {
+      "key" : "university",
+      "score" : 0.88
+    },
+    "regression.r2-complete-address-message" : {
+      "key" : "home_street_1",
+      "score" : 0.6
+    },
+    "regression.r2-country" : {
+      "key" : "home_country",
+      "score" : 0.6
+    },
+    "regression.r2-county" : {
+      "score" : 0
+    },
+    "regression.r2-date-of-issue-dd-mm-yyyy" : {
+      "score" : 0
+    },
+    "regression.r2-email-under-billing" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "regression.r2-email-under-guest-checkout" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "regression.r2-end-year-education" : {
+      "key" : "grad_year",
+      "score" : 0.93
+    },
+    "regression.r2-end-year-work" : {
+      "score" : 0
+    },
+    "regression.r2-enter-email-addresses" : {
+      "score" : 0
+    },
+    "regression.r2-example-email-placeholder" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "regression.r2-ext-under-delivery-address" : {
+      "score" : 0
+    },
+    "regression.r2-frequent-flyer" : {
+      "score" : 0
+    },
+    "regression.r2-full-name-placeholder" : {
+      "key" : "full_name",
+      "score" : 0.9
+    },
+    "regression.r2-global-entry" : {
+      "key" : "known_traveler_number",
+      "score" : 0.95
+    },
+    "regression.r2-guardian-first-name" : {
+      "score" : 0
+    },
+    "regression.r2-known-traveler-number" : {
+      "key" : "known_traveler_number",
+      "score" : 0.95
+    },
+    "regression.r2-known-traveler-number-ktn" : {
+      "key" : "known_traveler_number",
+      "score" : 0.95
+    },
+    "regression.r2-label-cell-address" : {
+      "key" : "home_street_1",
+      "score" : 0.33
+    },
+    "regression.r2-label-cell-billing-city" : {
+      "key" : "billing_city",
+      "score" : 0.506
+    },
+    "regression.r2-label-cell-card-number" : {
+      "key" : "card_number",
+      "score" : 0.523
+    },
+    "regression.r2-label-cell-email-in-billing" : {
+      "key" : "email_personal",
+      "score" : 0.396
+    },
+    "regression.r2-label-cell-gift-card" : {
+      "score" : 0
+    },
+    "regression.r2-label-cell-shipping-zip" : {
+      "key" : "home_postal",
+      "score" : 0.33
+    },
+    "regression.r2-landmark" : {
+      "score" : 0
+    },
+    "regression.r2-minor-dob" : {
+      "score" : 0
+    },
+    "regression.r2-nickname" : {
+      "key" : "preferred_name",
+      "score" : 0.95
+    },
+    "regression.r2-parents-home-address" : {
+      "key" : "home_street_1",
+      "score" : 0.92
+    },
+    "regression.r2-phone-area-code" : {
+      "score" : 0
+    },
+    "regression.r2-phone-exchange" : {
+      "score" : 0
+    },
+    "regression.r2-phone-home-work-or-mobile" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "regression.r2-phone-last-four" : {
+      "score" : 0
+    },
+    "regression.r2-phone-with-area-code" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "regression.r2-phone-with-search-nearby" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "regression.r2-redress-number" : {
+      "score" : 0
+    },
+    "regression.r2-state-province-region-county" : {
+      "key" : "home_state",
+      "score" : 0.6
+    },
+    "regression.r2-trusted-traveler" : {
+      "key" : "known_traveler_number",
+      "score" : 0.95
+    },
+    "regression.r2-tsa-precheck" : {
+      "key" : "known_traveler_number",
+      "score" : 0.95
+    },
+    "regression.r2-work-email" : {
+      "score" : 0
     },
     "regression.residential-first-name" : {
       "key" : "given_name",

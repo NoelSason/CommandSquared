@@ -36,15 +36,16 @@ final class MatcherEvalTests: XCTestCase {
         /// The nearest section heading, as `NearbyTextPolicy` finds it.
         let heading: String?
         /// The page's id for the field, which is what `AXDOMIdentifier` reports.
-        /// Capture doesn't read it today, so only the `+id` mode passes it on.
+        /// Capture passes it as `FieldContext.domIdentifier`, which only Chrome
+        /// and Safari fill in, so the headline leaves it out and the `+id` mode
+        /// passes it on.
         let fieldName: String?
         /// Every acceptable key. Empty means the field must match nothing.
         let expect: [String]
         let note: String?
         /// The fixture file the case came from.
         var source = ""
-        /// Run with `fieldName` passed through: what Control would see if
-        /// capture read the field's DOM id.
+        /// Run with the DOM id passed through, as capture does in Chrome and Safari.
         var withID = false
 
         /// The snapshot key. The `+id` run of a case is a separate prediction.
@@ -109,8 +110,8 @@ final class MatcherEvalTests: XCTestCase {
                 placeholder: testCase.placeholder,
                 helpText: testCase.help,
                 nearbyText: testCase.nearby ?? [],
-                fieldName: testCase.withID ? testCase.fieldName : nil,
-                heading: testCase.heading
+                heading: testCase.heading,
+                domIdentifier: testCase.withID ? testCase.fieldName : nil
             )
         case .fieldName:
             VaultImporter.context(forFieldName: testCase.label ?? "")
@@ -298,7 +299,7 @@ final class MatcherEvalTests: XCTestCase {
             lines.append(contentsOf: outside)
         }
         lines.append("harmful = wrong and confident enough to fill without asking")
-        lines.append("+id = the same field with its DOM id passed as fieldName, as capture could read it")
+        lines.append("+id = the same field with its DOM id, as capture reads it in Chrome and Safari")
 
         let positives = headline.filter { !$0.testCase.expect.isEmpty && $0.outcome == .correct }
         let silent = positives.filter { $0.prediction.score >= MatchThresholds.autoInsert }.count

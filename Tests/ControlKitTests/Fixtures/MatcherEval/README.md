@@ -40,9 +40,11 @@ make eval-accept   # accept current predictions as the new snapshot (review the 
 - About a quarter of cases are a holdout split (by FNV-1a of the id). The report gives
   totals for them, never per-case detail.
 - `fieldName` (optional, label cases only) is the field's DOM `id`, which is what
-  `AXDOMIdentifier` exposes. Capture doesn't read it today, so a case with one runs twice:
-  label-only (the headline) and `+id`, with `fieldName` passed through. The `+id` run has
-  its own snapshot entry (`<id>+id`) and shares its case's holdout split.
+  `AXDOMIdentifier` exposes. Capture reads it in Chrome and Safari as
+  `FieldContext.domIdentifier`, which the matcher treats as weak, nearby-strength evidence
+  and never sends to Jev. Native apps and other browsers have no id, so a case with one
+  runs twice: label-only (the headline) and `+id`, which passes the id as capture does.
+  The `+id` run has its own snapshot entry (`<id>+id`) and shares its case's holdout split.
 
 ## How the browser names were prepared
 

@@ -5,6 +5,8 @@ import Security
 public enum KeychainError: Error, LocalizedError {
     case unexpectedStatus(OSStatus)
     case malformedData
+    /// Touch ID or the password didn't confirm it's the user, or they cancelled.
+    case notAuthenticated(String)
 
     public var errorDescription: String? {
         switch self {
@@ -13,6 +15,8 @@ public enum KeychainError: Error, LocalizedError {
             return "Keychain error \(status): \(message)"
         case .malformedData:
             return "Keychain item was not valid UTF-8."
+        case let .notAuthenticated(message):
+            return message
         }
     }
 }
@@ -21,9 +25,14 @@ public enum KeychainError: Error, LocalizedError {
 ///
 /// Two storage classes:
 ///   - ordinary entries are plain generic-password items, readable while unlocked;
-///   - `sensitive` entries carry a `SecAccessControl` with `.userPresence`, so macOS
-///     itself demands Touch ID (or the login password) at read time. No crypto of
-///     our own anywhere.
+///   - `sensitive` entries are read only after Touch ID (or the login password),
+///     and never leave this Mac. When the build has the keychain entitlement they
+///     also carry a `SecAccessControl` with `.userPresence`, so macOS itself
+///     enforces that. Without it — a Developer ID build with no provisioning
+///     profile — macOS refuses any such item (`errSecMissingEntitlement`, in both
+///     keychains), so the value goes in the login keychain, this device only, and
+///     `get` asks for Touch ID itself before reading it. No crypto of our own
+///     anywhere.
 ///
 /// macOS has two keychains and Control has to cope with both. The modern
 /// data-protection keychain is preferred, but items written by an earlier build —
@@ -45,7 +54,16 @@ public enum Keychain {
         deviceOnly: Bool = false,
         service: String = Keychain.service
     ) throws {
-        let attributes = addAttributes(value, account, sensitive, deviceOnly, service)
+        do {
+            try add(addAttributes(value, account, sensitive, deviceOnly, service), account: account, service: service)
+        } catch KeychainError.unexpectedStatus(errSecMissingEntitlement) where sensitive {
+            // No entitlement for macOS's own Touch ID lock. Keep the value on
+            // this Mac only; `get` asks for Touch ID before every read.
+            try add(addAttributes(value, account, false, true, service), account: account, service: service)
+        }
+    }
+
+    private static func add(_ attributes: [CFString: Any], account: String, service: String) throws {
         do {
             try eitherKeychain(attributes) { SecItemAdd($0 as CFDictionary, nil) }
         } catch KeychainError.unexpectedStatus(errSecDuplicateItem) {
@@ -89,8 +107,9 @@ public enum Keychain {
 
     // MARK: Read
 
-    /// Reads a value. For a `sensitive` entry this is what raises the Touch ID
-    /// prompt — so never call it speculatively, only once the user has confirmed.
+    /// Reads a value. With a `prompt` — every read of a `sensitive` entry — this
+    /// asks for Touch ID first, so never call it speculatively, only once the
+    /// user has confirmed.
     public static func get(
         _ account: String,
         prompt: String? = nil,
@@ -104,9 +123,11 @@ public enum Keychain {
             kSecMatchLimit: kSecMatchLimitOne,
         ]
         if let prompt {
-            let context = LAContext()
-            context.localizedReason = prompt
-            attributes[kSecUseAuthenticationContext] = context
+            // Control asks, rather than leaving it to the item: an item saved
+            // without macOS's lock would otherwise read with no prompt at all.
+            // The confirmed context goes with the query, so an item that does
+            // carry the lock doesn't ask a second time.
+            attributes[kSecUseAuthenticationContext] = try authenticate(prompt)
         }
 
         var item: CFTypeRef?
@@ -208,6 +229,47 @@ public enum Keychain {
             var query = attributes
             if modern { query[kSecUseDataProtectionKeychain] = true }
             _ = SecItemDelete(query as CFDictionary)
+        }
+    }
+
+    // MARK: Authentication
+
+    /// Confirms it's the user — Touch ID, or the login password — and returns
+    /// the context that proves it. Replaceable so tests can run without a finger.
+    nonisolated(unsafe) static var authenticate: (_ reason: String) throws -> LAContext = askForTouchID
+
+    /// Blocks until the user answers. The prompt is macOS's own window and the
+    /// answer arrives on a private queue, so waiting here holds nothing up that
+    /// the prompt needs — the same wait a `.userPresence` read does inside
+    /// `SecItemCopyMatching`.
+    static func askForTouchID(_ reason: String) throws -> LAContext {
+        let context = LAContext()
+        let answer = Answer()
+        context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { ok, error in
+            answer.ok = ok
+            answer.error = error
+            answer.done.signal()
+        }
+        answer.done.wait()
+        guard answer.ok else { throw KeychainError.notAuthenticated(message(for: answer.error)) }
+        return context
+    }
+
+    /// Written on LocalAuthentication's queue before `done` is signalled, read
+    /// only after the wait: the semaphore orders every access.
+    private final class Answer: @unchecked Sendable {
+        let done = DispatchSemaphore(value: 0)
+        var ok = false
+        var error: Error?
+    }
+
+    private static func message(for error: Error?) -> String {
+        switch (error as? LAError)?.code {
+        case .userCancel?, .systemCancel?, .appCancel?: "Cancelled."
+        case .authenticationFailed?: "Touch ID didn't recognise you."
+        case .biometryLockout?: "Touch ID is locked. Unlock your Mac with your password, then try again."
+        case .passcodeNotSet?: "Set a login password on this Mac to protect this."
+        default: error?.localizedDescription ?? "Couldn't confirm it's you."
         }
     }
 

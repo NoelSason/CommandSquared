@@ -32,6 +32,10 @@ public enum VaultSchema {
                    detail: "The user's pronouns, e.g. they/them."),
         VaultField(key: "date_of_birth", label: "Date of birth", category: .identity, kind: .date,
                    detail: "The user's date of birth."),
+        // A government-issued id, so it gets the same care as a card: Touch ID
+        // to read, confirmed before every fill, never synced or imported.
+        VaultField(key: "known_traveler_number", label: "Known Traveler Number", category: .identity, sensitive: true,
+                   detail: "The user's Known Traveler Number (KTN) for TSA PreCheck: the PASSID from Global Entry, NEXUS or SENTRI, or the number TSA PreCheck issued. Not a frequent-flyer, loyalty, or redress number."),
     ]
 
     // MARK: Contact

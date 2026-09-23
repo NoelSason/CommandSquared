@@ -54,13 +54,31 @@ stop:
 ## navigate into ~/Library, so an app sitting in DerivedData can never be added
 ## to Full Disk Access by hand. A stable, reachable location also keeps the
 ## Accessibility grant and Login Item registration pointing at one thing.
+##
+## Sensitive values (cards, the traveler number) get macOS's own Touch ID lock only
+## when the app carries a keychain entitlement, and that needs a Developer ID
+## provisioning profile for com.noelsason.Control. Put the profile at $(PROFILE) and
+## install embeds it and signs with the keychain entitlements. Without it, the app
+## signs as before and Control asks for Touch ID itself (see Keychain.swift). Never
+## sign with the keychain entitlements without the profile: the app won't launch.
+PROFILE := $(HOME)/Library/Developer/Control/Control.provisionprofile
+PLAIN_ENTITLEMENTS := Sources/Control/Resources/Control.entitlements
+KEYCHAIN_ENTITLEMENTS := Sources/Control/Resources/Control-Keychain.entitlements
+
 install: build stop
 	@rm -rf "/Applications/Control.app"
 	@cp -R "$(APP)" "/Applications/Control.app"
 	@xattr -cr "/Applications/Control.app" 2>/dev/null || true
-	@codesign --force --sign "Developer ID Application" --options runtime \
-		--entitlements Sources/Control/Resources/Control.entitlements \
-		"/Applications/Control.app" 2>/dev/null || \
+	@if [ -f "$(PROFILE)" ]; then \
+		cp "$(PROFILE)" "/Applications/Control.app/Contents/embedded.provisionprofile"; \
+		xattr -c "/Applications/Control.app/Contents/embedded.provisionprofile" 2>/dev/null || true; \
+		entitlements="$(KEYCHAIN_ENTITLEMENTS)"; \
+		echo "Signing with the keychain entitlement (profile found at $(PROFILE))"; \
+	else \
+		entitlements="$(PLAIN_ENTITLEMENTS)"; \
+	fi; \
+	codesign --force --sign "Developer ID Application" --options runtime \
+		--entitlements "$$entitlements" "/Applications/Control.app" 2>/dev/null || \
 		codesign --force --sign - "/Applications/Control.app"
 	@echo "Installed to /Applications/Control.app"
 	@open "/Applications/Control.app"

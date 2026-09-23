@@ -442,6 +442,93 @@ extension LocalMatcherTests {
         }
         XCTAssertEqual(top(context(label: "Nickname"))?.key, "preferred_name")
     }
+
+    /// The page's DOM id is weak evidence: it can suggest a key for a field with
+    /// no label, but never fills on its own and never outranks the label.
+    func testTheDOMIdSuggestsButNeverDecides() {
+        var unlabelled = context()
+        unlabelled.domIdentifier = "billingZipCode"
+        let suggestion = top(unlabelled)
+        XCTAssertEqual(suggestion?.key, "billing_postal")
+        XCTAssertLessThan(suggestion?.score ?? 1, MatchThresholds.autoInsert)
+
+        // `payment-credit-user-address-firstName` names its container too.
+        var labelled = context(label: "First name")
+        labelled.domIdentifier = "payment-credit-user-address-firstName"
+        XCTAssertEqual(top(labelled)?.key, "given_name")
+
+        // Framework ids change between page loads; the cache key must not.
+        var reloaded = labelled
+        reloaded.domIdentifier = ":r1a:"
+        XCTAssertEqual(labelled.signature, reloaded.signature)
+    }
+
+    /// The vault has no county, and a dialling code is not the country.
+    func testACountyIsNotTheStateAndACallingCodeIsNotTheCountry() {
+        XCTAssertFalse(matcher.match(context(label: "County"), fillable: allKeys).contains { $0.key.hasSuffix("_state") })
+        XCTAssertEqual(top(context(label: "State/province/region/county *"))?.key, "home_state")
+        for label in ["Country Phone Code", "phoneCountry"] {
+            XCTAssertFalse(matcher.match(context(label: label), fillable: allKeys).contains { $0.key.hasSuffix("_country") }, label)
+        }
+        XCTAssertEqual(top(context(label: "Country"))?.key, "home_country")
+    }
+
+    /// Boxes that say "address" without being a line of one.
+    func testAWholeAddressALandmarkOrABirthplaceIsNotAStreetLine() {
+        for label in ["fullAddress", "Landmark", "Address Name:"] {
+            XCTAssertFalse(matcher.match(context(label: label), fillable: allKeys).contains { $0.key.contains("_street_") }, label)
+        }
+        XCTAssertFalse(matcher.match(context(label: "City or Town of Birth:"), fillable: allKeys).contains { $0.key.hasSuffix("_city") })
+        // A validation message asking for a complete address is still line 1.
+        XCTAssertEqual(top(context(label: "Address 1 Please enter a complete address."))?.key, "home_street_1")
+    }
+
+    /// "Name@yourmail.com" is an example value, not a name field.
+    func testAnExampleEmailPlaceholderMakesAnEmailField() {
+        let ranked = matcher.match(context(placeholder: "Name@yourmail.com"), fillable: allKeys)
+        XCTAssertEqual(ranked.first?.key, "email_personal")
+        XCTAssertFalse(ranked.contains { $0.key == "full_name" })
+        // A placeholder that only mentions a name is still read.
+        XCTAssertEqual(top(context(placeholder: "Full name"))?.key, "full_name")
+    }
+
+    /// TSA PreCheck's number, however the airline words it.
+    func testAKnownTravelerNumberIsItsOwnField() {
+        for label in ["Known Traveler Number", "Known Traveler Number (KTN)", "TSA PreCheck / Known Traveler #",
+                      "Global Entry number", "Trusted traveler number"] {
+            XCTAssertEqual(top(context(label: label))?.key, "known_traveler_number", label)
+            XCTAssertTrue(LocalMatcher.looksSensitive(context(label: label)), label)
+        }
+        for name in ["knownTravelerNumber", "travelers[0].ktn"] {
+            XCTAssertEqual(matcher.match(VaultImporter.context(forFieldName: name), fillable: allKeys).first?.key,
+                           "known_traveler_number", name)
+        }
+        // A loyalty or redress number is a different number, and the second
+        // traveller's is theirs.
+        for label in ["Frequent flyer number", "Redress number"] {
+            XCTAssertFalse(matcher.match(context(label: label), fillable: allKeys).contains { $0.key == "known_traveler_number" }, label)
+        }
+        XCTAssertFalse(matcher.match(VaultImporter.context(forFieldName: "travelers[1].knownTravelerNumber"), fillable: allKeys)
+            .contains { $0.key == "known_traveler_number" })
+    }
+
+    /// A government id gets the same care as a card.
+    func testTheKnownTravelerNumberIsAnIdentityFieldKeptAsSensitive() throws {
+        let field = try XCTUnwrap(VaultSchema.field(for: "known_traveler_number"))
+        XCTAssertEqual(field.category, .identity)
+        XCTAssertTrue(field.sensitive)
+        let imported = VaultImporter.fromBrowserAutofill([
+            BrowserAutofillRow(fieldName: "knownTravelerNumber", value: "TT0000000", useCount: 3),
+        ])
+        XCTAssertFalse(imported.contains { $0.key == field.key }, "sensitive values are never imported")
+    }
+
+    /// The school's city is where it is, not what it's called.
+    func testASchoolsPlaceIsNotItsName() {
+        let ranked = matcher.match(VaultImporter.context(forFieldName: "appEducation.colleges[0].city"), fillable: allKeys)
+        XCTAssertNotEqual(ranked.first?.key, "university")
+        XCTAssertEqual(top(context(label: "College or university"))?.key, "university")
+    }
 }
 
 final class MatchHintsTests: XCTestCase {

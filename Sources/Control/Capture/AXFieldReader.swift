@@ -111,7 +111,10 @@ enum AXFieldReader {
             helpText: helpText,
             nearbyText: ambient.nearby,
             isEmpty: (AX.rawValue(focused, kAXValueAttribute) ?? "").isEmpty,
-            heading: ambient.heading
+            heading: ambient.heading,
+            // Chrome and Safari expose the element's HTML id here. Weak
+            // evidence for the local matcher only; see `FieldContext`.
+            domIdentifier: AX.string(focused, "AXDOMIdentifier").flatMap { $0.isEmpty ? nil : $0 }
         )
 
         return .success(FocusedField(element: focused, context: context, app: app))

@@ -234,7 +234,7 @@ private struct OnboardingView: View {
                 Button("Skip for now") { model.detailsSkipped = true }
                     .buttonStyle(.link)
             }
-            Label("Your details stay on this Mac. Card details always ask for Touch ID first.", systemImage: "lock")
+            Label("Your details stay on this Mac. Card details and your traveler number always ask for Touch ID first.", systemImage: "lock")
                 .font(.system(size: 11))
                 .foregroundStyle(.secondary)
         }

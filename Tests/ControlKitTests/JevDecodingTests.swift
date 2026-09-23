@@ -221,6 +221,22 @@ extension JevDecodingTests {
         XCTAssertEqual(error.errorDescription, "Jev didn't accept this key. Check it at console.typesafe.ai/keys.")
     }
 
+    /// A page's field ids can carry per-page and per-user tokens
+    /// (`address2_45381448`, a LinkedIn member URN). They help the local
+    /// matcher and never leave the Mac.
+    func testTheFieldsDOMIdIsNeverSentToJev() {
+        let context = FieldContext(
+            appName: "Google Chrome",
+            bundleID: "com.google.Chrome",
+            label: "Zip",
+            nearbyText: ["Billing address"],
+            domIdentifier: "billingZip_45381448"
+        )
+        let body = String(describing: JevMatcher.state(for: context))
+        XCTAssertFalse(body.contains("45381448"))
+        XCTAssertFalse(body.lowercased().contains("billingzip"))
+    }
+
     func testRequestsGoToTypeSafe() {
         XCTAssertEqual(JevClient.defaultBaseURL.host, "api.typesafe.ai")
         XCTAssertEqual(JevClient.defaultModel, "jev-latest")

@@ -131,7 +131,7 @@ public struct LocalMatcher: Sendable {
         // gift card's number, and "Work phone:" a work number, though neither
         // is the field's label. Each piece of nearby text answers only for the
         // evidence it produced.
-        let nearbyParts = context.nearbyText.map { (raw: FieldContext.lowercasedCollapsingWhitespace($0), words: FieldContext.normalize($0)) }
+        let nearbyParts = context.nearbyEvidence.map { (raw: FieldContext.lowercasedCollapsingWhitespace($0), words: FieldContext.normalize($0)) }
             .filter { !$0.words.isEmpty }
         var nearbyVetoes: [String: [(type: ChromiumFieldType, veto: ChromiumMatching.Veto)]] = [:]
         for part in nearbyParts where nearbyVetoes[part.raw] == nil {
@@ -206,6 +206,7 @@ public struct LocalMatcher: Sendable {
         }
 
         let emailInLabel = chromium.contains { $0.type == .email && $0.own } || Self.mentions(own, Self.emailTokens)
+            || context.placeholderIsAnExampleEmail
 
         // Scoped components: "City" alone is meaningless, "City" under a "Billing
         // address" heading is not. Resolve the component, then the scope. When a
@@ -225,17 +226,26 @@ public struct LocalMatcher: Sendable {
                 Self.addressComponent(in: cell).flatMap { $0 == .streetGeneric && Self.mentions(cell, Self.emailTokens) ? nil : $0 }
             }]
         // A country *code* is a dialling or ISO code, not the country's name.
-        let isCountryCode = Self.mentions(own, ["country code"])
+        let isCountryCode = Self.mentions(own, Self.countryCodeWords)
+        // A county is not the state: Chromium's state pattern takes "county"
+        // for the UK's counties, and the vault has none. "State/province/
+        // region/county" still names the state.
+        let isCountyOnly = Self.mentions(own, ["county"]) && !Self.mentions(own, ["state", "province", "region"])
         // "Email address" is an address, but not a street one. Chromium never
         // meets this: it types a field as an email before it looks for an
         // address. Without it, "Email address" under a "Billing information"
         // heading filled the billing street.
-        // Line 3 and beyond have no key. They'd otherwise read as the
-        // generic "address" they also contain, and fill the street.
-        let isALaterLine = Self.mentions(own, Self.laterLineWords)
+        // Line 3 and beyond have no key, and nor does a box for the whole
+        // address, a landmark, or a name for the address. They'd otherwise
+        // read as the generic "address" they also contain, and fill the street.
+        let isALaterLine = Self.mentions(own, Self.laterLineWords + Self.notAStreetLineWords)
+        // A birthplace isn't where the user lives, and the vault has none.
+        let isABirthplace = Self.mentions(own, ["birth", "birthplace"])
         func usable(_ components: [AddressComponent?]) -> [AddressComponent] {
-            components.compactMap { $0 }.filter {
-                !($0 == .country && isCountryCode) && !($0 == .streetGeneric && emailInLabel)
+            guard !isABirthplace else { return [] }
+            return components.compactMap { $0 }.filter {
+                !($0 == .country && isCountryCode) && !($0 == .state && isCountyOnly)
+                    && !($0 == .streetGeneric && emailInLabel)
                     && !(isALaterLine && [.street1, .street2, .streetGeneric].contains($0))
             }
         }
@@ -283,7 +293,8 @@ public struct LocalMatcher: Sendable {
         mentions(context.searchText, [
             "card number", "credit card", "debit card", "cvv", "cvc", "security code",
             "expiration", "expiry", "card exp", "billing", "account number", "routing",
-            "social security", "ssn", "tax id", "passport",
+            "social security", "ssn", "tax id", "passport", "known traveler", "known traveller", "ktn",
+            "trusted traveler", "precheck", "global entry", "redress",
         ])
     }
 
@@ -350,13 +361,21 @@ public struct LocalMatcher: Sendable {
         // A form that splits the date into boxes labels them "birthDate-month" and
         // friends; `namesPartOfADate` keeps those from getting the whole date.
         Rule(key: "date_of_birth", phrases: ["date of birth", "birth date", "birthdate", "birthday", "dob"], confidence: 0.95),
+        // TSA PreCheck's number. Global Entry, NEXUS and SENTRI members use
+        // their PASSID, which is why "Global Entry" names it too. A frequent-
+        // flyer or redress number never says any of these.
+        Rule(key: "known_traveler_number", phrases: ["known traveler", "known traveller", "ktn", "trusted traveler",
+                                                     "trusted traveller", "tsa precheck", "tsa pre check", "precheck",
+                                                     "global entry"], confidence: 0.95),
 
         // Contact
         Rule(key: "phone_mobile", phrases: ["phone", "mobile number", "cell", "telephone", "contact number"], confidence: 0.92,
              excluding: ["work phone", "office phone", "emergency"] + otherPhoneWords),
 
         // Education
-        Rule(key: "university", phrases: ["university", "college", "school name", "institution", "current school", "where do you study", "school"], confidence: 0.88, excluding: ["email", "high school"]),
+        // A school's city, state or address is where it is, not what it's called.
+        Rule(key: "university", phrases: ["university", "college", "school name", "institution", "current school", "where do you study", "school"], confidence: 0.88,
+             excluding: ["email", "high school", "city", "state", "country", "zip", "postal", "address"]),
         Rule(key: "major_primary", phrases: ["major", "field of study", "course of study", "concentration", "degree program", "program of study"], confidence: 0.88, excluding: ["second", "double", "minor"]),
         Rule(key: "major_secondary", phrases: ["second major", "double major", "additional major", "other major"], confidence: 0.93),
         Rule(key: "degree_type", phrases: ["degree type", "degree level", "type of degree"], confidence: 0.92),
@@ -456,11 +475,11 @@ public struct LocalMatcher: Sendable {
     }
 
     /// The keys that hold the user's own person: names, contact, birth date,
-    /// addresses. Not their school, job or links, which a form about someone
+    /// traveler number, addresses. Not their school, job or links, which a form about someone
     /// else doesn't ask for.
     static func isPersonal(_ key: String) -> Bool {
         ["given_name", "middle_name", "family_name", "full_name", "preferred_name", "pronouns",
-         "date_of_birth", "email_personal", "email_school", "phone_mobile"].contains(key)
+         "date_of_birth", "known_traveler_number", "email_personal", "email_school", "phone_mobile"].contains(key)
             || addressKeySuffixes.contains { key.hasSuffix("_" + $0) }
     }
 
@@ -560,6 +579,14 @@ public struct LocalMatcher: Sendable {
 
         static func < (lhs: Self, rhs: Self) -> Bool { lhs.rawValue < rhs.rawValue }
     }
+
+    /// Boxes that mention an address without being a line of one.
+    static let notAStreetLineWords = ["full address", "landmark",
+                                      "address name", "address label", "address nickname"]
+
+    /// A dialling or ISO code for a country, not the country's name.
+    static let countryCodeWords = ["country code", "phone country", "country phone", "phone code",
+                                   "calling code", "dialing code", "dial code"]
 
     /// The third address line and beyond. The vault stores two.
     static let laterLineWords = ["address line 3", "address line 4", "address line 5", "address 3", "address 4",

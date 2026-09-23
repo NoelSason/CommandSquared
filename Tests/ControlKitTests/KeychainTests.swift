@@ -1,3 +1,4 @@
+import LocalAuthentication
 import XCTest
 @testable import ControlKit
 
@@ -67,6 +68,32 @@ final class KeychainTests: XCTestCase {
 
     func testMissingAccountReadsAsNilRatherThanThrowing() throws {
         XCTAssertNil(try Keychain.get("never_written", service: service))
+    }
+
+    /// "Couldn't save Known Traveler Number: Keychain error -34018." A Developer
+    /// ID build without a provisioning profile can't use macOS's own Touch ID
+    /// lock, and neither can this test runner. Sensitive values must still
+    /// save, and must still ask before they're read.
+    func testSensitiveValuesSaveWithoutTheKeychainEntitlement() throws {
+        try Keychain.set("TT0000000", for: "known_traveler_number", sensitive: true, service: service)
+        XCTAssertTrue(try Keychain.storedAccounts(service: service).contains("known_traveler_number"))
+
+        let real = Keychain.authenticate
+        defer { Keychain.authenticate = real }
+
+        var asked: [String] = []
+        Keychain.authenticate = { reason in
+            asked.append(reason)
+            return LAContext()
+        }
+        XCTAssertEqual(try Keychain.get("known_traveler_number", prompt: "fill your known traveler number", service: service),
+                       "TT0000000")
+        XCTAssertEqual(asked, ["fill your known traveler number"], "a sensitive read asks first")
+
+        Keychain.authenticate = { _ in throw KeychainError.notAuthenticated("Cancelled.") }
+        XCTAssertThrowsError(try Keychain.get("known_traveler_number", prompt: "fill your known traveler number", service: service)) {
+            XCTAssertEqual($0.localizedDescription, "Cancelled.")
+        }
     }
 
     func testUnicodeSurvivesTheRoundTrip() throws {
