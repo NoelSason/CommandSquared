@@ -227,26 +227,26 @@
 
   <div class="field">
     <span class="pseudo">Phone number <em style="color:var(--muted);font-style:normal">(aria-label only, no real label)</em></span>
-    <input type="tel" aria-label="Phone number" placeholder="5555555555">
+    <input id="m2" type="tel" aria-label="Phone number" placeholder="5555555555">
     <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span>aria-label → AXDescription. Formatted <b>6615239570</b> — bare digits, matching the placeholder</div>
   </div>
 
   <div class="field">
     <span class="pseudo">No label — placeholder carries it</span>
-    <input type="text" placeholder="Mobile phone">
+    <input id="m3" type="text" placeholder="Mobile phone">
     <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span>AXPlaceholderValue is the only signal</div>
   </div>
 
   <div class="field">
     <label>Wrapping label, no <code>for</code> attribute
-      <input type="text" style="margin-top:5px">
+      <input id="m4" type="text" style="margin-top:5px">
     </label>
     <div class="expect" aria-hidden="true"><span class="tag t-ask">asks</span>ambiguous text, but the label should still be <b>read</b> — check the inspector</div>
   </div>
 
   <div class="field">
     <span class="pseudo">title attribute only</span>
-    <input type="text" title="LinkedIn profile">
+    <input id="m5" type="text" title="LinkedIn profile">
     <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span><b>LinkedIn</b> — via AXHelp</div>
   </div>
 
@@ -258,7 +258,7 @@
 
   <div class="field">
     <span class="pseudo">contenteditable div (aria-label: "University")</span>
-    <div class="ce" contenteditable="true" role="textbox" aria-label="University"></div>
+    <div id="ce1" class="ce" contenteditable="true" role="textbox" aria-label="University"></div>
     <div class="expect" aria-hidden="true"><span class="tag t-auto">auto</span>no real input element — insertion likely falls through to synthesized keystrokes</div>
   </div>
 </section>

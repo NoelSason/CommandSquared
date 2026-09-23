@@ -15,7 +15,7 @@ APP          := $(DERIVED_DATA)/Build/Products/Debug/Control.app
 
 XCB := xcodebuild -project $(PROJECT) -scheme $(SCHEME) -derivedDataPath $(DERIVED_DATA)
 
-.PHONY: all generate build test run stop clean logs form install
+.PHONY: all generate build test eval eval-accept run stop clean logs form install
 
 all: build
 
@@ -28,6 +28,18 @@ build: generate
 
 test: generate
 	$(XCB) -configuration Debug test
+
+## Matcher accuracy: run the fixture eval and print its report. Fails if any case
+## the accepted snapshot got right is now wrong. See Tests/ControlKitTests/MatcherEvalTests.swift.
+EVAL_TEST := -only-testing:ControlKitTests/MatcherEvalTests
+EVAL_REPORT := sed -n '/=== MATCHER EVAL/,/=== END/p; / error: /p; /\*\* TEST/p'
+
+eval: generate
+	@set -o pipefail; $(XCB) -configuration Debug test $(EVAL_TEST) 2>&1 | $(EVAL_REPORT)
+
+## Accept the current predictions as the new snapshot. Review the diff before committing.
+eval-accept: generate
+	@set -o pipefail; TEST_RUNNER_CONTROL_EVAL_ACCEPT=1 $(XCB) -configuration Debug test $(EVAL_TEST) 2>&1 | $(EVAL_REPORT)
 
 ## Build and launch. Control is menu-bar only — look for the insert-text icon.
 run: build stop

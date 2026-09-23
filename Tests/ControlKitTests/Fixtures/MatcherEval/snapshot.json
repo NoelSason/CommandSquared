@@ -1,0 +1,3065 @@
+{
+  "cases" : {
+    "browser.10val-to-phone-number" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.<id>-name-input" : {
+      "score" : 0
+    },
+    "browser.<id>:loginForm:username" : {
+      "score" : 0
+    },
+    "browser.ADDRESS_LINE_1" : {
+      "key" : "home_street_1",
+      "score" : 0.6
+    },
+    "browser.Address1" : {
+      "key" : "home_street_1",
+      "score" : 0.6
+    },
+    "browser.Affiliation" : {
+      "score" : 0
+    },
+    "browser.AuthEmail" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.Billing_name" : {
+      "score" : 0
+    },
+    "browser.City" : {
+      "key" : "home_city",
+      "score" : 0.6
+    },
+    "browser.CodeOrNumber" : {
+      "score" : 0
+    },
+    "browser.Company" : {
+      "key" : "current_org",
+      "score" : 0.91
+    },
+    "browser.Contact_Information_email" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.Contact_Information_firstname" : {
+      "key" : "given_name",
+      "score" : 0.87
+    },
+    "browser.Contact_Information_lastname" : {
+      "key" : "family_name",
+      "score" : 0.87
+    },
+    "browser.Contact_Information_q_phone" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.Contact_Information_q_phone-country-code-picker" : {
+      "score" : 0
+    },
+    "browser.DATE OF FUNDRAISER" : {
+      "score" : 0
+    },
+    "browser.Description" : {
+      "score" : 0
+    },
+    "browser.EMAIL" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.EXTERNAL_APPLE_CLIENT_ID" : {
+      "score" : 0
+    },
+    "browser.EXTERNAL_GITHUB_CLIENT_ID" : {
+      "key" : "github_url",
+      "score" : 0.95
+    },
+    "browser.EXTERNAL_GOOGLE_CLIENT_ID" : {
+      "score" : 0
+    },
+    "browser.Email" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.Email address" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.EmailAddress" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.EmailAddress2" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.FIRST_NAME" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "browser.First Name" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "browser.FirstName" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "browser.ForgotPasswordv2:theForm:username" : {
+      "score" : 0
+    },
+    "browser.FriendlyName" : {
+      "score" : 0
+    },
+    "browser.GuestEmail" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.LAST_NAME" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "browser.LOCALITY" : {
+      "key" : "home_city",
+      "score" : 0.6
+    },
+    "browser.Last Name" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "browser.LastName" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "browser.LoginUserName" : {
+      "score" : 0
+    },
+    "browser.MAILER_SUBJECTS_MAGIC_LINK" : {
+      "score" : 0
+    },
+    "browser.MIDDLE_NAME" : {
+      "key" : "middle_name",
+      "score" : 0.95
+    },
+    "browser.MileagePlusLogin.MPIDEmailField" : {
+      "score" : 0
+    },
+    "browser.NewEventName" : {
+      "score" : 0
+    },
+    "browser.Organization Address 1" : {
+      "key" : "current_org",
+      "score" : 0.91
+    },
+    "browser.Organization Address 2" : {
+      "key" : "current_org",
+      "score" : 0.91
+    },
+    "browser.Organization Name" : {
+      "key" : "current_org",
+      "score" : 0.91
+    },
+    "browser.OrganizationName" : {
+      "key" : "current_org",
+      "score" : 0.91
+    },
+    "browser.PHONE_NUMBER" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.POSTAL_CODE" : {
+      "key" : "home_postal",
+      "score" : 0.6
+    },
+    "browser.Phone" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.Phone number or email" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.Pickup/Delivery Date" : {
+      "score" : 0
+    },
+    "browser.Postal Code" : {
+      "key" : "home_postal",
+      "score" : 0.6
+    },
+    "browser.PostalCode" : {
+      "key" : "home_postal",
+      "score" : 0.6
+    },
+    "browser.SEARCH_ZIP5" : {
+      "score" : 0
+    },
+    "browser.SITE_URL" : {
+      "score" : 0
+    },
+    "browser.SMTP_ADMIN_EMAIL" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.SMTP_HOST" : {
+      "score" : 0
+    },
+    "browser.SMTP_SENDER_NAME" : {
+      "score" : 0
+    },
+    "browser.SMTP_USER" : {
+      "score" : 0
+    },
+    "browser.SecondaryEmailAddress" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.Service" : {
+      "score" : 0
+    },
+    "browser.TravelerLastName" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "browser.US-STANDARD-ORA_VETERAN_STATUS-STANDARD" : {
+      "score" : 0
+    },
+    "browser.UserName" : {
+      "score" : 0
+    },
+    "browser.Your First Name" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "browser.Your Last Name" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "browser._0rif_mat-input-0" : {
+      "score" : 0
+    },
+    "browser._systemfield_email" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser._systemfield_name" : {
+      "score" : 0
+    },
+    "browser.account-name-input" : {
+      "score" : 0
+    },
+    "browser.accountIdentifier" : {
+      "score" : 0
+    },
+    "browser.accountName" : {
+      "score" : 0
+    },
+    "browser.account_name_text_field" : {
+      "score" : 0
+    },
+    "browser.add-domain-name" : {
+      "score" : 0
+    },
+    "browser.addGuestClaimEmailAddress" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.additionalGuests.0.firstName" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "browser.additionalGuests.0.lastName" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "browser.address" : {
+      "key" : "home_street_1",
+      "score" : 0.6
+    },
+    "browser.address-ui-widgets-enterAddressCity" : {
+      "key" : "home_city",
+      "score" : 0.6
+    },
+    "browser.address-ui-widgets-enterAddressFullName" : {
+      "key" : "full_name",
+      "score" : 0.9
+    },
+    "browser.address-ui-widgets-enterAddressLine1" : {
+      "key" : "home_street_1",
+      "score" : 0.6
+    },
+    "browser.address-ui-widgets-enterAddressLine2" : {
+      "key" : "home_street_2",
+      "score" : 0.6
+    },
+    "browser.address-ui-widgets-enterAddressPhoneNumber" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.address-ui-widgets-enterAddressPostalCode" : {
+      "key" : "home_postal",
+      "score" : 0.6
+    },
+    "browser.address-ui-widgets-landmark" : {
+      "key" : "home_street_1",
+      "score" : 0.6
+    },
+    "browser.address1" : {
+      "key" : "home_street_1",
+      "score" : 0.6
+    },
+    "browser.address1StNameField" : {
+      "key" : "home_street_1",
+      "score" : 0.6
+    },
+    "browser.addressLine1" : {
+      "key" : "home_street_1",
+      "score" : 0.6
+    },
+    "browser.affiliations-email" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.altemail" : {
+      "score" : 0
+    },
+    "browser.apiKeyName" : {
+      "score" : 0
+    },
+    "browser.appEducation.colleges[0].city" : {
+      "key" : "university",
+      "score" : 0.88
+    },
+    "browser.appEducation.colleges[0].endYYYY" : {
+      "key" : "university",
+      "score" : 0.88
+    },
+    "browser.appEducation.colleges[0].name" : {
+      "key" : "university",
+      "score" : 0.88
+    },
+    "browser.appEducation.colleges[0].startYYYY" : {
+      "key" : "university",
+      "score" : 0.88
+    },
+    "browser.appEducation.gradePointAverage" : {
+      "key" : "gpa",
+      "score" : 0.95
+    },
+    "browser.appEducation.hsCity" : {
+      "key" : "home_city",
+      "score" : 0.6
+    },
+    "browser.appEducation.hsCompYYYY" : {
+      "score" : 0
+    },
+    "browser.appEducation.hsName" : {
+      "score" : 0
+    },
+    "browser.apply-contact-pref-phone-0" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.artdeco-date" : {
+      "score" : 0
+    },
+    "browser.availableStartMonth" : {
+      "score" : 0
+    },
+    "browser.base-ui-_r_1k_-hidden-input" : {
+      "score" : 0
+    },
+    "browser.betaAppLocalizations[en-us].feedbackEmail" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.betaAppReviewDetails.contactEmail" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.betaAppReviewDetails.contactFirstName" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "browser.betaAppReviewDetails.contactLastName" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "browser.betaAppReviewDetails.contactPhone" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.betaAppReviewDetails.demoAccountName" : {
+      "score" : 0
+    },
+    "browser.betaAppReviewDetails.demoAccountPassword" : {
+      "score" : 0
+    },
+    "browser.billing-address-line-1" : {
+      "key" : "billing_street_1",
+      "score" : 0.92
+    },
+    "browser.billing-city" : {
+      "key" : "billing_city",
+      "score" : 0.92
+    },
+    "browser.billing-postal-code" : {
+      "key" : "billing_postal",
+      "score" : 0.92
+    },
+    "browser.billing-state" : {
+      "key" : "billing_state",
+      "score" : 0.92
+    },
+    "browser.billingAddressLine1" : {
+      "key" : "billing_street_1",
+      "score" : 0.92
+    },
+    "browser.billingLocality" : {
+      "key" : "billing_city",
+      "score" : 0.92
+    },
+    "browser.billingName" : {
+      "score" : 0
+    },
+    "browser.billingPostalCode" : {
+      "key" : "billing_postal",
+      "score" : 0.92
+    },
+    "browser.billing_address_1" : {
+      "key" : "billing_street_1",
+      "score" : 0.92
+    },
+    "browser.billing_address_2" : {
+      "score" : 0
+    },
+    "browser.billing_city" : {
+      "key" : "billing_city",
+      "score" : 0.92
+    },
+    "browser.billing_email" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.billing_first_name" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "browser.billing_last_name" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "browser.billing_phone" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.billing_postcode" : {
+      "key" : "billing_postal",
+      "score" : 0.92
+    },
+    "browser.birthDate-day" : {
+      "score" : 0
+    },
+    "browser.birthDate-month" : {
+      "score" : 0
+    },
+    "browser.birthDate-year" : {
+      "score" : 0
+    },
+    "browser.birthday" : {
+      "key" : "date_of_birth",
+      "score" : 0.95
+    },
+    "browser.bit-input-0" : {
+      "score" : 0
+    },
+    "browser.cEmail" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.candidateEmail" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.candidateName" : {
+      "score" : 0
+    },
+    "browser.candidatePhone" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.cardExpiry" : {
+      "key" : "card_exp",
+      "score" : 0.93
+    },
+    "browser.cardholderName" : {
+      "key" : "card_name",
+      "score" : 0.95
+    },
+    "browser.cardholdername" : {
+      "key" : "card_name",
+      "score" : 0.95
+    },
+    "browser.cc-exp" : {
+      "key" : "card_exp",
+      "score" : 0.93
+    },
+    "browser.ccmonth" : {
+      "score" : 0
+    },
+    "browser.ccname" : {
+      "key" : "card_name",
+      "score" : 0.89
+    },
+    "browser.ccyear" : {
+      "score" : 0
+    },
+    "browser.ceo.city" : {
+      "key" : "home_city",
+      "score" : 0.6
+    },
+    "browser.ceo.college" : {
+      "key" : "university",
+      "score" : 0.88
+    },
+    "browser.ceo.email" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.ceo.firstName" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "browser.ceo.github_url" : {
+      "key" : "github_url",
+      "score" : 0.95
+    },
+    "browser.ceo.lastName" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "browser.ceo.linkedin_url" : {
+      "key" : "linkedin_url",
+      "score" : 0.95
+    },
+    "browser.ceo.phoneNumber" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.ceo.portfolio_url" : {
+      "key" : "website_url",
+      "score" : 0.88
+    },
+    "browser.cfctest-locked-org-picker" : {
+      "score" : 0
+    },
+    "browser.change-group-name" : {
+      "score" : 0
+    },
+    "browser.city" : {
+      "key" : "home_city",
+      "score" : 0.6
+    },
+    "browser.city.value" : {
+      "key" : "home_city",
+      "score" : 0.6
+    },
+    "browser.cl-target-input" : {
+      "score" : 0
+    },
+    "browser.claimCode" : {
+      "score" : 0
+    },
+    "browser.claimDetailToTelephone" : {
+      "key" : "phone_mobile",
+      "score" : 0.92
+    },
+    "browser.claimLossCostItem0" : {
+      "score" : 0
+    },
+    "browser.claimNewTrkNum" : {
+      "score" : 0
+    },
+    "browser.clientId" : {
+      "score" : 0
+    },
+    "browser.code" : {
+      "score" : 0
+    },
+    "browser.codeBox2" : {
+      "score" : 0
+    },
+    "browser.cofounderMatching.profile.calendlyLink" : {
+      "score" : 0
+    },
+    "browser.cofounderMatching.profile.howHeard" : {
+      "score" : 0
+    },
+    "browser.combine" : {
+      "score" : 0
+    },
+    "browser.company" : {
+      "key" : "current_org",
+      "score" : 0.91
+    },
+    "browser.company.name" : {
+      "key" : "current_org",
+      "score" : 0.91
+    },
+    "browser.companyName" : {
+      "key" : "current_org",
+      "score" : 0.91
+    },
+    "browser.concentration10" : {
+      "key" : "major_primary",
+      "score" : 0.88
+    },
+    "browser.concentration20" : {
+      "key" : "major_primary",
+      "score" : 0.88
+    },
+    "browser.confirm-email-input" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.confirmationNumber" : {
+      "score" : 0
+    },
+    "browser.confirmationText" : {
+      "score" : 0
+    },
+    "browser.contactEmail" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.contactFirstName" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "browser.contactLastName" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "browser.contactPhone" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.contact_email" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.contact_name" : {
+      "key" : "full_name",
+      "score" : 0.87
+    },
+    "browser.copyright" : {
+      "score" : 0
+    },
+    "browser.country" : {
+      "key" : "home_country",
+      "score" : 0.6
+    },
+    "browser.countryCode" : {
+      "score" : 0
+    },
+    "browser.course-results-current-page" : {
+      "score" : 0
+    },
+    "browser.credit_card_exp" : {
+      "key" : "card_exp",
+      "score" : 0.93
+    },
+    "browser.credit_card_number" : {
+      "key" : "card_number",
+      "score" : 0.95
+    },
+    "browser.credit_card_zip" : {
+      "key" : "billing_postal",
+      "score" : 0.92
+    },
+    "browser.cron-every-amount" : {
+      "score" : 0
+    },
+    "browser.ctl00$MainContent$txtEmail" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.ctl00$MainContent$txtFirstName" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "browser.ctl00$MainContent$txtLastName" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "browser.currentTextInput" : {
+      "score" : 0
+    },
+    "browser.currentUser.gender" : {
+      "score" : 0
+    },
+    "browser.currentUser.instagramLink" : {
+      "score" : 0
+    },
+    "browser.currentUser.location" : {
+      "score" : 0
+    },
+    "browser.current_position" : {
+      "key" : "current_title",
+      "score" : 0.9
+    },
+    "browser.current_role" : {
+      "key" : "current_title",
+      "score" : 0.9
+    },
+    "browser.custom-slug" : {
+      "score" : 0
+    },
+    "browser.customer-authentication-web-email" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.cvf_email" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.dateTimePickerTriggerFrom" : {
+      "score" : 0
+    },
+    "browser.dateTimePickerTriggerTo" : {
+      "score" : 0
+    },
+    "browser.day" : {
+      "score" : 0
+    },
+    "browser.demoAccountName" : {
+      "score" : 0
+    },
+    "browser.description" : {
+      "score" : 0
+    },
+    "browser.desiredPay" : {
+      "score" : 0
+    },
+    "browser.destination-url" : {
+      "score" : 0
+    },
+    "browser.dietary" : {
+      "score" : 0
+    },
+    "browser.dir-email" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.displayDate" : {
+      "score" : 0
+    },
+    "browser.displayName" : {
+      "score" : 0
+    },
+    "browser.displayname" : {
+      "score" : 0
+    },
+    "browser.domain" : {
+      "score" : 0
+    },
+    "browser.education-15--firstYearAttended-dateSectionYear-input" : {
+      "score" : 0
+    },
+    "browser.education-15--lastYearAttended-dateSectionYear-input" : {
+      "score" : 0
+    },
+    "browser.education-251--firstYearAttended-dateSectionYear-input" : {
+      "score" : 0
+    },
+    "browser.education-251--lastYearAttended-dateSectionYear-input" : {
+      "score" : 0
+    },
+    "browser.education-35--firstYearAttended-dateSectionYear-input" : {
+      "score" : 0
+    },
+    "browser.education-35--lastYearAttended-dateSectionYear-input" : {
+      "score" : 0
+    },
+    "browser.education-414--firstYearAttended-dateSectionYear-input" : {
+      "score" : 0
+    },
+    "browser.education-414--lastYearAttended-dateSectionYear-input" : {
+      "score" : 0
+    },
+    "browser.eeo.eeoDisabilityStatusName" : {
+      "score" : 0
+    },
+    "browser.email" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.email-field" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.email-input" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.emailAddress" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.emailAddressForCheck" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.emailConfirmField" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.emailField" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.emailInput" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.email_confirmation" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.email_input" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.email_or_mobile" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.ember211" : {
+      "score" : 0
+    },
+    "browser.enterWebsiteUrl" : {
+      "key" : "website_url",
+      "score" : 0.88
+    },
+    "browser.eventDate" : {
+      "score" : 0
+    },
+    "browser.exp-date" : {
+      "key" : "card_exp",
+      "score" : 0.93
+    },
+    "browser.expiration-month" : {
+      "score" : 0
+    },
+    "browser.expiration-year" : {
+      "score" : 0
+    },
+    "browser.expiry" : {
+      "key" : "card_exp",
+      "score" : 0.93
+    },
+    "browser.expiry-date" : {
+      "key" : "card_exp",
+      "score" : 0.93
+    },
+    "browser.extMaxPort" : {
+      "score" : 0
+    },
+    "browser.extMinPort" : {
+      "score" : 0
+    },
+    "browser.fName" : {
+      "key" : "given_name",
+      "score" : 0.87
+    },
+    "browser.familyName" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "browser.fequitypct" : {
+      "score" : 0
+    },
+    "browser.fifthDigit" : {
+      "score" : 0
+    },
+    "browser.filter-search" : {
+      "score" : 0
+    },
+    "browser.first-name" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "browser.first-name-input" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "browser.firstDigit" : {
+      "score" : 0
+    },
+    "browser.firstName" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "browser.firstNameField" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "browser.firstNameInput" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "browser.first_name" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "browser.firstname" : {
+      "key" : "given_name",
+      "score" : 0.87
+    },
+    "browser.fname" : {
+      "key" : "given_name",
+      "score" : 0.87
+    },
+    "browser.form-input-id-capabilities" : {
+      "score" : 0
+    },
+    "browser.form-input-id-useExistingBrand" : {
+      "score" : 0
+    },
+    "browser.form-username" : {
+      "score" : 0
+    },
+    "browser.formAttendee-companyname" : {
+      "key" : "current_org",
+      "score" : 0.91
+    },
+    "browser.formAttendee-email" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.formAttendee-email2" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.formAttendee-firstname" : {
+      "key" : "given_name",
+      "score" : 0.87
+    },
+    "browser.formAttendee-jobtitle" : {
+      "key" : "current_title",
+      "score" : 0.9
+    },
+    "browser.formAttendee-lastname" : {
+      "key" : "family_name",
+      "score" : 0.87
+    },
+    "browser.fourthDigit" : {
+      "score" : 0
+    },
+    "browser.friendlyName" : {
+      "score" : 0
+    },
+    "browser.frontierContact.EmailAddress" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.frontierContact.Name.First" : {
+      "key" : "given_name",
+      "score" : 0.87
+    },
+    "browser.frontierContact.Name.Last" : {
+      "key" : "family_name",
+      "score" : 0.87
+    },
+    "browser.frontierContact.OtherPhone" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.frontierContact.PostalCode" : {
+      "key" : "home_postal",
+      "score" : 0.6
+    },
+    "browser.frontierPassengers[0].Name.First" : {
+      "key" : "given_name",
+      "score" : 0.87
+    },
+    "browser.frontierPassengers[0].Name.Last" : {
+      "key" : "family_name",
+      "score" : 0.87
+    },
+    "browser.frontierPassengers[0].Name.Middle" : {
+      "key" : "middle_name",
+      "score" : 0.87
+    },
+    "browser.frontierPassengers[1].Name.First" : {
+      "key" : "given_name",
+      "score" : 0.87
+    },
+    "browser.frontierPassengers[1].Name.Last" : {
+      "key" : "family_name",
+      "score" : 0.87
+    },
+    "browser.frontierPassengers[1].Name.Middle" : {
+      "key" : "middle_name",
+      "score" : 0.87
+    },
+    "browser.fsa_Input_AuthCode" : {
+      "score" : 0
+    },
+    "browser.fsa_Input_Username" : {
+      "score" : 0
+    },
+    "browser.full-name" : {
+      "key" : "full_name",
+      "score" : 0.9
+    },
+    "browser.fullAddress" : {
+      "key" : "home_street_1",
+      "score" : 0.6
+    },
+    "browser.fullName" : {
+      "key" : "full_name",
+      "score" : 0.9
+    },
+    "browser.full_name" : {
+      "key" : "full_name",
+      "score" : 0.9
+    },
+    "browser.fullname" : {
+      "key" : "full_name",
+      "score" : 0.87
+    },
+    "browser.fundraisingShopSearch" : {
+      "score" : 0
+    },
+    "browser.gc-from-input-Email" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.gender" : {
+      "score" : 0
+    },
+    "browser.github" : {
+      "key" : "github_url",
+      "score" : 0.95
+    },
+    "browser.givenName" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "browser.gradeAverage" : {
+      "key" : "gpa",
+      "score" : 0.95
+    },
+    "browser.group[name]" : {
+      "score" : 0
+    },
+    "browser.guess" : {
+      "score" : 0
+    },
+    "browser.highSchoolName" : {
+      "score" : 0
+    },
+    "browser.hmPhoneField" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.homepage" : {
+      "key" : "website_url",
+      "score" : 0.88
+    },
+    "browser.hostname" : {
+      "score" : 0
+    },
+    "browser.identity-mobile-number-phone-number" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.input" : {
+      "score" : 0
+    },
+    "browser.input_address-<id>.city" : {
+      "key" : "home_city",
+      "score" : 0.6
+    },
+    "browser.input_address-<id>.postal_code" : {
+      "key" : "home_postal",
+      "score" : 0.6
+    },
+    "browser.input_address-<id>.street_1" : {
+      "key" : "home_street_1",
+      "score" : 0.6
+    },
+    "browser.input_address-<id>.subdivision" : {
+      "key" : "home_state",
+      "score" : 0.6
+    },
+    "browser.input_phone_number-2-IxGOQantk" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.input_phone_number-<id>" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.instagram" : {
+      "score" : 0
+    },
+    "browser.intStartPort" : {
+      "score" : 0
+    },
+    "browser.itemData.variations.0.priceMoney" : {
+      "score" : 0
+    },
+    "browser.job-role-search" : {
+      "score" : 0
+    },
+    "browser.jobTitle" : {
+      "key" : "current_title",
+      "score" : 0.9
+    },
+    "browser.jsonData" : {
+      "score" : 0
+    },
+    "browser.kahoot-title" : {
+      "score" : 0
+    },
+    "browser.keywords" : {
+      "score" : 0
+    },
+    "browser.knownAs" : {
+      "key" : "preferred_name",
+      "score" : 0.95
+    },
+    "browser.lName" : {
+      "key" : "family_name",
+      "score" : 0.87
+    },
+    "browser.last-name" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "browser.last-name-input" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "browser.lastName" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "browser.lastNameField" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "browser.lastNameInput" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "browser.last_name" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "browser.lastname" : {
+      "key" : "family_name",
+      "score" : 0.87
+    },
+    "browser.legal.legalAcknowledgmentName" : {
+      "score" : 0
+    },
+    "browser.legal.legalUniversityAnticipatedGraduationDate" : {
+      "key" : "grad_year",
+      "score" : 0.93
+    },
+    "browser.legalName--firstName" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "browser.legalName--lastName" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "browser.linkedInAccount" : {
+      "key" : "linkedin_url",
+      "score" : 0.95
+    },
+    "browser.linkedInUrl" : {
+      "key" : "linkedin_url",
+      "score" : 0.95
+    },
+    "browser.linkedin" : {
+      "key" : "linkedin_url",
+      "score" : 0.95
+    },
+    "browser.linkedin-input" : {
+      "key" : "linkedin_url",
+      "score" : 0.95
+    },
+    "browser.linkedinUrl" : {
+      "key" : "linkedin_url",
+      "score" : 0.95
+    },
+    "browser.linkedin_profile" : {
+      "key" : "linkedin_url",
+      "score" : 0.95
+    },
+    "browser.locality" : {
+      "key" : "home_city",
+      "score" : 0.6
+    },
+    "browser.localizations[0].name" : {
+      "score" : 0
+    },
+    "browser.location" : {
+      "score" : 0
+    },
+    "browser.location-input" : {
+      "score" : 0
+    },
+    "browser.locations[0].type" : {
+      "score" : 0
+    },
+    "browser.login" : {
+      "score" : 0
+    },
+    "browser.login-verification-key" : {
+      "score" : 0
+    },
+    "browser.loginFN" : {
+      "score" : 0
+    },
+    "browser.loginLN" : {
+      "score" : 0
+    },
+    "browser.loginUsername" : {
+      "score" : 0
+    },
+    "browser.login_email" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.major" : {
+      "key" : "major_primary",
+      "score" : 0.88
+    },
+    "browser.marketingUrl" : {
+      "score" : 0
+    },
+    "browser.max" : {
+      "score" : 0
+    },
+    "browser.middleNameField" : {
+      "key" : "middle_name",
+      "score" : 0.95
+    },
+    "browser.middleNames" : {
+      "key" : "middle_name",
+      "score" : 0.95
+    },
+    "browser.min" : {
+      "score" : 0
+    },
+    "browser.mobile" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.mpui-combo-field-input" : {
+      "score" : 0
+    },
+    "browser.name" : {
+      "key" : "full_name",
+      "score" : 0.87
+    },
+    "browser.nameYourKey_7" : {
+      "key" : "full_name",
+      "score" : 0.87
+    },
+    "browser.newGroupName" : {
+      "score" : 0
+    },
+    "browser.newRedirectUri" : {
+      "score" : 0
+    },
+    "browser.nlg_username" : {
+      "score" : 0
+    },
+    "browser.oauth-auth-url" : {
+      "score" : 0
+    },
+    "browser.oauth-client-id" : {
+      "score" : 0
+    },
+    "browser.oauth-redirect-url" : {
+      "score" : 0
+    },
+    "browser.oauth-scopes" : {
+      "score" : 0
+    },
+    "browser.oauth_application[callback_url]" : {
+      "score" : 0
+    },
+    "browser.oauth_application[name]" : {
+      "score" : 0
+    },
+    "browser.oauth_application[url]" : {
+      "score" : 0
+    },
+    "browser.oneLiner" : {
+      "score" : 0
+    },
+    "browser.order_id" : {
+      "score" : 0
+    },
+    "browser.organization" : {
+      "key" : "current_org",
+      "score" : 0.91
+    },
+    "browser.organization-industry-typeahead" : {
+      "score" : 0
+    },
+    "browser.organizationName" : {
+      "key" : "current_org",
+      "score" : 0.91
+    },
+    "browser.otp-code-0" : {
+      "score" : 0
+    },
+    "browser.pairing_code" : {
+      "score" : 0
+    },
+    "browser.password" : {
+      "score" : 0
+    },
+    "browser.patientCity" : {
+      "key" : "home_city",
+      "score" : 0.6
+    },
+    "browser.patientFirstName" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "browser.patientLastName" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "browser.patientPhone" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.patientZipcode" : {
+      "key" : "home_postal",
+      "score" : 0.6
+    },
+    "browser.payment_zip_code" : {
+      "key" : "billing_postal",
+      "score" : 0.92
+    },
+    "browser.personal.email" : {
+      "key" : "email_personal",
+      "score" : 0.95
+    },
+    "browser.personal.firstName" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "browser.personal.lastName" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "browser.personal.middleName" : {
+      "key" : "middle_name",
+      "score" : 0.95
+    },
+    "browser.personal.phone" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.personal.profileLinks[0].link" : {
+      "score" : 0
+    },
+    "browser.personal.profileLinks[1].link" : {
+      "score" : 0
+    },
+    "browser.personal.profileLinks[2].link" : {
+      "score" : 0
+    },
+    "browser.phone" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.phone-country-code-picker" : {
+      "score" : 0
+    },
+    "browser.phone-input" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.phone-number" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.phone-number-field" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.phone-number-input" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.phoneCountry" : {
+      "key" : "home_country",
+      "score" : 0.6
+    },
+    "browser.phoneNumber" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.phoneNumberConfirm" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.phoneNumberInput" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.phoneNumbers[0][number]" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.phonePart1" : {
+      "score" : 0
+    },
+    "browser.phonePart2" : {
+      "score" : 0
+    },
+    "browser.phonePart3" : {
+      "score" : 0
+    },
+    "browser.phone_number" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.platformNotes.0.note" : {
+      "score" : 0
+    },
+    "browser.platformNotes.2.note" : {
+      "score" : 0
+    },
+    "browser.platformUrls.0.url" : {
+      "score" : 0
+    },
+    "browser.platformUrls.1.url" : {
+      "score" : 0
+    },
+    "browser.platformUrls.2.url" : {
+      "score" : 0
+    },
+    "browser.portfolio" : {
+      "key" : "website_url",
+      "score" : 0.88
+    },
+    "browser.position" : {
+      "score" : 0
+    },
+    "browser.postCode" : {
+      "key" : "home_postal",
+      "score" : 0.6
+    },
+    "browser.postal" : {
+      "key" : "home_postal",
+      "score" : 0.6
+    },
+    "browser.postal-code" : {
+      "key" : "home_postal",
+      "score" : 0.6
+    },
+    "browser.postalCode" : {
+      "key" : "home_postal",
+      "score" : 0.6
+    },
+    "browser.postal_code" : {
+      "key" : "home_postal",
+      "score" : 0.6
+    },
+    "browser.postcode" : {
+      "key" : "home_postal",
+      "score" : 0.6
+    },
+    "browser.price" : {
+      "score" : 0
+    },
+    "browser.primary-email" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.primaryQuestionnaire--<id>-dateSectionDay-input" : {
+      "score" : 0
+    },
+    "browser.primaryQuestionnaire--<id>-dateSectionMonth-input" : {
+      "score" : 0
+    },
+    "browser.primaryQuestionnaire--<id>-dateSectionYear-input" : {
+      "score" : 0
+    },
+    "browser.privacyPolicyUrl" : {
+      "score" : 0
+    },
+    "browser.prize" : {
+      "score" : 0
+    },
+    "browser.profile-field-city" : {
+      "key" : "home_city",
+      "score" : 0.6
+    },
+    "browser.profile-field-line1" : {
+      "key" : "home_street_1",
+      "score" : 0.6
+    },
+    "browser.profile-field-state" : {
+      "key" : "home_state",
+      "score" : 0.6
+    },
+    "browser.profile-field-zip" : {
+      "key" : "home_postal",
+      "score" : 0.6
+    },
+    "browser.profile-firstname" : {
+      "key" : "given_name",
+      "score" : 0.87
+    },
+    "browser.profile-lastname" : {
+      "key" : "family_name",
+      "score" : 0.87
+    },
+    "browser.profile.lastName" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "browser.profile[first_name]" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "browser.profile[last_name]" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "browser.profile[optional_links][]" : {
+      "score" : 0
+    },
+    "browser.profile[phones][]" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.profileattribute-First Name" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "browser.profileattribute-Last Name" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "browser.project-name" : {
+      "score" : 0
+    },
+    "browser.projectName" : {
+      "score" : 0
+    },
+    "browser.q" : {
+      "score" : 0
+    },
+    "browser.query" : {
+      "score" : 0
+    },
+    "browser.quoteInput" : {
+      "score" : 0
+    },
+    "browser.react-aria2353603841-:r20:" : {
+      "score" : 0
+    },
+    "browser.regEmail" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.regFirstName" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "browser.regLastName" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "browser.regPhone" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.register-start_form_input_email" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.register-start_form_input_name" : {
+      "score" : 0
+    },
+    "browser.registration_answers.4.value.company" : {
+      "key" : "current_org",
+      "score" : 0.91
+    },
+    "browser.registration_answers.4.value.job_title" : {
+      "key" : "current_title",
+      "score" : 0.9
+    },
+    "browser.release[name]" : {
+      "score" : 0
+    },
+    "browser.repository-name-input" : {
+      "score" : 0
+    },
+    "browser.request[anonymous_requester_email]" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.request[subject]" : {
+      "score" : 0
+    },
+    "browser.residentialFistName" : {
+      "score" : 0
+    },
+    "browser.residentialLastName" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "browser.resume_email" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.rrNum" : {
+      "score" : 0
+    },
+    "browser.rr_type" : {
+      "score" : 0
+    },
+    "browser.rtiTraveler.travelers[0].email" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.rtiTraveler.travelers[0].extraDetails.phone.mobileNumber" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.sAdd" : {
+      "score" : 0
+    },
+    "browser.sAdd2" : {
+      "score" : 0
+    },
+    "browser.school" : {
+      "key" : "university",
+      "score" : 0.88
+    },
+    "browser.school-search" : {
+      "score" : 0
+    },
+    "browser.schoolName" : {
+      "key" : "university",
+      "score" : 0.88
+    },
+    "browser.search" : {
+      "score" : 0
+    },
+    "browser.search-alternative" : {
+      "score" : 0
+    },
+    "browser.search-input" : {
+      "score" : 0
+    },
+    "browser.search-ui-input-:r27:" : {
+      "score" : 0
+    },
+    "browser.searchInput" : {
+      "score" : 0
+    },
+    "browser.searchTerm" : {
+      "score" : 0
+    },
+    "browser.secondDigit" : {
+      "score" : 0
+    },
+    "browser.secret_name" : {
+      "score" : 0
+    },
+    "browser.secrets.0.name" : {
+      "score" : 0
+    },
+    "browser.security-input-0" : {
+      "score" : 0
+    },
+    "browser.selfIdentifiedDisabilityData--dateSignedOn-dateSectionDay-input" : {
+      "score" : 0
+    },
+    "browser.selfIdentifiedDisabilityData--dateSignedOn-dateSectionMonth-input" : {
+      "score" : 0
+    },
+    "browser.selfIdentifiedDisabilityData--dateSignedOn-dateSectionYear-input" : {
+      "score" : 0
+    },
+    "browser.sellerContactInfo.address.addressLine1" : {
+      "key" : "home_street_1",
+      "score" : 0.6
+    },
+    "browser.sellerContactInfo.address.city" : {
+      "key" : "home_city",
+      "score" : 0.6
+    },
+    "browser.sellerContactInfo.address.postalCode" : {
+      "key" : "home_postal",
+      "score" : 0.6
+    },
+    "browser.sellerContactInfo.email" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.sellerContactInfo.phoneNumber" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.sessionCodeInput" : {
+      "score" : 0
+    },
+    "browser.session[email]" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.session_key" : {
+      "score" : 0
+    },
+    "browser.shipCity" : {
+      "key" : "home_city",
+      "score" : 0.6
+    },
+    "browser.shipFirstName" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "browser.shipLastName" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "browser.shipPhone" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.shipPostalCode" : {
+      "key" : "home_postal",
+      "score" : 0.6
+    },
+    "browser.shipStreet" : {
+      "key" : "home_street_1",
+      "score" : 0.6
+    },
+    "browser.shipStreet2" : {
+      "key" : "home_street_2",
+      "score" : 0.6
+    },
+    "browser.shipping_address.city" : {
+      "key" : "home_city",
+      "score" : 0.6
+    },
+    "browser.shipping_address.full_name" : {
+      "key" : "full_name",
+      "score" : 0.9
+    },
+    "browser.shipping_address.postal_code" : {
+      "key" : "home_postal",
+      "score" : 0.6
+    },
+    "browser.short_phrase" : {
+      "score" : 0
+    },
+    "browser.sid-birthdate-day" : {
+      "score" : 0
+    },
+    "browser.sid-birthdate-year" : {
+      "score" : 0
+    },
+    "browser.sid-birthdate__month" : {
+      "score" : 0
+    },
+    "browser.sid-country" : {
+      "key" : "home_country",
+      "score" : 0.6
+    },
+    "browser.sid-email" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.sid-first-name" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "browser.sid-last-name" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "browser.single-line-text-form-component-formElement-urn-li-jobs-applyformcommon-easyApplyFormElement-<n>-9-phoneNumber-nationalNumber" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.single-line-text-form-component-profileEditFormElement-POSITION-profilePosition-<id>-<id>-1-headline" : {
+      "score" : 0
+    },
+    "browser.single-line-text-form-component-profileEditFormElement-POSITION-profilePosition-<id>-<id>-<n>-headline" : {
+      "score" : 0
+    },
+    "browser.single-line-text-form-component-profileEditFormElement-TOP-CARD-profile-<id>-<id>-firstName" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "browser.single-line-text-form-component-profileEditFormElement-TOP-CARD-profile-<id>-<id>-geoLocation-postalCodeTextField" : {
+      "key" : "home_postal",
+      "score" : 0.6
+    },
+    "browser.single-line-text-form-component-profileEditFormElement-TOP-CARD-profile-<id>-<id>-lastName" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "browser.single-line-text-form-component-urn-li-fsu-pageCreationFormItem-NAME" : {
+      "score" : 0
+    },
+    "browser.single-line-text-form-component-urn-li-fsu-pageCreationFormItem-UNIVERSAL-NAME" : {
+      "score" : 0
+    },
+    "browser.single-typeahead-entity-form-component-profileEditFormElement-POSITION-profilePosition-<id>-<id>-1-optionalCompany" : {
+      "key" : "current_org",
+      "score" : 0.91
+    },
+    "browser.single-typeahead-entity-form-component-profileEditFormElement-POSITION-profilePosition-<id>-<id>-1-requiredCompany" : {
+      "key" : "current_org",
+      "score" : 0.91
+    },
+    "browser.single-typeahead-entity-form-component-profileEditFormElement-POSITION-profilePosition-<id>-<id>-1-title" : {
+      "score" : 0
+    },
+    "browser.single-typeahead-entity-form-component-profileEditFormElement-TOP-CARD-profile-<id>-<id>-geoLocation-countryField" : {
+      "key" : "home_country",
+      "score" : 0.6
+    },
+    "browser.single-typeahead-entity-form-component-profileEditFormElement-TOP-CARD-profile-<id>-<id>-industryId" : {
+      "score" : 0
+    },
+    "browser.single-typeahead-entity-form-component-urn-li-fsu-pageCreationFormItem-INDUSTRY" : {
+      "score" : 0
+    },
+    "browser.sixthDigit" : {
+      "score" : 0
+    },
+    "browser.sl_list-search-box" : {
+      "score" : 0
+    },
+    "browser.slug" : {
+      "score" : 0
+    },
+    "browser.smsModel.[0].mobile.phoneNumber" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.source_details" : {
+      "score" : 0
+    },
+    "browser.ssh_key[title]" : {
+      "score" : 0
+    },
+    "browser.ssn_last_4" : {
+      "score" : 0
+    },
+    "browser.ssoUser.email" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.ssoUser.firstName" : {
+      "key" : "given_name",
+      "score" : 0.87
+    },
+    "browser.ssoUser.lastName" : {
+      "key" : "family_name",
+      "score" : 0.87
+    },
+    "browser.ssoUser.linkedin" : {
+      "key" : "linkedin_url",
+      "score" : 0.95
+    },
+    "browser.stNo" : {
+      "score" : 0
+    },
+    "browser.stack" : {
+      "score" : 0
+    },
+    "browser.startPrice" : {
+      "score" : 0
+    },
+    "browser.startupName" : {
+      "score" : 0
+    },
+    "browser.state" : {
+      "key" : "home_state",
+      "score" : 0.6
+    },
+    "browser.street" : {
+      "key" : "home_street_1",
+      "score" : 0.6
+    },
+    "browser.street2" : {
+      "key" : "home_street_2",
+      "score" : 0.6
+    },
+    "browser.streetAddress.value" : {
+      "key" : "home_street_1",
+      "score" : 0.6
+    },
+    "browser.street_address_2" : {
+      "key" : "home_street_2",
+      "score" : 0.6
+    },
+    "browser.string" : {
+      "score" : 0
+    },
+    "browser.studentAnswerInput" : {
+      "score" : 0
+    },
+    "browser.subdomain" : {
+      "score" : 0
+    },
+    "browser.subject" : {
+      "score" : 0
+    },
+    "browser.subtitle" : {
+      "score" : 0
+    },
+    "browser.sudo_email_otp" : {
+      "score" : 0
+    },
+    "browser.supportUrl" : {
+      "score" : 0
+    },
+    "browser.susi_email" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.tAddress" : {
+      "key" : "home_street_1",
+      "score" : 0.6
+    },
+    "browser.tCity" : {
+      "key" : "home_city",
+      "score" : 0.6
+    },
+    "browser.tEmail" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.tPhone" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.tZip-byaddress" : {
+      "key" : "home_postal",
+      "score" : 0.6
+    },
+    "browser.t_web_lookup__license_no" : {
+      "score" : 0
+    },
+    "browser.team-name" : {
+      "score" : 0
+    },
+    "browser.team-one-liner" : {
+      "score" : 0
+    },
+    "browser.team_id" : {
+      "score" : 0
+    },
+    "browser.tel" : {
+      "score" : 0
+    },
+    "browser.text" : {
+      "score" : 0
+    },
+    "browser.tfa_1148" : {
+      "score" : 0
+    },
+    "browser.tfa_resumeEmail" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.thirdDigit" : {
+      "score" : 0
+    },
+    "browser.title-editor" : {
+      "score" : 0
+    },
+    "browser.tl_list-search-box" : {
+      "score" : 0
+    },
+    "browser.transactionOtherAmount" : {
+      "score" : 0
+    },
+    "browser.transit-time" : {
+      "score" : 0
+    },
+    "browser.tripPreferencesRequests[0].carTripPreferencesRequest.driverName" : {
+      "score" : 0
+    },
+    "browser.tripPreferencesRequests[0].carTripPreferencesRequest.phoneNumber" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.trusted-website" : {
+      "key" : "website_url",
+      "score" : 0.88
+    },
+    "browser.twitter" : {
+      "score" : 0
+    },
+    "browser.type" : {
+      "score" : 0
+    },
+    "browser.ulp-first-name" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "browser.ulp-last-name" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "browser.urls.0.value" : {
+      "score" : 0
+    },
+    "browser.urls.1.value" : {
+      "score" : 0
+    },
+    "browser.urls.2.value" : {
+      "score" : 0
+    },
+    "browser.urls[0]" : {
+      "score" : 0
+    },
+    "browser.user-code-0" : {
+      "score" : 0
+    },
+    "browser.user.attributes.address.city" : {
+      "key" : "home_city",
+      "score" : 0.6
+    },
+    "browser.user.attributes.address.postal_code" : {
+      "key" : "home_postal",
+      "score" : 0.6
+    },
+    "browser.user.attributes.address.street1" : {
+      "key" : "home_street_1",
+      "score" : 0.6
+    },
+    "browser.user.attributes.name.middle" : {
+      "key" : "middle_name",
+      "score" : 0.87
+    },
+    "browser.user.attributes.name.preferred" : {
+      "score" : 0
+    },
+    "browser.user.attributes.phone.number" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.user.attributes.verification.code" : {
+      "score" : 0
+    },
+    "browser.userEmail" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.userId-text-input-field" : {
+      "score" : 0
+    },
+    "browser.userLoginId" : {
+      "score" : 0
+    },
+    "browser.user[display_name]" : {
+      "score" : 0
+    },
+    "browser.user[email]" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.user[first_name]" : {
+      "key" : "given_name",
+      "score" : 0.87
+    },
+    "browser.user[last_name]" : {
+      "key" : "family_name",
+      "score" : 0.87
+    },
+    "browser.user[login]" : {
+      "score" : 0
+    },
+    "browser.user[profile_blog]" : {
+      "score" : 0
+    },
+    "browser.user[profile_company]" : {
+      "key" : "current_org",
+      "score" : 0.91
+    },
+    "browser.user[profile_location]" : {
+      "score" : 0
+    },
+    "browser.user[profile_social_accounts][][url]" : {
+      "score" : 0
+    },
+    "browser.user_code" : {
+      "score" : 0
+    },
+    "browser.userid" : {
+      "score" : 0
+    },
+    "browser.username" : {
+      "score" : 0
+    },
+    "browser.username-input" : {
+      "score" : 0
+    },
+    "browser.usernameOrMileage" : {
+      "score" : 0
+    },
+    "browser.variable_name" : {
+      "score" : 0
+    },
+    "browser.verificationCode" : {
+      "score" : 0
+    },
+    "browser.verification_code" : {
+      "score" : 0
+    },
+    "browser.verification_field" : {
+      "score" : 0
+    },
+    "browser.verifyCode" : {
+      "score" : 0
+    },
+    "browser.versionString" : {
+      "score" : 0
+    },
+    "browser.video-url" : {
+      "score" : 0
+    },
+    "browser.website" : {
+      "key" : "website_url",
+      "score" : 0.88
+    },
+    "browser.website-input" : {
+      "key" : "website_url",
+      "score" : 0.88
+    },
+    "browser.websiteUrl" : {
+      "key" : "website_url",
+      "score" : 0.88
+    },
+    "browser.workEmail" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "browser.workExperience-10--startDate-dateSectionMonth-input" : {
+      "score" : 0
+    },
+    "browser.workExperience-10--startDate-dateSectionYear-input" : {
+      "score" : 0
+    },
+    "browser.workStartMonths[2]" : {
+      "score" : 0
+    },
+    "browser.yourInfoPhone" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "browser.youtube_url" : {
+      "score" : 0
+    },
+    "browser.zCode" : {
+      "score" : 0
+    },
+    "browser.zip.value" : {
+      "key" : "home_postal",
+      "score" : 0.6
+    },
+    "browser.zip_code" : {
+      "key" : "home_postal",
+      "score" : 0.6
+    },
+    "browser.zipcodeField" : {
+      "key" : "home_postal",
+      "score" : 0.6
+    },
+    "form.b1" : {
+      "key" : "billing_city",
+      "score" : 0.92
+    },
+    "form.b2" : {
+      "key" : "billing_postal",
+      "score" : 0.92
+    },
+    "form.c1" : {
+      "key" : "home_street_1",
+      "score" : 0.92
+    },
+    "form.c2" : {
+      "key" : "home_city",
+      "score" : 0.92
+    },
+    "form.c3" : {
+      "key" : "home_postal",
+      "score" : 0.92
+    },
+    "form.cc" : {
+      "key" : "card_number",
+      "score" : 0.95
+    },
+    "form.ce" : {
+      "key" : "card_exp",
+      "score" : 0.93
+    },
+    "form.ce1" : {
+      "key" : "university",
+      "score" : 0.88
+    },
+    "form.cv" : {
+      "key" : "card_cvv",
+      "score" : 0.95
+    },
+    "form.cy" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "form.dob" : {
+      "score" : 0
+    },
+    "form.em" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "form.fn" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "form.gb" : {
+      "key" : "preferred_name",
+      "score" : 0.95
+    },
+    "form.gh" : {
+      "key" : "github_url",
+      "score" : 0.95
+    },
+    "form.ghu" : {
+      "key" : "github_url",
+      "score" : 0.95
+    },
+    "form.gy" : {
+      "key" : "grad_year",
+      "score" : 0.93
+    },
+    "form.h1" : {
+      "key" : "home_street_1",
+      "score" : 0.92
+    },
+    "form.h2" : {
+      "key" : "home_street_2",
+      "score" : 0.92
+    },
+    "form.h3" : {
+      "key" : "home_city",
+      "score" : 0.92
+    },
+    "form.h4" : {
+      "key" : "home_postal",
+      "score" : 0.92
+    },
+    "form.j1" : {
+      "key" : "university",
+      "score" : 0.88
+    },
+    "form.j2" : {
+      "score" : 0
+    },
+    "form.j3" : {
+      "score" : 0
+    },
+    "form.j4" : {
+      "score" : 0
+    },
+    "form.j5" : {
+      "score" : 0
+    },
+    "form.ln" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "form.m1" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "form.m2" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "form.m3" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "form.m4" : {
+      "score" : 0
+    },
+    "form.m5" : {
+      "key" : "linkedin_url",
+      "score" : 0.95
+    },
+    "form.nm" : {
+      "key" : "full_name",
+      "score" : 0.87
+    },
+    "form.pe" : {
+      "key" : "email_personal",
+      "score" : 0.95
+    },
+    "form.pn" : {
+      "key" : "preferred_name",
+      "score" : 0.95
+    },
+    "form.se" : {
+      "key" : "email_school",
+      "score" : 0.95
+    },
+    "form.ta" : {
+      "key" : "website_url",
+      "score" : 0.88
+    },
+    "form.u1" : {
+      "key" : "home_city",
+      "score" : 0.92
+    },
+    "form.un" : {
+      "score" : 0
+    },
+    "form.visible-neighbour" : {
+      "score" : 0
+    },
+    "hand.alternate-email" : {
+      "key" : "email_personal",
+      "score" : 0.95
+    },
+    "hand.billing-info-street" : {
+      "key" : "billing_street_1",
+      "score" : 0.92
+    },
+    "hand.birthday" : {
+      "key" : "date_of_birth",
+      "score" : 0.95
+    },
+    "hand.co-address" : {
+      "key" : "home_street_1",
+      "score" : 0.6
+    },
+    "hand.co-apartment" : {
+      "key" : "home_street_2",
+      "score" : 0.6
+    },
+    "hand.co-billing-address" : {
+      "key" : "billing_street_1",
+      "score" : 0.92
+    },
+    "hand.co-card-information" : {
+      "key" : "card_number",
+      "score" : 0.89
+    },
+    "hand.co-cardholder-name" : {
+      "key" : "card_name",
+      "score" : 0.95
+    },
+    "hand.co-company-optional" : {
+      "key" : "current_org",
+      "score" : 0.91
+    },
+    "hand.co-cvc" : {
+      "key" : "card_cvv",
+      "score" : 0.95
+    },
+    "hand.co-discount-code" : {
+      "score" : 0
+    },
+    "hand.co-email-or-phone" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "hand.co-expiration-date" : {
+      "key" : "card_exp",
+      "score" : 0.93
+    },
+    "hand.co-first-name-optional" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "hand.co-order-notes" : {
+      "score" : 0
+    },
+    "hand.co-phone-optional" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "hand.co-promo-code" : {
+      "score" : 0
+    },
+    "hand.co-quantity" : {
+      "score" : 0
+    },
+    "hand.co-search" : {
+      "score" : 0
+    },
+    "hand.co-zip-code" : {
+      "key" : "home_postal",
+      "score" : 0.6
+    },
+    "hand.country" : {
+      "key" : "home_country",
+      "score" : 0.6
+    },
+    "hand.current-address-line-2" : {
+      "key" : "campus_street_2",
+      "score" : 0.92
+    },
+    "hand.current-role-question" : {
+      "key" : "current_title",
+      "score" : 0.9
+    },
+    "hand.email-school-parens" : {
+      "key" : "email_school",
+      "score" : 0.95
+    },
+    "hand.employer" : {
+      "key" : "current_org",
+      "score" : 0.88
+    },
+    "hand.gf-at-berkeley-email" : {
+      "key" : "email_school",
+      "score" : 0.95
+    },
+    "hand.gf-calnet-id" : {
+      "score" : 0
+    },
+    "hand.gf-dietary" : {
+      "score" : 0
+    },
+    "hand.gf-email" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "hand.gf-emergency-name" : {
+      "key" : "full_name",
+      "score" : 0.87
+    },
+    "hand.gf-emergency-phone" : {
+      "score" : 0
+    },
+    "hand.gf-expected-graduation" : {
+      "key" : "grad_year",
+      "score" : 0.93
+    },
+    "hand.gf-majors" : {
+      "key" : "major_primary",
+      "score" : 0.88
+    },
+    "hand.gf-phone-for-texts" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "hand.gf-pronouns" : {
+      "key" : "pronouns",
+      "score" : 0.95
+    },
+    "hand.gf-shirt-size" : {
+      "score" : 0
+    },
+    "hand.gf-sid" : {
+      "key" : "student_id",
+      "score" : 0.93
+    },
+    "hand.gf-student-id-number" : {
+      "key" : "student_id",
+      "score" : 0.93
+    },
+    "hand.gf-year" : {
+      "score" : 0
+    },
+    "hand.gf-your-name" : {
+      "key" : "full_name",
+      "score" : 0.9
+    },
+    "hand.gh-current-company" : {
+      "key" : "current_org",
+      "score" : 0.91
+    },
+    "hand.gh-current-title" : {
+      "key" : "current_title",
+      "score" : 0.9
+    },
+    "hand.gh-degree" : {
+      "score" : 0
+    },
+    "hand.gh-disability" : {
+      "score" : 0
+    },
+    "hand.gh-discipline" : {
+      "score" : 0
+    },
+    "hand.gh-email-star" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "hand.gh-end-year" : {
+      "score" : 0
+    },
+    "hand.gh-first-name-star" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "hand.gh-gender" : {
+      "score" : 0
+    },
+    "hand.gh-github-url" : {
+      "key" : "github_url",
+      "score" : 0.95
+    },
+    "hand.gh-hear-about" : {
+      "score" : 0
+    },
+    "hand.gh-hispanic" : {
+      "score" : 0
+    },
+    "hand.gh-last-name-star" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "hand.gh-linkedin-profile" : {
+      "key" : "linkedin_url",
+      "score" : 0.95
+    },
+    "hand.gh-location-city" : {
+      "key" : "home_city",
+      "score" : 0.6
+    },
+    "hand.gh-phone" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "hand.gh-portfolio-url" : {
+      "key" : "website_url",
+      "score" : 0.88
+    },
+    "hand.gh-preferred-first-name" : {
+      "key" : "preferred_name",
+      "score" : 0.95
+    },
+    "hand.gh-resume" : {
+      "score" : 0
+    },
+    "hand.gh-school" : {
+      "key" : "university",
+      "score" : 0.88
+    },
+    "hand.gh-sponsorship" : {
+      "score" : 0
+    },
+    "hand.gh-start-month" : {
+      "score" : 0
+    },
+    "hand.gh-veteran" : {
+      "score" : 0
+    },
+    "hand.gh-website" : {
+      "key" : "website_url",
+      "score" : 0.88
+    },
+    "hand.gh-work-authorization" : {
+      "key" : "home_street_2",
+      "score" : 0.6
+    },
+    "hand.home-address-city" : {
+      "key" : "home_city",
+      "score" : 0.92
+    },
+    "hand.job-title" : {
+      "key" : "current_title",
+      "score" : 0.9
+    },
+    "hand.lever-additional-info" : {
+      "score" : 0
+    },
+    "hand.lever-current-company" : {
+      "key" : "current_org",
+      "score" : 0.91
+    },
+    "hand.lever-full-name" : {
+      "key" : "full_name",
+      "score" : 0.9
+    },
+    "hand.lever-linkedin-url" : {
+      "key" : "linkedin_url",
+      "score" : 0.95
+    },
+    "hand.lever-other-website" : {
+      "key" : "website_url",
+      "score" : 0.88
+    },
+    "hand.lever-twitter-url" : {
+      "score" : 0
+    },
+    "hand.link-to-github" : {
+      "key" : "github_url",
+      "score" : 0.95
+    },
+    "hand.mailing-city" : {
+      "key" : "home_city",
+      "score" : 0.6
+    },
+    "hand.mobile" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "hand.name-of-your-school" : {
+      "key" : "university",
+      "score" : 0.88
+    },
+    "hand.neg-account-number" : {
+      "score" : 0
+    },
+    "hand.neg-choose-username" : {
+      "score" : 0
+    },
+    "hand.neg-company-size" : {
+      "score" : 0
+    },
+    "hand.neg-county" : {
+      "key" : "home_state",
+      "score" : 0.6
+    },
+    "hand.neg-event-name" : {
+      "score" : 0
+    },
+    "hand.neg-fax" : {
+      "score" : 0
+    },
+    "hand.neg-maiden-name" : {
+      "score" : 0
+    },
+    "hand.neg-message" : {
+      "score" : 0
+    },
+    "hand.neg-project-name" : {
+      "score" : 0
+    },
+    "hand.neg-reference-name" : {
+      "score" : 0
+    },
+    "hand.neg-referral-code" : {
+      "score" : 0
+    },
+    "hand.neg-routing-number" : {
+      "score" : 0
+    },
+    "hand.neg-six-digit-code" : {
+      "score" : 0
+    },
+    "hand.neg-ssn-last-4" : {
+      "score" : 0
+    },
+    "hand.neg-subject" : {
+      "score" : 0
+    },
+    "hand.neg-verification-code" : {
+      "score" : 0
+    },
+    "hand.nickname" : {
+      "key" : "preferred_name",
+      "score" : 0.95
+    },
+    "hand.organization" : {
+      "key" : "current_org",
+      "score" : 0.91
+    },
+    "hand.postcode" : {
+      "key" : "home_postal",
+      "score" : 0.6
+    },
+    "hand.region" : {
+      "key" : "home_state",
+      "score" : 0.6
+    },
+    "hand.shipping-zip" : {
+      "key" : "home_postal",
+      "score" : 0.6
+    },
+    "hand.state-province" : {
+      "key" : "home_state",
+      "score" : 0.6
+    },
+    "hand.street" : {
+      "key" : "home_street_1",
+      "score" : 0.6
+    },
+    "hand.telephone" : {
+      "key" : "phone_mobile",
+      "score" : 0.92
+    },
+    "hand.town-city" : {
+      "key" : "home_city",
+      "score" : 0.6
+    },
+    "hand.uni-anticipated-graduation" : {
+      "key" : "grad_year",
+      "score" : 0.93
+    },
+    "hand.uni-birth-month" : {
+      "score" : 0
+    },
+    "hand.uni-cell-phone" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "hand.uni-class-level" : {
+      "score" : 0
+    },
+    "hand.uni-college-or-university" : {
+      "key" : "university",
+      "score" : 0.88
+    },
+    "hand.uni-cumulative-gpa" : {
+      "key" : "gpa",
+      "score" : 0.95
+    },
+    "hand.uni-dob-format" : {
+      "score" : 0
+    },
+    "hand.uni-home-phone" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "hand.uni-institution-name" : {
+      "key" : "university",
+      "score" : 0.88
+    },
+    "hand.uni-intended-major" : {
+      "key" : "major_primary",
+      "score" : 0.88
+    },
+    "hand.uni-legal-last-name" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "hand.uni-local-address" : {
+      "key" : "campus_street_1",
+      "score" : 0.92
+    },
+    "hand.uni-minor" : {
+      "score" : 0
+    },
+    "hand.uni-permanent-home-address" : {
+      "key" : "home_street_1",
+      "score" : 0.92
+    },
+    "hand.uni-personal-website" : {
+      "key" : "website_url",
+      "score" : 0.88
+    },
+    "hand.wd-address-line-1" : {
+      "key" : "home_street_1",
+      "score" : 0.6
+    },
+    "hand.wd-city" : {
+      "key" : "home_city",
+      "score" : 0.6
+    },
+    "hand.wd-country-phone-code" : {
+      "key" : "home_country",
+      "score" : 0.6
+    },
+    "hand.wd-email-address" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "hand.wd-family-name" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "hand.wd-given-names" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "hand.wd-middle-name" : {
+      "key" : "middle_name",
+      "score" : 0.95
+    },
+    "hand.wd-phone-device-type" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "hand.wd-phone-number" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "hand.wd-postal-code" : {
+      "key" : "home_postal",
+      "score" : 0.6
+    },
+    "hand.wd-prefix" : {
+      "score" : 0
+    },
+    "hand.wd-state" : {
+      "key" : "home_state",
+      "score" : 0.6
+    },
+    "hand.wd-suffix" : {
+      "score" : 0
+    },
+    "hand.where-work-question" : {
+      "score" : 0
+    },
+    "regression.address-line-2" : {
+      "key" : "home_street_2",
+      "score" : 0.92
+    },
+    "regression.apt-suite-unit" : {
+      "key" : "home_street_2",
+      "score" : 0.92
+    },
+    "regression.bare-name" : {
+      "key" : "full_name",
+      "score" : 0.87
+    },
+    "regression.berkeley-email" : {
+      "key" : "email_school",
+      "score" : 0.95
+    },
+    "regression.berkeley-email-address" : {
+      "key" : "email_school",
+      "score" : 0.95
+    },
+    "regression.billing-city" : {
+      "key" : "billing_city",
+      "score" : 0.92
+    },
+    "regression.campus-city" : {
+      "key" : "campus_city",
+      "score" : 0.92
+    },
+    "regression.campus-street" : {
+      "key" : "campus_street_1",
+      "score" : 0.92
+    },
+    "regression.card-number" : {
+      "key" : "card_number",
+      "score" : 0.95
+    },
+    "regression.company-name" : {
+      "key" : "current_org",
+      "score" : 0.91
+    },
+    "regression.cvv" : {
+      "key" : "card_cvv",
+      "score" : 0.95
+    },
+    "regression.date-of-birth" : {
+      "key" : "date_of_birth",
+      "score" : 0.95
+    },
+    "regression.email-address" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "regression.expected-grad-year" : {
+      "key" : "grad_year",
+      "score" : 0.93
+    },
+    "regression.favourite-colour" : {
+      "score" : 0
+    },
+    "regression.first-and-last-name" : {
+      "key" : "full_name",
+      "score" : 0.96
+    },
+    "regression.first-name" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "regression.github" : {
+      "key" : "github_url",
+      "score" : 0.95
+    },
+    "regression.go-by" : {
+      "key" : "preferred_name",
+      "score" : 0.95
+    },
+    "regression.google-forms-required" : {
+      "key" : "full_name",
+      "score" : 0.96
+    },
+    "regression.gpa" : {
+      "key" : "gpa",
+      "score" : 0.95
+    },
+    "regression.hyphenated-email" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "regression.last-name" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "regression.legal-first-name" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "regression.linkedin-profile" : {
+      "key" : "linkedin_url",
+      "score" : 0.95
+    },
+    "regression.middle-initial" : {
+      "key" : "middle_name",
+      "score" : 0.95
+    },
+    "regression.mobile-number" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "regression.name-first-and-last" : {
+      "key" : "full_name",
+      "score" : 0.96
+    },
+    "regression.name-first-and-last-amp" : {
+      "key" : "full_name",
+      "score" : 0.96
+    },
+    "regression.name-first-middle-last" : {
+      "key" : "full_name",
+      "score" : 0.96
+    },
+    "regression.name-on-card" : {
+      "key" : "card_name",
+      "score" : 0.95
+    },
+    "regression.name.Description" : {
+      "score" : 0
+    },
+    "regression.name.birthDate-day" : {
+      "score" : 0
+    },
+    "regression.name.birthDate-month" : {
+      "score" : 0
+    },
+    "regression.name.birthDate-year" : {
+      "score" : 0
+    },
+    "regression.name.dateOfBirth" : {
+      "key" : "date_of_birth",
+      "score" : 0.95
+    },
+    "regression.name.email" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "regression.name.emailInput" : {
+      "key" : "email_personal",
+      "score" : 0.72
+    },
+    "regression.name.firstNameInput" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "regression.name.lastNameInput" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "regression.name.phone" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "regression.name.project-name" : {
+      "score" : 0
+    },
+    "regression.name.repository-name-input" : {
+      "score" : 0
+    },
+    "regression.name.sid-country" : {
+      "key" : "home_country",
+      "score" : 0.6
+    },
+    "regression.name.studentId" : {
+      "key" : "student_id",
+      "score" : 0.93
+    },
+    "regression.name.subdomain" : {
+      "score" : 0
+    },
+    "regression.permanent-zip" : {
+      "key" : "home_postal",
+      "score" : 0.92
+    },
+    "regression.personal-email" : {
+      "key" : "email_personal",
+      "score" : 0.95
+    },
+    "regression.phone-number" : {
+      "key" : "phone_mobile",
+      "score" : 0.93
+    },
+    "regression.preferred-first-name" : {
+      "key" : "preferred_name",
+      "score" : 0.95
+    },
+    "regression.preferred-name" : {
+      "key" : "preferred_name",
+      "score" : 0.95
+    },
+    "regression.residential-first-name" : {
+      "key" : "given_name",
+      "score" : 0.95
+    },
+    "regression.school-email" : {
+      "key" : "email_school",
+      "score" : 0.95
+    },
+    "regression.second-major" : {
+      "key" : "major_secondary",
+      "score" : 0.93
+    },
+    "regression.security-code" : {
+      "key" : "card_cvv",
+      "score" : 0.95
+    },
+    "regression.ssn" : {
+      "score" : 0
+    },
+    "regression.student-email" : {
+      "key" : "email_school",
+      "score" : 0.95
+    },
+    "regression.student-id" : {
+      "key" : "student_id",
+      "score" : 0.93
+    },
+    "regression.surname" : {
+      "key" : "family_name",
+      "score" : 0.95
+    },
+    "regression.university-email" : {
+      "key" : "email_school",
+      "score" : 0.95
+    },
+    "regression.unscoped-city" : {
+      "key" : "home_city",
+      "score" : 0.6
+    },
+    "regression.username" : {
+      "score" : 0
+    }
+  }
+}

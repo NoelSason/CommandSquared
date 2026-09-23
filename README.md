@@ -12,6 +12,37 @@ Matching runs in three tiers, first hit wins:
 3. **[Jev](https://www.jevai.org)** — a `choice` question over the candidate keys for
    anything the rules can't settle, gated on the returned `confidence`.
 
+## Local rules
+
+`LocalMatcher` combines two sources of evidence:
+
+- **Chromium's autofill patterns** (`Match/ChromiumPatterns.swift`, BSD-3-Clause, see
+  `THIRD_PARTY_NOTICES.md`) decide *what kind* of field this is: a first name, an email,
+  a city, a card number. They also recognise fields that must be left alone, such as
+  search boxes, one-time codes and promo codes, and those veto every match.
+- **Control's own rules** handle what a browser can't: school vs personal email (using
+  the user's own institution as a hint), home vs campus vs billing address (from the
+  section heading), the education and professional keys Chromium has no type for, and
+  snippets, which are never guessed.
+
+The patterns run against **raw, lowercased text, one attribute at a time**, not against
+the normalised `searchText` Control's phrase rules use. That's deliberate:
+
+- `normalize()` turns punctuation into spaces, and many patterns depend on punctuation
+  (`e.?mail`, `(?<!\.)zip`, `address[_-]?line`, `m\.i\.`). On normalised text they stop
+  matching, or match exactly what they were written to exclude.
+- Anchors such as `^name` describe one label, not a joined string.
+- Rewriting the patterns for normalised text would be translation with nothing to check
+  it against.
+
+The full reasoning is on `FieldContext.patternLabelParts`, and `ChromiumPatternTests`
+pins it in both directions. Every match must still begin a word, the same rule that
+stops "sid" matching inside "residential".
+
+Accuracy is measured, not asserted. `make eval` runs about 850 labelled cases (the
+hand-test page, past regressions, and real browser field names) and fails if any case the
+accepted snapshot got right is now wrong. See `Tests/ControlKitTests/Fixtures/MatcherEval/`.
+
 ## Privacy boundary
 
 Vault **values never leave the device.** `JevMatcher` is the only type that builds a
@@ -44,6 +75,7 @@ would register a global hotkey and prompt for Accessibility on every run.
 ```sh
 make build     # generate the project and build
 make test      # run the ControlKit suite
+make eval      # matcher accuracy report (make eval-accept records a new snapshot)
 make run       # build, relaunch, and open the app
 make logs      # stream Control's own os_log output
 make clean     # drop DerivedData and the generated project

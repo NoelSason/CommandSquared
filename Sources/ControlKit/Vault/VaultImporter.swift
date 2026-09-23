@@ -75,12 +75,7 @@ public enum VaultImporter {
             let trimmed = row.value.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !trimmed.isEmpty, trimmed.count <= 200 else { continue }
 
-            let context = FieldContext(
-                appName: "Browser",
-                bundleID: "import",
-                label: humanize(row.fieldName)
-            )
-            guard let top = matcher.match(context, fillable: allKeys).first,
+            guard let top = matcher.match(context(forFieldName: row.fieldName), fillable: allKeys).first,
                   top.score >= minimumConfidence
             else { continue }
 
@@ -100,20 +95,17 @@ public enum VaultImporter {
         return best.values.sorted { ($0.confidence, $0.key) > ($1.confidence, $1.key) }
     }
 
+    /// What the matcher sees for a browser field name. One definition, shared by
+    /// the importer and the matcher eval, so the eval measures exactly what an
+    /// import would do.
+    public static func context(forFieldName fieldName: String) -> FieldContext {
+        FieldContext(appName: "Browser", bundleID: "import", fieldName: fieldName)
+    }
+
     /// `firstNameInput` and `first_name` are both "first name" to a human, and the
     /// matcher only understands the human form.
     public static func humanize(_ fieldName: String) -> String {
-        var spaced = ""
-        var previous: Character?
-        for character in fieldName {
-            // Split camelCase, but not runs of capitals like "ZIP".
-            if let previous, character.isUppercase, previous.isLowercase || previous.isNumber {
-                spaced.append(" ")
-            }
-            spaced.append(character)
-            previous = character
-        }
-        return FieldContext.normalize(spaced)
+        FieldContext.normalize(FieldContext.splitCamelCase(fieldName))
     }
 
     // MARK: vCard
