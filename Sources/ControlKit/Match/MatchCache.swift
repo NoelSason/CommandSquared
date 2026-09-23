@@ -19,6 +19,18 @@ public final class MatchCache {
         /// Kept for the cache inspector in settings, so a wrong entry is findable.
         public var label: String?
         public var appName: String?
+
+        /// Whether this entry knows something the rules don't.
+        ///
+        /// A pick, a cycle landing or a hand correction does, and so does a Jev
+        /// answer, since asking again costs a network call. A plain local fill
+        /// does not: it is only an echo of what the rules said at the time, and
+        /// replaying it ahead of the rules freezes a wrong guess in place — the
+        /// campus fields on the hand-test page kept getting the home address
+        /// that way — and hides every rule fix made since.
+        public var isAuthoritative: Bool {
+            userConfirmed || source == .manual || source == .jev
+        }
     }
 
     public private(set) var entries: [String: Entry] = [:]
@@ -40,7 +52,7 @@ public final class MatchCache {
     // MARK: Lookup
 
     public func entry(for context: FieldContext) -> Entry? {
-        entries[context.signature]
+        entries[context.signature].flatMap { $0.isAuthoritative ? $0 : nil }
     }
 
     // MARK: Record
@@ -52,6 +64,11 @@ public final class MatchCache {
         userConfirmed: Bool
     ) {
         let signature = context.signature
+
+        // Echoes of the rules — and replays of an entry already here — teach
+        // nothing, and recording a replay as `.cache` would demote the
+        // correction it came from.
+        guard userConfirmed || source == .manual || source == .jev else { return }
 
         // A user's own pick outranks anything the model says later.
         if let existing = entries[signature], existing.userConfirmed, !userConfirmed {
@@ -90,18 +107,32 @@ public final class MatchCache {
     // MARK: Persistence
 
     private func load() {
+        guard FileManager.default.fileExists(atPath: fileURL.path) else { return }
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        guard let data = try? Data(contentsOf: fileURL),
-              let decoded = try? decoder.decode([String: Entry].self, from: data)
-        else { return }
-        entries = decoded
+        do {
+            let decoded = try decoder.decode([String: Entry].self, from: Data(contentsOf: fileURL))
+            // Echo entries written by older builds are dropped rather than kept
+            // inert, so the inspector in settings lists only what is actually used.
+            entries = decoded.filter { $0.value.isAuthoritative }
+        } catch {
+            // The file holds the user's corrections. Starting empty is fine;
+            // overwriting it on the next save is not, so it is kept aside.
+            Log.match.error("Match cache could not be read: \(error.localizedDescription, privacy: .public)")
+            _ = VaultStore.moveAside(fileURL)
+        }
     }
 
     private func save() {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         encoder.dateEncodingStrategy = .iso8601
-        try? encoder.encode(entries).write(to: fileURL, options: .atomic)
+        do {
+            try encoder.encode(entries).write(to: fileURL, options: .atomic)
+        } catch {
+            // Not fatal — fills still work, they just aren't remembered — but a
+            // correction that silently fails to stick looks exactly like a bug.
+            Log.match.error("Match cache could not be saved: \(error.localizedDescription, privacy: .public)")
+        }
     }
 }

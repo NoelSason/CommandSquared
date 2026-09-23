@@ -56,23 +56,87 @@ private struct SettingsView: View {
     @Bindable var preferences: Preferences
     let onTriggerChanged: @MainActor () -> Void
 
-    var body: some View {
-        TabView {
-            DetailsTab(vault: vault)
-                .tabItem { Label("Your details", systemImage: "person.text.rectangle") }
-            SnippetsTab(vault: vault)
-                .tabItem { Label("Snippets", systemImage: "text.quote") }
-            ShortcutTab(preferences: preferences, onTriggerChanged: onTriggerChanged)
-                .tabItem { Label("Trigger", systemImage: "command") }
-            MatchingTab(preferences: preferences)
-                .tabItem { Label("Matching", systemImage: "wand.and.stars") }
-            PrivacyTab(preferences: preferences)
-                .tabItem { Label("Privacy", systemImage: "hand.raised") }
-            MemoryTab(cache: cache, vault: vault)
-                .tabItem { Label("Memory", systemImage: "clock.arrow.circlepath") }
+    @State private var section: Section = .details
+
+    /// The panes, in order. Drawn as a bar inside the window rather than as a
+    /// `TabView`, which macOS puts in the window toolbar and folds into a `>>`
+    /// overflow menu once six tabs no longer fit.
+    enum Section: String, CaseIterable, Identifiable {
+        case details, snippets, trigger, matching, privacy, memory
+
+        var id: String { rawValue }
+
+        var title: String {
+            switch self {
+            case .details: "Your details"
+            case .snippets: "Snippets"
+            case .trigger: "Trigger"
+            case .matching: "Matching"
+            case .privacy: "Privacy"
+            case .memory: "Memory"
+            }
         }
-        .padding(16)
+
+        var symbol: String {
+            switch self {
+            case .details: "person.text.rectangle"
+            case .snippets: "text.quote"
+            case .trigger: "command"
+            case .matching: "wand.and.stars"
+            case .privacy: "hand.raised"
+            case .memory: "clock.arrow.circlepath"
+            }
+        }
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            tabBar
+            Divider()
+            content
+                .padding(16)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        }
         .frame(minWidth: 560, minHeight: 480)
+    }
+
+    private var tabBar: some View {
+        HStack(spacing: 4) {
+            ForEach(Section.allCases) { item in
+                Button { section = item } label: {
+                    VStack(spacing: 4) {
+                        Image(systemName: item.symbol)
+                            .font(.system(size: 17))
+                            .frame(height: 20)
+                        Text(item.title)
+                            .font(.system(size: 11))
+                    }
+                    .frame(width: 82, height: 50)
+                    .foregroundStyle(section == item ? Color.accentColor : Color.secondary)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(section == item ? Color.accentColor.opacity(0.12) : Color.clear)
+                    )
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(section == item ? .isSelected : [])
+            }
+        }
+        .padding(.vertical, 8)
+        .frame(maxWidth: .infinity)
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        switch section {
+        case .details: DetailsTab(vault: vault)
+        case .snippets: SnippetsTab(vault: vault)
+        case .trigger: ShortcutTab(preferences: preferences, onTriggerChanged: onTriggerChanged)
+        case .matching: MatchingTab(preferences: preferences)
+        case .privacy: PrivacyTab(preferences: preferences)
+        case .memory: MemoryTab(cache: cache, vault: vault)
+        }
     }
 }
 

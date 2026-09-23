@@ -84,19 +84,29 @@ struct JevRequest: Encodable {
     let questions: [String: JevQuestion]
 }
 
-struct JevEnvelope: Decodable {
-    let code: Int
-    let message: String?
-    let data: JevDecisionData?
+/// A successful reply: `{"model": "jev-1.13.0", "answers": {…}, "usage": {…}}`.
+struct JevResponse: Decodable {
+    let model: String?
+    let answers: [String: JevAnswer]
 }
 
-struct JevDecisionData: Decodable {
-    let answers: [String: JevAnswer]?
-    // Present on the preset endpoints (tool-guard, route, …), absent on native decisions.
-    let decision: String?
-    let confidence: Double?
-    let probabilities: [String: Double]?
-    let guidance: String?
+/// A failed reply: `{"detail": {"error_type": "…", "message": "…"}}`. A
+/// validation failure (422) may carry a list instead; that decodes to nil and
+/// the status code speaks for itself.
+struct JevErrorBody: Decodable {
+    struct Detail: Decodable {
+        let error_type: String?
+        let message: String?
+    }
+
+    let detail: Detail?
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        detail = try? container.decodeIfPresent(Detail.self, forKey: .detail)
+    }
+
+    private enum CodingKeys: String, CodingKey { case detail }
 }
 
 // MARK: Errors
@@ -105,16 +115,18 @@ public enum JevError: Error, LocalizedError {
     case notConfigured
     case bodyTooLarge(Int)
     case http(Int)
-    case api(code: Int, message: String)
+    /// A failure the service explained, with its own words.
+    case api(status: Int, message: String)
     case transport(String)
     case decoding(String)
 
     public var errorDescription: String? {
         switch self {
         case .notConfigured: "No Jev API key is set."
-        case let .bodyTooLarge(bytes): "Request body is \(bytes) bytes, over Jev's 32 KiB limit."
+        case let .bodyTooLarge(bytes): "The request came to \(bytes) bytes, over Control's 32 KiB limit."
+        case .http(401): "Jev didn't accept this key. Check it at console.typesafe.ai/keys."
         case let .http(status): "Jev returned HTTP \(status)."
-        case let .api(code, message): "Jev error \(code): \(message)"
+        case let .api(_, message): message
         case let .transport(message): "Could not reach Jev: \(message)"
         case let .decoding(message): "Could not read Jev's response: \(message)"
         }
@@ -123,15 +135,21 @@ public enum JevError: Error, LocalizedError {
 
 // MARK: Client
 
-/// Talks to Jev's native decisions endpoint.
+/// Talks to Jev through TypeSafe's System One endpoint
+/// (`POST https://api.typesafe.ai/v1/systemone`, docs at docs.typesafe.ai/api).
+///
+/// Earlier builds pointed at www.jevai.org, a different service that rejects
+/// TypeSafe keys — which is why no key ever worked.
 ///
 /// Deliberately thin: one POST, typed answers out. Nothing here knows what a
 /// vault is — building the questions and reading the confidence is `JevMatcher`'s
 /// job, which keeps the network layer testable against recorded JSON.
 public struct JevClient: Sendable {
-    public static let defaultBaseURL = URL(string: "https://www.jevai.org")!
-    public static let defaultModel = "typesafe-ai/jev"
-    /// Documented request cap.
+    public static let defaultBaseURL = URL(string: "https://api.typesafe.ai")!
+    /// TypeSafe's alias for the current Jev release.
+    public static let defaultModel = "jev-latest"
+    /// Control's own cap, not the service's: a field's description has no
+    /// business being large, and a big body means something is leaking in.
     public static let maxBodyBytes = 32 * 1024
 
     public var baseURL: URL
@@ -168,7 +186,7 @@ public struct JevClient: Sendable {
             throw JevError.bodyTooLarge(body.count)
         }
 
-        var request = URLRequest(url: baseURL.appendingPathComponent("api/v1/decisions"))
+        var request = URLRequest(url: baseURL.appendingPathComponent("v1/systemone"))
         request.httpMethod = "POST"
         request.httpBody = body
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -186,14 +204,15 @@ public struct JevClient: Sendable {
         }
 
         if let http = response as? HTTPURLResponse, !(200 ..< 300).contains(http.statusCode) {
-            // Jev explains itself in the body — "Invalid or missing Jev API key"
-            // is far more use than "HTTP 401". Read it before giving up.
-            if let envelope = try? JSONDecoder().decode(JevEnvelope.self, from: data),
-               let message = envelope.message {
-                throw JevError.api(code: envelope.code, message: message)
-            }
-            throw JevError.http(http.statusCode)
+            throw Self.error(status: http.statusCode, body: data)
         }
+
+        #if DEBUG
+        // Debug builds only: the raw answer, so a real response can be recorded
+        // into JevDecodingTests. It holds field keys and confidences — never a
+        // vault value, which never leaves the Mac in the first place.
+        Log.match.debug("Jev response: \(String(decoding: data, as: UTF8.self), privacy: .public)")
+        #endif
 
         return try Self.parse(data)
     }
@@ -214,15 +233,20 @@ public struct JevClient: Sendable {
 
     /// Split out so tests can exercise it against recorded responses.
     public static func parse(_ data: Data) throws -> [String: JevAnswer] {
-        let envelope: JevEnvelope
         do {
-            envelope = try JSONDecoder().decode(JevEnvelope.self, from: data)
+            return try JSONDecoder().decode(JevResponse.self, from: data).answers
         } catch {
             throw JevError.decoding(error.localizedDescription)
         }
-        guard envelope.code == 0 else {
-            throw JevError.api(code: envelope.code, message: envelope.message ?? "unknown")
+    }
+
+    /// A failed request, in the service's own words where it gave some.
+    /// A bad key is reworded to say where to get a good one.
+    public static func error(status: Int, body: Data) -> JevError {
+        if status == 401 { return .http(401) }
+        if let message = (try? JSONDecoder().decode(JevErrorBody.self, from: body))?.detail?.message {
+            return .api(status: status, message: message)
         }
-        return envelope.data?.answers ?? [:]
+        return .http(status)
     }
 }

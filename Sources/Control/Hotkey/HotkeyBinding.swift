@@ -1,5 +1,6 @@
 import AppKit
 import Carbon.HIToolbox
+import ControlKit
 import Foundation
 
 /// A key combination, stored as an `NSEvent`-style modifier mask (what the
@@ -92,5 +93,20 @@ struct HotkeyBinding: Equatable, Sendable {
 
         guard status == noErr, length > 0 else { return nil }
         return String(utf16CodeUnits: characters, count: length).uppercased()
+    }
+}
+
+extension Preferences {
+    /// How the user summons Control, as they would say it: "Tap ⌘ twice", "⌃⌘V".
+    var triggerDescription: String {
+        switch triggerMode {
+        case .doubleCommand, .doubleControl:
+            triggerMode.title
+        case .chord:
+            HotkeyBinding(
+                keyCode: UInt32(hotKeyCode),
+                modifiers: NSEvent.ModifierFlags(rawValue: UInt(hotKeyModifiers))
+            ).displayString
+        }
     }
 }

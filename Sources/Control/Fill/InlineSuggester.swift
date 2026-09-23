@@ -187,6 +187,8 @@ final class InlineSuggester {
 
         for offset in 0 ..< candidates.count {
             let candidate = candidates[(index + offset) % candidates.count]
+            // An unreadable value is simply not suggested; nothing is inserted
+            // unless the user accepts a suggestion that did read.
             guard let value = try? vault.resolvedValue(for: candidate, context: context),
                   !value.isEmpty,
                   let matchEnd = CompletionMatcher.matchEnd(of: typed, in: value)

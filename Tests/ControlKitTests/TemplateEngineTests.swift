@@ -117,6 +117,15 @@ final class TemplateEngineTests: XCTestCase {
         XCTAssertEqual(result.cursorOffset, 5)
     }
 
+    func testCursorOffsetCountsWhatTheAccessibilityAPICounts() {
+        // Accessibility text ranges are UTF-16. "👋" is one Character but two
+        // UTF-16 units, so a Character count put the caret one place early.
+        let result = TemplateEngine.expand("👋 {cursor}!", in: environment())
+        XCTAssertEqual(result.text, "👋 !")
+        XCTAssertEqual(result.cursorOffset, 3)
+        XCTAssertEqual(result.text.utf16.count - (result.cursorOffset ?? 0), 1, "one unit back from the end")
+    }
+
     // MARK: Robustness
 
     func testUnclosedBracesAreLeftExactlyAsWritten() {

@@ -33,6 +33,8 @@ final class MatcherEvalTests: XCTestCase {
         let placeholder: String?
         let help: String?
         let nearby: [String]?
+        /// The nearest section heading, as `NearbyTextPolicy` finds it.
+        let heading: String?
         /// Every acceptable key. Empty means the field must match nothing.
         let expect: [String]
         let note: String?
@@ -40,7 +42,7 @@ final class MatcherEvalTests: XCTestCase {
         var source = ""
 
         private enum CodingKeys: String, CodingKey {
-            case id, input, label, placeholder, help, nearby, expect, note
+            case id, input, label, placeholder, help, nearby, heading, expect, note
         }
     }
 
@@ -94,7 +96,8 @@ final class MatcherEvalTests: XCTestCase {
                 label: testCase.label,
                 placeholder: testCase.placeholder,
                 helpText: testCase.help,
-                nearbyText: testCase.nearby ?? []
+                nearbyText: testCase.nearby ?? [],
+                heading: testCase.heading
             )
         case .fieldName:
             VaultImporter.context(forFieldName: testCase.label ?? "")

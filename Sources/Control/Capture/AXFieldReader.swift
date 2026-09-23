@@ -45,6 +45,12 @@ enum AXFieldReader {
             return .failure(unreachableEditorReason(for: app) ?? .noFocusedField)
         }
 
+        return read(focused, app: app)
+    }
+
+    /// Everything Control can learn about one element, focused or not. Whole-form
+    /// fill reads every field on a page through here.
+    static func read(_ focused: AXUIElement, app: NSRunningApplication) -> Result<FocusedField, BlockReason> {
         let role = AX.string(focused, kAXRoleAttribute)
         let subrole = AX.string(focused, kAXSubroleAttribute)
 
@@ -89,17 +95,23 @@ enum AXFieldReader {
             return .failure(.hiddenField)
         }
 
+        let label = label(for: focused)
+        let placeholder = AX.string(focused, kAXPlaceholderValueAttribute)
+        let helpText = AX.string(focused, kAXHelpAttribute)
+        let ambient = ambientContext(around: focused, own: [label, placeholder, helpText].compactMap { $0 })
+
         let context = FieldContext(
             appName: app.localizedName ?? "Unknown",
             bundleID: bundleID,
             domain: BrowserURLReader.domain(for: focused, app: app),
             role: role,
             subrole: subrole,
-            label: label(for: focused),
-            placeholder: AX.string(focused, kAXPlaceholderValueAttribute),
-            helpText: AX.string(focused, kAXHelpAttribute),
-            nearbyText: nearbyText(around: focused),
-            isEmpty: (AX.rawValue(focused, kAXValueAttribute) ?? "").isEmpty
+            label: label,
+            placeholder: placeholder,
+            helpText: helpText,
+            nearbyText: ambient.nearby,
+            isEmpty: (AX.rawValue(focused, kAXValueAttribute) ?? "").isEmpty,
+            heading: ambient.heading
         )
 
         return .success(FocusedField(element: focused, context: context, app: app))
@@ -205,73 +217,103 @@ enum AXFieldReader {
 
     // MARK: Ambient text
 
-    /// Static text from the field's ancestors — section headings like "Mailing
-    /// address" that turn a meaningless "Line 1" into something matchable.
-    private static func nearbyText(around element: AXUIElement, levels: Int = 3, limit: Int = 8) -> [String] {
-        var collected: [String] = []
-        var seen = Set<String>()
-        var budget = 120  // hard ceiling: every AX read is an IPC round trip
+    private typealias Node = NearbyTextPolicy.Node
+
+    /// Static text around the field — section headings like "Mailing address"
+    /// that turn a meaningless "Line 1" into something matchable.
+    ///
+    /// This only describes the tree; `NearbyTextPolicy` decides what belongs to
+    /// this field. Chromium prunes wrapper divs, so a section can arrive as one
+    /// flat list of labels and inputs: the window around the field matters, and
+    /// the first few children of a big section say nothing about a field near
+    /// its end.
+    private static func ambientContext(
+        around element: AXUIElement,
+        own: [String],
+        levels: Int = 3
+    ) -> NearbyTextPolicy.Context {
+        var budget = 160  // hard ceiling: every AX read is an IPC round trip
+        var nodeLevels: [[Node]] = []
         var current = element
 
         for _ in 0 ..< levels {
             guard budget > 0, let parent = AX.element(current, kAXParentAttribute) else { break }
             budget -= 1
 
-            for child in AX.elements(parent, kAXChildrenAttribute).prefix(16) {
-                guard budget > 0, collected.count < limit else { break }
-                guard !AX.same(child, element), !AX.same(child, current) else { continue }
+            let children = AX.elements(parent, kAXChildrenAttribute)
+            guard let index = children.firstIndex(where: { AX.same($0, current) }) else { break }
 
-                let subtree = collectSubtree(child, depth: 2, budget: &budget)
-                // Anything containing another input belongs to *that* field. Its
-                // label and help text are not context for this one — taking them
-                // is how "What are you studying?" ends up holding a phone number.
-                guard !subtree.containsField else { continue }
-
-                for text in subtree.texts where seen.insert(text).inserted {
-                    collected.append(text)
-                    if collected.count >= limit { break }
+            var nodes: [Node] = []
+            for position in max(0, index - 16) ..< min(children.count, index + 5) {
+                guard budget > 0 else { break }
+                if position == index {
+                    nodes.append(.target)
+                    continue
+                }
+                switch summarize(children[position], depth: 2, budget: &budget) {
+                case let .control(label): nodes.append(.control(label: label))
+                case .group: nodes.append(.group)
+                case let .texts(texts): nodes.append(contentsOf: texts)
                 }
             }
-
+            nodeLevels.append(nodes)
             current = parent
         }
 
-        return collected
+        return NearbyTextPolicy.context(levels: nodeLevels, own: own)
     }
 
-    /// Gathers the text in a subtree, and reports whether that subtree also holds
-    /// a form control — in which case the caller throws the text away.
-    private static func collectSubtree(
-        _ element: AXUIElement,
-        depth: Int,
-        budget: inout Int
-    ) -> (texts: [String], containsField: Bool) {
-        guard budget > 0 else { return ([], false) }
+    private enum Summary {
+        /// A form control itself, with its label when it has a readable one.
+        case control(label: String?)
+        /// Something holding a control somewhere inside.
+        case group
+        /// Only text, in reading order.
+        case texts([Node])
+    }
+
+    private static let controlRoles: Set<String> = ["AXButton", "AXPopUpButton", "AXCheckBox", "AXRadioButton"]
+
+    private static func summarize(_ element: AXUIElement, depth: Int, budget: inout Int) -> Summary {
+        guard budget > 0 else { return .texts([]) }
         budget -= 1
 
         let role = AX.string(element, kAXRoleAttribute)
-        if let role, editableRoles.contains(role) { return ([], true) }
-        if role == "AXButton" || role == "AXPopUpButton" || role == "AXCheckBox" {
-            return ([], true)
+        if let role, editableRoles.contains(role) {
+            // The policy drops exactly this label's text from the neighbours,
+            // and nothing else — so a subhead right above it survives.
+            budget -= 3
+            return .control(label: label(for: element))
         }
+        if let role, controlRoles.contains(role) { return .control(label: nil) }
 
         if role == kAXStaticTextRole || role == "AXHeading" {
-            guard let text = AX.string(element, kAXValueAttribute) ?? AX.string(element, kAXTitleAttribute),
-                  text.count <= 120
-            else { return ([], false) }
-            return ([text], false)
+            let isHeading = role == "AXHeading"
+            if let text = AX.string(element, kAXValueAttribute) ?? AX.string(element, kAXTitleAttribute) {
+                guard text.count <= 120 else { return .texts([]) }
+                return .texts([isHeading ? .heading(text) : .text(text)])
+            }
+            // Some browsers put a heading's words in a static-text child.
+            guard isHeading, depth > 0,
+                  case let .texts(inner) = summarize(AX.elements(element, kAXChildrenAttribute), depth: depth - 1, budget: &budget)
+            else { return .texts([]) }
+            return .texts(inner.map { $0.text.map(Node.heading) ?? $0 })
         }
 
-        guard depth > 0 else { return ([], false) }
+        guard depth > 0 else { return .texts([]) }
+        return summarize(AX.elements(element, kAXChildrenAttribute), depth: depth - 1, budget: &budget)
+    }
 
-        var texts: [String] = []
-        for child in AX.elements(element, kAXChildrenAttribute).prefix(8) {
+    private static func summarize(_ children: [AXUIElement], depth: Int, budget: inout Int) -> Summary {
+        var nodes: [Node] = []
+        for child in children.prefix(8) {
             guard budget > 0 else { break }
-            let sub = collectSubtree(child, depth: depth - 1, budget: &budget)
-            if sub.containsField { return ([], true) }
-            texts.append(contentsOf: sub.texts)
+            switch summarize(child, depth: depth, budget: &budget) {
+            case .control, .group: return .group
+            case let .texts(texts): nodes.append(contentsOf: texts)
+            }
         }
-        return (texts, false)
+        return .texts(nodes)
     }
 
     // MARK: Debug

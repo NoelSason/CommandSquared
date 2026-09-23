@@ -2201,15 +2201,15 @@
       "score" : 0.92
     },
     "form.c1" : {
-      "key" : "home_street_1",
+      "key" : "campus_street_1",
       "score" : 0.92
     },
     "form.c2" : {
-      "key" : "home_city",
+      "key" : "campus_city",
       "score" : 0.92
     },
     "form.c3" : {
-      "key" : "home_postal",
+      "key" : "campus_postal",
       "score" : 0.92
     },
     "form.cc" : {
@@ -2233,7 +2233,8 @@
       "score" : 0.72
     },
     "form.dob" : {
-      "score" : 0
+      "key" : "date_of_birth",
+      "score" : 0.95
     },
     "form.em" : {
       "key" : "email_personal",
@@ -2336,7 +2337,7 @@
     },
     "form.u1" : {
       "key" : "home_city",
-      "score" : 0.92
+      "score" : 0.6
     },
     "form.un" : {
       "score" : 0
@@ -2737,7 +2738,8 @@
       "score" : 0.95
     },
     "hand.uni-dob-format" : {
-      "score" : 0
+      "key" : "date_of_birth",
+      "score" : 0.95
     },
     "hand.uni-home-phone" : {
       "key" : "phone_mobile",

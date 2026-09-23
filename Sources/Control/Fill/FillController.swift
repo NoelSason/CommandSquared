@@ -23,6 +23,12 @@ final class FillController {
     var inspectorIsOpen = false
     var onInspect: (@MainActor (FieldContext, [(String, String)]) -> Void)?
 
+    /// Set while setup's practice box has focus. Control's own window can't be
+    /// read through the Accessibility API from Control itself — the request
+    /// waits on the main thread that is making it — so the trigger is handed to
+    /// setup instead, which fills its box through `practiceFill`.
+    var practiceHandler: (@MainActor () async -> Bool)?
+
     private var lastFill: FillPlanner.LastFill?
     private var lastElement: AXUIElement?
     /// How long after a fill a second press means "wrong one, try the next"
@@ -43,6 +49,10 @@ final class FillController {
 
     func handleHotkey() async {
         guard !picker.isVisible else { return }
+        if let practiceHandler, await practiceHandler() { return }
+        // Control's own windows are not something to fill, and reading them
+        // through the Accessibility API from Control itself can hang.
+        guard !NSRunningApplication.current.isActive else { return }
         if suggester?.cycle() == true { return }
         corrections.stop()
 
@@ -143,13 +153,46 @@ final class FillController {
                         field.key == token || FieldContext.normalize(field.label) == wanted
                     }
                     guard let match, !match.sensitive else { return nil }
-                    guard let value = try? self.vault.resolvedValue(for: match.key, context: context),
-                          !value.isEmpty
-                    else { return nil }
-                    return value
+                    // A token that can't be read is left as written, so the gap
+                    // is visible in the text — and the reason is in the log.
+                    do {
+                        guard let value = try self.vault.resolvedValue(for: match.key, context: context),
+                              !value.isEmpty
+                        else { return nil }
+                        return value
+                    } catch {
+                        Log.insert.error("Snippet token {\(token, privacy: .public)} could not be read: \(error.localizedDescription, privacy: .public)")
+                        return nil
+                    }
                 }
             }
         )
+    }
+
+    // MARK: Practice
+
+    /// What a field with this label would be filled with: the real matcher and
+    /// the real vault, without reading or writing any other app. Sensitive
+    /// values are never used for practice.
+    func practiceFill(label: String) async -> String? {
+        let context = FieldContext(
+            appName: "Control",
+            bundleID: Bundle.main.bundleIdentifier ?? "Control",
+            role: kAXTextFieldRole,
+            label: label
+        )
+        let result: MatchResult
+        switch await coordinator.decide(for: context) {
+        case let .insert(match), let .confirm(match): result = match
+        case .choose, .blocked: return nil
+        }
+        guard let field = vault.field(for: result.key), !field.sensitive else { return nil }
+        do {
+            return try vault.resolvedValue(for: result.key, context: context)
+        } catch {
+            Log.insert.error("Practice fill could not read \(result.key, privacy: .public): \(error.localizedDescription, privacy: .public)")
+            return nil
+        }
     }
 
     // MARK: Fill
@@ -278,7 +321,7 @@ final class FillController {
         }
 
         // `{cursor}` asked for the caret to land somewhere specific.
-        if let caretOffset { TextInserter.placeCaret(in: field.element, offsetFromEnd: value.count - caretOffset) }
+        if let caretOffset { TextInserter.placeCaret(in: field.element, offsetFromEnd: value.utf16.count - caretOffset) }
 
         Log.insert.info("Filled \(key, privacy: .public) via \(strategy.rawValue, privacy: .public).")
         coordinator.remember(key, for: field.context, source: source, userConfirmed: userConfirmed)
@@ -337,6 +380,8 @@ final class FillController {
         let needle = typed.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         guard !needle.isEmpty else { return nil }
 
+        // Best effort: a value that can't be read just can't be recognised, and
+        // nothing is learned from it. No fill depends on this.
         for field in vault.fillableFields where !field.sensitive {
             guard let value = try? vault.resolvedValue(for: field.key, context: context),
                   !value.isEmpty
@@ -441,7 +486,7 @@ final class FillController {
             let preview: String
             if field.sensitive {
                 preview = "••••••"
-            } else if let stored = try? vault.storedValue(for: key) {
+            } else if let stored = try? vault.storedValue(for: key) {  // preview only; committing reads again and reports failures
                 preview = String(stored.prefix(40))
             } else {
                 preview = ""

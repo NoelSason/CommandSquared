@@ -9,7 +9,7 @@ Matching runs in three tiers, first hit wins:
    holds your corrections permanently.
 2. **Local rules** — `LocalMatcher`'s deterministic table. "Email address", "ZIP",
    "Phone number" and friends never cost a network call.
-3. **[Jev](https://www.jevai.org)** — a `choice` question over the candidate keys for
+3. **[Jev](https://docs.typesafe.ai)** (TypeSafe's model, `api.typesafe.ai/v1/systemone`) — a `choice` question over the candidate keys for
    anything the rules can't settle, gated on the returned `confidence`.
 
 ## Local rules
@@ -104,7 +104,7 @@ reused every run, never a fresh `/tmp` directory.
 3. Grant **Accessibility** access when asked (System Settings → Privacy & Security →
    Accessibility). Nothing works without it: Control can neither read a label nor type.
 4. Menu bar → **Settings…** → *Your details* and fill in what you want available.
-5. Optional: *Matching* → paste a Jev API key from `https://www.jevai.org/agent/keys`.
+5. Optional: *Matching* → paste a TypeSafe API key from `https://console.typesafe.ai/keys`.
    Tiers 1 and 2 work without it.
 
 Accessibility trust is keyed on bundle ID **and** code signature, which is why the Makefile

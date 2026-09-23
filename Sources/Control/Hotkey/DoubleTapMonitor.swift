@@ -21,6 +21,10 @@ final class DoubleTapMonitor {
 
     private var flagsMonitor: Any?
     private var keyMonitor: Any?
+    /// Global monitors never see events sent to Control's own windows, so
+    /// these cover setup's practice box. They observe and pass every event on.
+    private var localFlagsMonitor: Any?
+    private var localKeyMonitor: Any?
 
     private var modifier: NSEvent.ModifierFlags = .command
     private var pressedAt: Date?
@@ -44,15 +48,26 @@ final class DoubleTapMonitor {
         keyMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.keyDown, .leftMouseDown, .rightMouseDown]) { [weak self] _ in
             MainActor.assumeIsolated { self?.keyPressedDuringHold = true }
         }
+        localFlagsMonitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
+            MainActor.assumeIsolated { self?.handleFlags(event) }
+            return event
+        }
+        localKeyMonitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .leftMouseDown, .rightMouseDown]) { [weak self] event in
+            MainActor.assumeIsolated { self?.keyPressedDuringHold = true }
+            return event
+        }
 
         Log.app.info("Watching for a double-tap of \(Self.name(for: modifier), privacy: .public).")
     }
 
     func stop() {
-        if let flagsMonitor { NSEvent.removeMonitor(flagsMonitor) }
-        if let keyMonitor { NSEvent.removeMonitor(keyMonitor) }
+        for monitor in [flagsMonitor, keyMonitor, localFlagsMonitor, localKeyMonitor].compactMap({ $0 }) {
+            NSEvent.removeMonitor(monitor)
+        }
         flagsMonitor = nil
         keyMonitor = nil
+        localFlagsMonitor = nil
+        localKeyMonitor = nil
         pressedAt = nil
         lastTapAt = nil
     }

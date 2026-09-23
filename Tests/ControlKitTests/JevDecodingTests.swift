@@ -14,15 +14,15 @@ final class JevDecodingTests: XCTestCase {
         try JevClient.parse(Data(json.utf8))
     }
 
-    // MARK: Envelope
+    // MARK: Response shape
 
-    func testSuccessfulEnvelopeYieldsTypedAnswers() throws {
+    func testASuccessfulReplyYieldsTypedAnswers() throws {
         let parsed = try answers("""
-        {"code":0,"message":"ok","data":{"answers":{
+        {"model":"jev-1.13.0","answers":{
           "field":{"choice":"preferred_name","confidence":0.91,
                    "probabilities":{"preferred_name":0.91,"given_name":0.07,"family_name":0.02}},
           "is_sensitive":{"noul":0.02}
-        }}}
+        }}
         """)
 
         XCTAssertEqual(parsed["field"]?.choice, "preferred_name")
@@ -30,13 +30,19 @@ final class JevDecodingTests: XCTestCase {
         XCTAssertEqual(parsed["is_sensitive"]?.noul, 0.02)
     }
 
-    func testNonZeroCodeThrows() {
-        XCTAssertThrowsError(try answers(#"{"code":401,"message":"invalid key","data":null}"#)) { error in
-            guard case let JevError.api(code, message) = error else {
-                return XCTFail("expected JevError.api, got \(error)")
-            }
-            XCTAssertEqual(code, 401)
-            XCTAssertEqual(message, "invalid key")
+    func testAFailedRequestCarriesTheServicesOwnWords() {
+        let body = Data(#"{"detail":{"error_type":"rate_limit_error","message":"Slow down."}}"#.utf8)
+        guard case let .api(status, message) = JevClient.error(status: 429, body: body) else {
+            return XCTFail("expected JevError.api")
+        }
+        XCTAssertEqual(status, 429)
+        XCTAssertEqual(message, "Slow down.")
+    }
+
+    func testAValidationListFallsBackToTheStatus() {
+        let body = Data(#"{"detail":[{"loc":["body","model"],"msg":"field required"}]}"#.utf8)
+        guard case .http(422) = JevClient.error(status: 422, body: body) else {
+            return XCTFail("expected JevError.http(422)")
         }
     }
 
@@ -53,11 +59,11 @@ final class JevDecodingTests: XCTestCase {
     func testConfidentAnswerMapsToTheChosenKey() throws {
         let result = JevMatcher.result(
             from: try answers("""
-            {"code":0,"message":"ok","data":{"answers":{
+            {"model":"jev-1.13.0","answers":{
               "field":{"choice":"preferred_name","confidence":0.91,
                        "probabilities":{"preferred_name":0.91,"given_name":0.07}},
               "is_sensitive":{"noul":0.01}
-            }}}
+            }}
             """),
             candidates: candidates
         )
@@ -73,11 +79,11 @@ final class JevDecodingTests: XCTestCase {
     func testNoMatchZeroesConfidenceButKeepsTheRanking() throws {
         let result = JevMatcher.result(
             from: try answers("""
-            {"code":0,"message":"ok","data":{"answers":{
+            {"model":"jev-1.13.0","answers":{
               "field":{"choice":"no_match","confidence":0.44,
                        "probabilities":{"given_name":0.30,"family_name":0.14}},
               "is_sensitive":{"noul":0.02}
-            }}}
+            }}
             """),
             candidates: candidates
         )
@@ -90,10 +96,10 @@ final class JevDecodingTests: XCTestCase {
     func testSensitivityIsIndependentOfTheChoice() throws {
         let result = JevMatcher.result(
             from: try answers("""
-            {"code":0,"message":"ok","data":{"answers":{
+            {"model":"jev-1.13.0","answers":{
               "field":{"choice":"card_number","confidence":0.97,"probabilities":{"card_number":0.97}},
               "is_sensitive":{"noul":0.96}
-            }}}
+            }}
             """),
             candidates: candidates
         )
@@ -105,11 +111,11 @@ final class JevDecodingTests: XCTestCase {
         // Guards against a model answer that isn't one of the options we offered.
         let result = JevMatcher.result(
             from: try answers("""
-            {"code":0,"message":"ok","data":{"answers":{
+            {"model":"jev-1.13.0","answers":{
               "field":{"choice":"passport_number","confidence":0.99,
                        "probabilities":{"passport_number":0.99,"given_name":0.01}},
               "is_sensitive":{"noul":0.9}
-            }}}
+            }}
             """),
             candidates: candidates
         )
@@ -179,15 +185,44 @@ final class JevDecodingTests: XCTestCase {
 }
 
 extension JevDecodingTests {
-    func testAuthFailureCarriesJevsOwnMessage() {
-        // The real 401 body, recorded from the live endpoint.
-        let body = Data(#"{"code":-1,"message":"Invalid or missing Jev API key","data":null}"#.utf8)
-        XCTAssertThrowsError(try JevClient.parse(body)) { error in
-            guard case let JevError.api(code, message) = error else {
-                return XCTFail("expected JevError.api, got \(error)")
-            }
-            XCTAssertEqual(code, -1)
-            XCTAssertEqual(message, "Invalid or missing Jev API key")
-        }
+    // MARK: Recorded from api.typesafe.ai on 2026-09-22
+
+    /// The hand-test page's "Handle" field: one word, no context. Jev leans to
+    /// GitHub but barely, and says so — which must land on the picker, not a fill.
+    private static let recordedHandle = """
+    {"model":"jev-1.13.0","answers":{"field":{"type":"choice","choice":"github_url","confidence":0.29,\
+    "probabilities":{"github_url":0.53,"email_personal":0.0,"no_match":0.47}},\
+    "is_sensitive":{"type":"noul","noul":0.1}},"usage":{"input_tokens":399,"output_tokens":62}}
+    """
+
+    func testARealAnswerDecodes() throws {
+        let parsed = try JevClient.parse(Data(Self.recordedHandle.utf8))
+        XCTAssertEqual(parsed["field"]?.choice, "github_url")
+        XCTAssertEqual(parsed["field"]?.confidence, 0.29)
+        XCTAssertEqual(parsed["field"]?.probabilities?["no_match"], 0.47)
+        XCTAssertEqual(parsed["is_sensitive"]?.noul, 0.1)
+    }
+
+    func testAnUnsureRealAnswerFallsThroughToThePicker() throws {
+        let result = JevMatcher.result(
+            from: try JevClient.parse(Data(Self.recordedHandle.utf8)),
+            candidates: [VaultSchema.field(for: "github_url")!, VaultSchema.field(for: "email_personal")!]
+        )
+        XCTAssertEqual(result?.key, "github_url", "still first in the picker")
+        XCTAssertLessThan(result?.confidence ?? 1, MatchThresholds.confirm,
+                          "0.29 must not fill — the form expects Control to ask")
+        XCTAssertFalse(result?.looksSensitive ?? true)
+    }
+
+    func testABadKeyTellsYouWhereToFixIt() {
+        // The real 401 body.
+        let body = Data(#"{"detail":{"error_type":"authentication_error","message":"Cannot authenticate with the server. Please check your API key and try again."}}"#.utf8)
+        let error = JevClient.error(status: 401, body: body)
+        XCTAssertEqual(error.errorDescription, "Jev didn't accept this key. Check it at console.typesafe.ai/keys.")
+    }
+
+    func testRequestsGoToTypeSafe() {
+        XCTAssertEqual(JevClient.defaultBaseURL.host, "api.typesafe.ai")
+        XCTAssertEqual(JevClient.defaultModel, "jev-latest")
     }
 }

@@ -36,13 +36,16 @@ public enum Keychain {
 
     // MARK: Write
 
+    /// - Parameter deviceOnly: keep a non-sensitive item on this Mac only. For
+    ///   credentials such as the Jev key, which must never leave with the vault.
     public static func set(
         _ value: String,
         for account: String,
         sensitive: Bool,
+        deviceOnly: Bool = false,
         service: String = Keychain.service
     ) throws {
-        let attributes = addAttributes(value, account, sensitive, service)
+        let attributes = addAttributes(value, account, sensitive, deviceOnly, service)
         do {
             try eitherKeychain(attributes) { SecItemAdd($0 as CFDictionary, nil) }
         } catch KeychainError.unexpectedStatus(errSecDuplicateItem) {
@@ -58,6 +61,7 @@ public enum Keychain {
         _ value: String,
         _ account: String,
         _ sensitive: Bool,
+        _ deviceOnly: Bool,
         _ service: String
     ) -> [CFString: Any] {
         var attributes: [CFString: Any] = [
@@ -76,7 +80,7 @@ public enum Keychain {
         ) {
             attributes[kSecAttrAccessControl] = control
         } else {
-            attributes[kSecAttrAccessible] = sensitive
+            attributes[kSecAttrAccessible] = sensitive || deviceOnly
                 ? kSecAttrAccessibleWhenUnlockedThisDeviceOnly
                 : kSecAttrAccessibleWhenUnlocked
         }
@@ -133,12 +137,19 @@ public enum Keychain {
         ]
 
         var accounts = Set<String>()
+        var failures: [OSStatus] = []
         for modern in [true, false] {
             var query = attributes
             if modern { query[kSecUseDataProtectionKeychain] = true }
 
             var item: CFTypeRef?
-            guard SecItemCopyMatching(query as CFDictionary, &item) == errSecSuccess else { continue }
+            let status = SecItemCopyMatching(query as CFDictionary, &item)
+            // Nothing stored, or no entitlement for the modern keychain, are
+            // ordinary answers. Anything else is a real failure.
+            guard status == errSecSuccess else {
+                if status != errSecItemNotFound, status != errSecMissingEntitlement { failures.append(status) }
+                continue
+            }
 
             // Security returns a CFArray of CFDictionary. Swift bridges those keys
             // to `String`, NOT `CFString` — casting to [[CFString: Any]] compiles
@@ -149,6 +160,13 @@ public enum Keychain {
                     accounts.insert(account)
                 }
             }
+        }
+        // If both keychains failed, an empty answer would make the whole vault
+        // look empty with no explanation — which is how this went unnoticed.
+        // One keychain failing while the other answers is still worth knowing.
+        if let failure = failures.first {
+            if failures.count == 2 { throw KeychainError.unexpectedStatus(failure) }
+            Log.app.error("One keychain could not be listed (status \(failure)); showing what the other holds.")
         }
         return accounts
     }

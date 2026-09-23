@@ -10,6 +10,7 @@ final class MenuBarController {
     var onOpenSettings: (@MainActor () -> Void)?
     var onOpenInspector: (@MainActor () -> Void)?
     var onGrantAccess: (@MainActor () -> Void)?
+    var onOpenSetup: (@MainActor () -> Void)?
     var onSelectProfile: (@MainActor (String) -> Void)?
     var activeProfileID: () -> String = { VaultProfile.defaultID }
 
@@ -40,17 +41,7 @@ final class MenuBarController {
         fill.target = Actions.shared
         menu.addItem(fill)
 
-        let description: String
-        switch preferences.triggerMode {
-        case .doubleCommand, .doubleControl:
-            description = preferences.triggerMode.title
-        case .chord:
-            description = HotkeyBinding(
-                keyCode: UInt32(preferences.hotKeyCode),
-                modifiers: NSEvent.ModifierFlags(rawValue: UInt(preferences.hotKeyModifiers))
-            ).displayString
-        }
-        let shortcut = NSMenuItem(title: description, action: nil, keyEquivalent: "")
+        let shortcut = NSMenuItem(title: preferences.triggerDescription, action: nil, keyEquivalent: "")
         shortcut.isEnabled = false
         menu.addItem(shortcut)
 
@@ -80,6 +71,10 @@ final class MenuBarController {
         inspector.target = Actions.shared
         menu.addItem(inspector)
 
+        let setup = NSMenuItem(title: "Set Up Control…", action: #selector(Actions.setup), keyEquivalent: "")
+        setup.target = Actions.shared
+        menu.addItem(setup)
+
         menu.addItem(.separator())
         menu.addItem(NSMenuItem(title: "Quit Control", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
 
@@ -97,6 +92,7 @@ final class MenuBarController {
         @objc func settings() { controller?.onOpenSettings?() }
         @objc func inspector() { controller?.onOpenInspector?() }
         @objc func grant() { controller?.onGrantAccess?() }
+        @objc func setup() { controller?.onOpenSetup?() }
         @objc func selectProfile(_ sender: NSMenuItem) {
             guard let id = sender.representedObject as? String else { return }
             controller?.onSelectProfile?(id)

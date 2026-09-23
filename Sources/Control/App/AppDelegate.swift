@@ -30,6 +30,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var menuBar: MenuBarController?
     private var settingsWindow: SettingsWindowController?
     private var inspectorWindow: FieldInspectorController?
+    private var onboardingWindow: OnboardingWindowController?
 
     override init() {
         let vault = VaultStore()
@@ -44,6 +45,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         retireOtherInstances()
         installMainMenu()
+        preferences.migrateJevKeyIfNeeded()
+        vault.refreshFilledKeys()
         cache.prune(validKeys: Set(vault.fields.map(\.key)))
 
         let menuBar = MenuBarController(preferences: preferences)
@@ -51,6 +54,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menuBar.onOpenSettings = { [weak self] in self?.showSettings() }
         menuBar.onOpenInspector = { [weak self] in self?.showInspector() }
         menuBar.onGrantAccess = { [weak self] in self?.requestAccess() }
+        menuBar.onOpenSetup = { [weak self] in self?.showOnboarding() }
         menuBar.activeProfileID = { [weak self] in self?.vault.activeProfileID ?? VaultProfile.defaultID }
         menuBar.onSelectProfile = { [weak self] id in
             guard let self else { return }
@@ -65,10 +69,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         installTrigger()
         installSuggester()
 
-        if !PermissionsGate.isGranted {
-            // First run with no permission: the app is inert until this is fixed,
-            // so say so up front rather than letting the first hotkey press fail.
-            showSettings()
+        if OnboardingFlow.showsAtLaunch(
+            completed: preferences.onboardingCompleted,
+            accessGranted: PermissionsGate.isGranted,
+            savedDetails: vault.filledKeys.count
+        ) {
+            showOnboarding()
+        } else {
+            // Already set up before setup existed: don't send them through it.
+            preferences.onboardingCompleted = true
+            if !PermissionsGate.isGranted {
+                // Access was revoked since: the app is inert until it's back, so
+                // say so up front rather than letting the first press fail.
+                showSettings()
+            }
         }
 
         Log.app.info("Control launched. Accessibility trusted: \(PermissionsGate.isGranted, privacy: .public)")
@@ -196,6 +210,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // menu-bar-only app opens the window behind whatever is in front and it
         // looks like the click did nothing — so you click again.
         settingsWindow?.show()
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
+    private func showOnboarding() {
+        if onboardingWindow == nil {
+            onboardingWindow = OnboardingWindowController(
+                vault: vault,
+                preferences: preferences,
+                fillController: fillController,
+                onOpenSettings: { [weak self] in self?.showSettings() },
+                onOpenInspector: { [weak self] in self?.showInspector() }
+            )
+        }
+        onboardingWindow?.show()
         NSApp.activate(ignoringOtherApps: true)
     }
 

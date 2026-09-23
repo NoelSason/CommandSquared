@@ -126,6 +126,7 @@ private struct InspectorView: View {
                 ("Placeholder", context.placeholder ?? "—"),
                 ("Help", context.helpText ?? "—"),
                 ("Nearby text", context.nearbyText.isEmpty ? "—" : context.nearbyText.joined(separator: " · ")),
+                ("Section heading", context.heading ?? "—"),
                 ("Field is empty", context.isEmpty ? "yes" : "no"),
                 ("Normalized", context.searchText.isEmpty ? "—" : context.searchText),
             ])

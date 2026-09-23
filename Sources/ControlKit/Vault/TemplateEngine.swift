@@ -38,7 +38,10 @@ public enum TemplateEngine {
 
     public struct Result: Sendable, Equatable {
         public var text: String
-        /// Where the caret should land, if the template said so with `{cursor}`.
+        /// Where the caret should land, if the template said so with `{cursor}`,
+        /// in UTF-16 code units from the start of `text` — the unit the
+        /// Accessibility API's text ranges count in. Counting `Character`s put
+        /// the caret in the wrong place after an emoji or a `\r\n`.
         public var cursorOffset: Int?
         /// Placeholders that could not be resolved, left in place in `text`.
         public var unresolved: [String]
@@ -67,7 +70,7 @@ public enum TemplateEngine {
             remainder = remainder[remainder.index(after: close)...]
 
             if token == "cursor" {
-                cursorOffset = output.count
+                cursorOffset = output.utf16.count
                 continue
             }
             if let resolved = resolve(token, in: environment) {

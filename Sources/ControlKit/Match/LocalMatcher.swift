@@ -100,7 +100,8 @@ public struct LocalMatcher: Sendable {
         }
 
         func isVetoed(_ key: String) -> Bool {
-            vetoes.contains { type, veto in
+            if key == "date_of_birth", Self.namesPartOfADate(own) { return true }
+            return vetoes.contains { type, veto in
                 // Inside a payment form, "Verification code" is the card's.
                 // Chromium parses card fields before one-time codes for the
                 // same reason.
@@ -120,10 +121,7 @@ public struct LocalMatcher: Sendable {
             if let phrase = rule.matchingPhrase(in: own, vetoedBy: own) {
                 offer(rule.key, rule.confidence, "phrase \"\(phrase)\" in label")
             } else if let phrase = rule.matchingPhrase(in: all, vetoedBy: own) {
-                // Evidence from surrounding page text only. Weighted so that even
-                // a strong rule lands near the fill threshold rather than sailing
-                // past it — ambient text is suggestive, not decisive.
-                offer(rule.key, rule.confidence * 0.6, "phrase \"\(phrase)\" in nearby text")
+                offer(rule.key, rule.confidence * Self.nearbyWeight, "phrase \"\(phrase)\" in nearby text")
             }
         }
 
@@ -143,7 +141,7 @@ public struct LocalMatcher: Sendable {
             if hit.own {
                 offer(key, score, "Chromium \(hit.type.rawValue) in \"\(hit.text)\"")
             } else {
-                offer(key, score * 0.6, "Chromium \(hit.type.rawValue) in nearby \"\(hit.text)\"")
+                offer(key, score * Self.nearbyWeight, "Chromium \(hit.type.rawValue) in nearby \"\(hit.text)\"")
             }
         }
 
@@ -160,28 +158,40 @@ public struct LocalMatcher: Sendable {
         func usable(_ components: [AddressComponent?]) -> [AddressComponent] {
             components.compactMap { $0 }.filter { !($0 == .country && isCountryCode) }
         }
-        if let component = usable(ownComponents).min() ?? usable(nearbyComponents).min() {
-            let scope = Self.addressScope(in: own) ?? Self.addressScope(in: all)
+        let ownComponent = usable(ownComponents).min()
+        if let component = ownComponent ?? usable(nearbyComponents).min() {
+            // The field's own words first, then its section heading. Only when
+            // capture found no heading at all does any scope word nearby count —
+            // otherwise the "Permanent address" section above would claim the
+            // campus fields below it.
+            let headingScope = context.heading.map { Self.addressScope(in: FieldContext.normalize($0)) }
+            let scope = Self.addressScope(in: own) ?? (headingScope ?? Self.addressScope(in: all))
+            let weight = ownComponent == nil ? Self.nearbyWeight : 1
             let why = "address \(component.suffix), scope \(scope?.prefix ?? "none")"
-            offer("\(scope?.prefix ?? "home")_\(component.suffix)", scope == nil ? 0.60 : 0.92, why)
+                + (ownComponent == nil ? " (from nearby text)" : "")
+            offer("\(scope?.prefix ?? "home")_\(component.suffix)", (scope == nil ? 0.60 : 0.92) * weight, why)
             if scope == nil {
-                offer("campus_\(component.suffix)", 0.55, why)
-                offer("billing_\(component.suffix)", 0.40, why)
+                offer("campus_\(component.suffix)", 0.55 * weight, why)
+                offer("billing_\(component.suffix)", 0.40 * weight, why)
             }
         }
 
-        let chromiumSaysEmail = chromium.contains { $0.type == .email }
-        if chromiumSaysEmail || Self.mentions(own, Self.emailTokens) || Self.mentions(all, Self.emailTokens) {
+        let emailInLabel = chromium.contains { $0.type == .email && $0.own } || Self.mentions(own, Self.emailTokens)
+        let emailNearby = chromium.contains { $0.type == .email } || Self.mentions(all, Self.emailTokens)
+        if emailInLabel || emailNearby {
+            // An email field in the section is not evidence that *this* field
+            // wants one: "Username" under "Email address" is still a username.
+            let weight = emailInLabel ? 1 : Self.nearbyWeight
             let scoped = Self.mentions(own, ["school", "university", "edu", "academic", "campus", "student", "institution"])
                 || Self.mentions(own, Array(hints.schoolTokens))
             let personal = Self.mentions(own, ["personal", "private", "home", "alternate"])
-            if scoped { offer("email_school", 0.95, "email, school word in label") }
-            if personal { offer("email_personal", 0.95, "email, personal word in label") }
+            if scoped { offer("email_school", 0.95 * weight, "email, school word in label") }
+            if personal { offer("email_personal", 0.95 * weight, "email, personal word in label") }
             if !scoped && !personal {
                 // Genuinely ambiguous for someone with both. Land in the confirm
                 // band so the HUD shows both rather than picking wrong.
-                offer("email_personal", 0.72, "email, unscoped")
-                offer("email_school", 0.68, "email, unscoped")
+                offer("email_personal", 0.72 * weight, "email, unscoped" + (emailInLabel ? "" : ", from nearby text"))
+                offer("email_school", 0.68 * weight, "email, unscoped" + (emailInLabel ? "" : ", from nearby text"))
             }
         }
 
@@ -220,6 +230,23 @@ public struct LocalMatcher: Sendable {
 
     static let emailTokens = ["email", "e mail", "mail address"]
 
+    /// What evidence found only in surrounding page text is worth, relative to
+    /// the same evidence in the field's own label. Low enough that even the
+    /// strongest rule (0.97 × 0.55 ≈ 0.53) stays under `autoInsert`: a heading
+    /// or a neighbour's words can put a key first in the picker, but never fill
+    /// it silently. At 0.6 they could, which is how "Date of birth" was filled
+    /// from a nearby "What name do you go by?".
+    static let nearbyWeight = 0.55
+
+    /// One box of a split date — "birthDate-month", a placeholder of "MM" —
+    /// wants that part only. A full format like "MM/DD/YYYY" names every part
+    /// and is the whole date; it used to veto the date-of-birth rule too.
+    static func namesPartOfADate(_ text: String) -> Bool {
+        let parts = [["month", "mm"], ["day", "dd"], ["year", "yyyy", "yy"]]
+        let named = parts.filter { mentions(text, $0) }.count
+        return named > 0 && named < parts.count
+    }
+
     /// Evidence that a field belongs to a payment form.
     static let paymentWords = ["card", "credit", "debit", "cc", "cvv", "cvc", "csc", "cvn", "expir", "billing", "payment"]
 
@@ -237,10 +264,9 @@ public struct LocalMatcher: Sendable {
                                          "first middle last", "last first"], confidence: 0.96,
              excluding: ["user", "card", "company", "organization"]),
         Rule(key: "pronouns", phrases: ["pronoun"], confidence: 0.95),
-        Rule(key: "date_of_birth", phrases: ["date of birth", "birth date", "birthdate", "birthday", "dob"], confidence: 0.95,
-             // A form that splits a date into three boxes labels them "birthDate-month"
-             // and friends. Each part is a fragment, not the date.
-             excluding: ["month", "day", "year", "mm", "dd", "yyyy"]),
+        // A form that splits the date into boxes labels them "birthDate-month" and
+        // friends; `namesPartOfADate` keeps those from getting the whole date.
+        Rule(key: "date_of_birth", phrases: ["date of birth", "birth date", "birthdate", "birthday", "dob"], confidence: 0.95),
 
         // Contact
         Rule(key: "phone_mobile", phrases: ["phone", "mobile number", "cell", "telephone", "contact number"], confidence: 0.92,

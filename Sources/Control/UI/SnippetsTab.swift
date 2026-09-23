@@ -13,6 +13,8 @@ struct SnippetsTab: View {
     @State private var editing: String?
     @State private var draftName = ""
     @State private var draftBody = ""
+    /// Set when a snippet couldn't be opened for editing.
+    @State private var openError: String?
 
     private var snippets: [VaultField] {
         vault.fields(in: .snippet).sorted { $0.label < $1.label }
@@ -21,6 +23,12 @@ struct SnippetsTab: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             header
+
+            if let openError {
+                Text(openError)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.orange)
+            }
 
             if snippets.isEmpty && editing == nil {
                 empty
@@ -67,6 +75,8 @@ struct SnippetsTab: View {
         HStack(alignment: .top, spacing: 10) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(snippet.label).font(.system(size: 13, weight: .medium))
+                // Display only: an unreadable snippet shows blank here, and
+                // opening it to edit reports the error instead.
                 Text((try? vault.storedValue(for: snippet.key)) ?? "")
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
@@ -121,9 +131,17 @@ struct SnippetsTab: View {
     }
 
     private func startEditing(_ snippet: VaultField) {
+        // An unreadable snippet used to open with an empty body, and saving
+        // that wrote the empty body over the real one.
+        do {
+            draftBody = try vault.storedValue(for: snippet.key) ?? ""
+        } catch {
+            openError = "Couldn't open “\(snippet.label)” to edit it: \(error.localizedDescription)"
+            return
+        }
+        openError = nil
         editing = snippet.key
         draftName = snippet.label
-        draftBody = (try? vault.storedValue(for: snippet.key)) ?? ""
     }
 
     private func save() {

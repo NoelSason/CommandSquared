@@ -2,7 +2,8 @@ import Foundation
 import Observation
 
 /// User-facing settings. Everything here is non-secret; the Jev API key is the one
-/// exception and lives in the Keychain, reachable through `jevAPIKey`.
+/// exception and lives in the Keychain under its own service, reachable through
+/// `jevAPIKey`.
 @MainActor
 @Observable
 public final class Preferences {
@@ -18,16 +19,32 @@ public final class Preferences {
         static let inlineSuggestions = "inlineSuggestions"
         static let autoInsertEnabled = "autoInsertEnabled"
         static let confirmedCategories = "confirmedCategories"
+        static let onboardingCompleted = "onboardingCompleted"
     }
 
-    /// Keychain account for the API key. Not part of the vault service, so a
-    /// vault wipe does not take the key with it.
+    /// Keychain account for the API key.
     private static let apiKeyAccount = "jev_api_key"
 
-    private let defaults: UserDefaults
+    /// Where the Jev key lives: its own service, stored on this Mac only.
+    ///
+    /// Builds before this one kept it under the vault's service, despite a
+    /// comment saying otherwise. That counted it as a saved detail, let "Clear
+    /// and start over" delete it, and would have synced it along with the vault.
+    public static let settingsService = "com.noelsason.Control.settings"
 
-    public init(defaults: UserDefaults = .standard) {
+    private let defaults: UserDefaults
+    private let settingsService: String
+    /// Where older builds put the key. Read as a fallback until it has moved.
+    private let legacyKeyService: String
+
+    public init(
+        defaults: UserDefaults = .standard,
+        settingsService: String = Preferences.settingsService,
+        legacyKeyService: String = Keychain.service
+    ) {
         self.defaults = defaults
+        self.settingsService = settingsService
+        self.legacyKeyService = legacyKeyService
         defaults.register(defaults: [
             Key.triggerMode: TriggerMode.doubleCommand.rawValue,
             Key.hotKeyCode: 9,               // V
@@ -37,6 +54,15 @@ public final class Preferences {
             Key.autoInsertEnabled: true,
             Key.confirmedCategories: [VaultCategory.payment.rawValue],
         ])
+    }
+
+    // MARK: Setup
+
+    /// Set once first-run setup has been finished or closed. Setup stays
+    /// reachable from the menu either way.
+    public var onboardingCompleted: Bool {
+        get { defaults.bool(forKey: Key.onboardingCompleted) }
+        set { defaults.set(newValue, forKey: Key.onboardingCompleted) }
     }
 
     // MARK: Profiles
@@ -151,15 +177,32 @@ public final class Preferences {
     /// for reasons that have nothing to do with it.
     public private(set) var jevKeyError: String?
 
+    /// The key, from its own place first and from where older builds kept it
+    /// second, so it keeps working whether or not it has moved yet.
+    ///
+    /// A read that *fails* — as opposed to finding nothing — used to become ""
+    /// and silently switch Jev off. It now says why.
     public var jevAPIKey: String {
-        get { (try? Keychain.get(Self.apiKeyAccount)) .flatMap { $0 } ?? "" }
+        get {
+            do {
+                if let key = try Keychain.get(Self.apiKeyAccount, service: settingsService) { return key }
+                return try Keychain.get(Self.apiKeyAccount, service: legacyKeyService) ?? ""
+            } catch {
+                jevKeyError = "Couldn't read the Jev key: \(error.localizedDescription)"
+                Log.app.error("Could not read the Jev key: \(error.localizedDescription, privacy: .public)")
+                return ""
+            }
+        }
         set {
             do {
                 if newValue.isEmpty {
-                    try Keychain.delete(Self.apiKeyAccount)
+                    try Keychain.delete(Self.apiKeyAccount, service: settingsService)
                 } else {
-                    try Keychain.set(newValue, for: Self.apiKeyAccount, sensitive: false)
+                    try Keychain.set(newValue, for: Self.apiKeyAccount, sensitive: false, deviceOnly: true,
+                                     service: settingsService)
                 }
+                // Whatever an older build left behind is superseded either way.
+                try Keychain.delete(Self.apiKeyAccount, service: legacyKeyService)
                 jevKeyError = nil
             } catch {
                 jevKeyError = error.localizedDescription
@@ -168,7 +211,32 @@ public final class Preferences {
         }
     }
 
+    /// Read by the settings view on every redraw, so it only looks — a failure
+    /// to look shows as "not set", and the next real read reports the error.
     public var hasJevKey: Bool {
-        (try? Keychain.storedAccounts().contains(Self.apiKeyAccount)) ?? false
+        let here = (try? Keychain.storedAccounts(service: settingsService)) ?? []
+        let legacy = (try? Keychain.storedAccounts(service: legacyKeyService)) ?? []
+        return here.contains(Self.apiKeyAccount) || legacy.contains(Self.apiKeyAccount)
+    }
+
+    /// Moves a key stored by an older build into its own service: copy, read
+    /// back, and only then delete the old one. A failure at any step leaves the
+    /// key where it was, still working, and is retried on the next launch.
+    public func migrateJevKeyIfNeeded() {
+        do {
+            guard let legacy = try Keychain.get(Self.apiKeyAccount, service: legacyKeyService) else { return }
+            if try Keychain.get(Self.apiKeyAccount, service: settingsService) == nil {
+                try Keychain.set(legacy, for: Self.apiKeyAccount, sensitive: false, deviceOnly: true,
+                                 service: settingsService)
+                guard try Keychain.get(Self.apiKeyAccount, service: settingsService) == legacy else {
+                    Log.app.error("The Jev key did not read back after moving; leaving the original in place.")
+                    return
+                }
+            }
+            try Keychain.delete(Self.apiKeyAccount, service: legacyKeyService)
+            Log.app.info("Moved the Jev key to its own keychain service.")
+        } catch {
+            Log.app.error("Could not move the Jev key: \(error.localizedDescription, privacy: .public)")
+        }
     }
 }

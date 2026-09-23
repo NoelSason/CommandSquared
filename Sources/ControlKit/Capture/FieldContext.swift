@@ -22,8 +22,12 @@ public struct FieldContext: Sendable, Equatable, Codable {
     public var placeholder: String?
     public var helpText: String?
     /// Static text found near the field — section headings like "Mailing address"
-    /// that disambiguate an otherwise meaningless label such as "Line 1".
+    /// that disambiguate an otherwise meaningless label such as "Line 1". Nearest
+    /// first, and never another field's label (see `NearbyTextPolicy`).
     public var nearbyText: [String]
+    /// The nearest section heading above the field, when capture could tell one
+    /// apart from labels. Address scope comes from here first.
+    public var heading: String?
     /// Whether the field already has content. Never the content itself.
     public var isEmpty: Bool
     /// The HTML field name (`firstNameInput`, `billing_address.zip`), when known.
@@ -42,7 +46,8 @@ public struct FieldContext: Sendable, Equatable, Codable {
         helpText: String? = nil,
         nearbyText: [String] = [],
         isEmpty: Bool = true,
-        fieldName: String? = nil
+        fieldName: String? = nil,
+        heading: String? = nil
     ) {
         self.appName = appName
         self.bundleID = bundleID
@@ -55,6 +60,7 @@ public struct FieldContext: Sendable, Equatable, Codable {
         self.nearbyText = nearbyText
         self.isEmpty = isEmpty
         self.fieldName = fieldName
+        self.heading = heading
     }
 }
 

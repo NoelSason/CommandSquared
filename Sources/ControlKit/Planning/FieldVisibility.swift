@@ -12,6 +12,12 @@ import Foundation
 ///
 /// The rule: if it has a frame, that frame has to be somewhere a person could
 /// have seen and clicked.
+///
+/// Known gap: a full-size input made invisible with `opacity: 0` (on itself or
+/// an ancestor) passes. The Accessibility API reports frames, not opacity or
+/// paint, so there is nothing here to check. The single-field fill still needs
+/// the user to have focused it, and whole-form fill shows every value before
+/// writing anything.
 public enum FieldVisibility {
     /// Smaller than this in either direction is not a field anyone clicked into.
     /// Hidden inputs are typically 0×0 or 1×1.

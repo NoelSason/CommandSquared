@@ -40,9 +40,29 @@ public final class VaultStore {
     /// cached: each read must go through Touch ID.
     private var valueCache: [String: String] = [:]
 
+    /// Set when `vault.json` could not be read and could not be moved aside
+    /// either. Saving would then overwrite the only copy of the user's custom
+    /// fields, so it is refused instead.
+    private var schemaIsReadOnly = false
+
     public init(fileURL: URL? = nil) {
         self.fileURL = fileURL ?? Self.defaultFileURL
-        fields = Self.loadFields(from: self.fileURL) ?? VaultSchema.builtIn
+        switch Self.loadFields(from: self.fileURL) {
+        case .fresh:
+            fields = VaultSchema.builtIn
+        case let .loaded(loaded):
+            fields = loaded
+        case let .unreadable(keptAs):
+            fields = VaultSchema.builtIn
+            if let keptAs {
+                lastError = "Your custom fields couldn't be read, so Control started with the built-in ones. "
+                    + "The original was kept as \(keptAs.lastPathComponent) in Control's folder."
+            } else {
+                schemaIsReadOnly = true
+                lastError = "Your custom fields couldn't be read. Control won't save field changes until "
+                    + "vault.json in Control's folder is fixed or removed, so nothing in it is lost."
+            }
+        }
         refreshFilledKeys()
         prefetch()
     }
@@ -51,6 +71,8 @@ public final class VaultStore {
     private func prefetch() {
         for field in fields where !field.sensitive && !field.isDerived && filledKeys.contains(field.key) {
             guard let account = account(providing: field.key) else { continue }
+            // Warming only: a value that fails here is read again, with its
+            // error reported, when it is actually needed.
             if let value = try? Keychain.get(account) {
                 valueCache[account] = value
             }
@@ -236,6 +258,7 @@ public final class VaultStore {
     /// Built from the user's own values, so an ambiguous label like "Berkeley
     /// email" can be resolved without a hard-coded list of institutions.
     public var matchHints: MatchHints {
+        // Hints only sharpen a guess; without them the matcher still works.
         MatchHints(
             university: try? storedValue(for: "university"),
             schoolEmail: try? storedValue(for: "email_school")
@@ -279,12 +302,18 @@ public final class VaultStore {
                 keys.insert(parsed.key)
             }
         }
-        filledKeys = keys
+        // Only the vault's own fields count as saved details. Anything else in
+        // the service — the Jev key, before it moved out — is not one of them.
+        filledKeys = keys.intersection(fields.map(\.key))
     }
 
     // MARK: Persistence
 
     private func persistFields() {
+        guard !schemaIsReadOnly else {
+            lastError = "Field changes aren't being saved: vault.json in Control's folder couldn't be read."
+            return
+        }
         do {
             let encoder = JSONEncoder()
             encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
@@ -294,16 +323,46 @@ public final class VaultStore {
         }
     }
 
+    enum LoadedFields: Equatable {
+        /// No file yet: a fresh install.
+        case fresh
+        /// The built-in catalog plus the user's custom fields.
+        case loaded([VaultField])
+        /// A file that wouldn't decode, moved to `keptAs` — or left in place,
+        /// when even the move failed.
+        case unreadable(keptAs: URL?)
+    }
+
     /// Merges the on-disk schema with the built-in catalog so that new built-in
     /// fields shipped in an update appear for existing users.
-    private static func loadFields(from url: URL) -> [VaultField]? {
-        guard let data = try? Data(contentsOf: url),
-              let stored = try? JSONDecoder().decode([VaultField].self, from: data)
-        else { return nil }
+    ///
+    /// A file that won't decode is somebody's custom fields, not an absence of
+    /// them. It used to be treated as a fresh install, and the next save wrote
+    /// the built-in catalog over it.
+    static func loadFields(from url: URL) -> LoadedFields {
+        guard FileManager.default.fileExists(atPath: url.path) else { return .fresh }
+        do {
+            let stored = try JSONDecoder().decode([VaultField].self, from: Data(contentsOf: url))
+            var merged = VaultSchema.builtIn
+            let builtInKeys = Set(merged.map(\.key))
+            merged.append(contentsOf: stored.filter { !builtInKeys.contains($0.key) })
+            return .loaded(merged)
+        } catch {
+            Log.app.error("vault.json could not be read: \(error.localizedDescription, privacy: .public)")
+            return .unreadable(keptAs: moveAside(url))
+        }
+    }
 
-        var merged = VaultSchema.builtIn
-        let builtInKeys = Set(merged.map(\.key))
-        merged.append(contentsOf: stored.filter { !builtInKeys.contains($0.key) })
-        return merged
+    /// Renames an unreadable file out of the way, so it survives the next save.
+    static func moveAside(_ url: URL) -> URL? {
+        let stamp = ISO8601DateFormatter().string(from: Date()).replacingOccurrences(of: ":", with: "-")
+        let aside = url.appendingPathExtension("corrupt-\(stamp)")
+        do {
+            try FileManager.default.moveItem(at: url, to: aside)
+            return aside
+        } catch {
+            Log.app.error("Could not move \(url.lastPathComponent, privacy: .public) aside: \(error.localizedDescription, privacy: .public)")
+            return nil
+        }
     }
 }
