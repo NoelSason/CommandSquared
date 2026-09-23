@@ -35,14 +35,26 @@ final class MatcherEvalTests: XCTestCase {
         let nearby: [String]?
         /// The nearest section heading, as `NearbyTextPolicy` finds it.
         let heading: String?
+        /// The page's id for the field, which is what `AXDOMIdentifier` reports.
+        /// Capture doesn't read it today, so only the `+id` mode passes it on.
+        let fieldName: String?
         /// Every acceptable key. Empty means the field must match nothing.
         let expect: [String]
         let note: String?
         /// The fixture file the case came from.
         var source = ""
+        /// Run with `fieldName` passed through: what Control would see if
+        /// capture read the field's DOM id.
+        var withID = false
+
+        /// The snapshot key. The `+id` run of a case is a separate prediction.
+        var key: String { withID ? id + "+id" : id }
+
+        /// The headline is what Control sees today, on English forms.
+        var inHeadline: Bool { !withID && !MatcherEvalTests.outsideHeadline.contains(source) }
 
         private enum CodingKeys: String, CodingKey {
-            case id, input, label, placeholder, help, nearby, heading, expect, note
+            case id, input, label, placeholder, help, nearby, heading, fieldName, expect, note
         }
     }
 
@@ -97,6 +109,7 @@ final class MatcherEvalTests: XCTestCase {
                 placeholder: testCase.placeholder,
                 helpText: testCase.help,
                 nearbyText: testCase.nearby ?? [],
+                fieldName: testCase.withID ? testCase.fieldName : nil,
                 heading: testCase.heading
             )
         case .fieldName:
@@ -128,7 +141,8 @@ final class MatcherEvalTests: XCTestCase {
 
     /// About a quarter of cases, chosen by a stable hash of the id. The report
     /// gives only totals for these, so rules cannot be tuned against them case
-    /// by case. (`hashValue` is seeded per process, hence FNV-1a.)
+    /// by case. (`hashValue` is seeded per process, hence FNV-1a.) Takes the
+    /// case id, not the snapshot key, so both runs of a case share a split.
     static func isHoldout(_ id: String) -> Bool {
         var hash: UInt64 = 0xCBF2_9CE4_8422_2325
         for byte in id.utf8 {
@@ -172,10 +186,10 @@ final class MatcherEvalTests: XCTestCase {
         var harmfulBefore = 0
         var harmfulNow = 0
         for result in results {
-            guard let before = snapshot.cases[result.testCase.id] else { continue }
+            guard let before = snapshot.cases[result.testCase.key] else { continue }
             let beforeOutcome = Self.outcome(of: before, for: result.testCase)
             if beforeOutcome == .correct, result.outcome != .correct {
-                regressed.append("\(result.testCase.id): \(Self.describe(before)) → \(Self.describe(result.prediction))")
+                regressed.append("\(result.testCase.key): \(Self.describe(before)) → \(Self.describe(result.prediction))")
             }
             if beforeOutcome == .wrong, before.score >= MatchThresholds.autoInsert { harmfulBefore += 1 }
             if result.harmful { harmfulNow += 1 }
@@ -226,11 +240,14 @@ final class MatcherEvalTests: XCTestCase {
         var seen = Set<String>()
         let known = Self.fillable
         for testCase in cases {
-            XCTAssertTrue(seen.insert(testCase.id).inserted, "duplicate case id \(testCase.id)")
+            XCTAssertTrue(seen.insert(testCase.key).inserted, "duplicate case id \(testCase.key)")
             for key in testCase.expect {
                 XCTAssertTrue(known.contains(key), "\(testCase.id) expects unknown key \(key)")
             }
-            let text = [testCase.label, testCase.placeholder, testCase.help].compactMap { $0 }
+            // A field with no label of its own still has a case when the page
+            // gives it nearby text or an id: capture meets those too.
+            let text = [testCase.label, testCase.placeholder, testCase.help, testCase.heading, testCase.fieldName]
+                .compactMap { $0 } + (testCase.nearby ?? [])
             XCTAssertFalse(text.isEmpty, "\(testCase.id) has nothing to match on")
         }
     }
@@ -239,6 +256,7 @@ final class MatcherEvalTests: XCTestCase {
 
     static func report(_ results: [Result], snapshot: Snapshot?) -> String {
         var lines = ["=== MATCHER EVAL ==="]
+        let headline = results.filter(\.testCase.inHeadline)
 
         func summary(_ name: String, _ subset: [Result]) -> String {
             let count = subset.count
@@ -246,29 +264,59 @@ final class MatcherEvalTests: XCTestCase {
             let wrong = subset.filter { $0.outcome == .wrong }.count
             let missed = subset.filter { $0.outcome == .missed }.count
             let harmful = subset.filter(\.harmful).count
-            return name.padding(toLength: 13, withPad: " ", startingAt: 0)
+            let dev = subset.filter { !$0.holdout }
+            let holdout = subset.filter(\.holdout)
+            return name.padding(toLength: 20, withPad: " ", startingAt: 0)
                 + pad(count, 5) + pad(correct, 9) + pad(wrong, 7) + pad(missed, 8) + pad(harmful, 9)
-                + "   " + percent(correct, count)
+                + "   " + percent(correct, count).padding(toLength: 9, withPad: " ", startingAt: 0)
+                + percent(dev.filter { $0.outcome == .correct }.count, dev.count).padding(toLength: 8, withPad: " ", startingAt: 0)
+                + percent(holdout.filter { $0.outcome == .correct }.count, holdout.count)
         }
 
         lines.append("")
-        lines.append("source         cases  correct  wrong  missed  harmful   accuracy")
-        lines.append(summary("all", results))
+        lines.append("source                cases  correct  wrong  missed  harmful   accuracy dev     holdout")
+        lines.append(summary("all", headline))
         for source in sources {
-            let subset = results.filter { $0.testCase.source == source }
+            let subset = headline.filter { $0.testCase.source == source }
             if !subset.isEmpty { lines.append(summary(source, subset)) }
         }
-        lines.append(summary("dev", results.filter { !$0.holdout }))
-        lines.append(summary("holdout", results.filter(\.holdout)))
-        lines.append("harmful = wrong and confident enough to fill without asking")
+        lines.append(summary("dev", headline.filter { !$0.holdout }))
+        lines.append(summary("holdout", headline.filter(\.holdout)))
 
-        let positives = results.filter { !$0.testCase.expect.isEmpty && $0.outcome == .correct }
+        // Measured, ratcheted, but not what Control sees today on English forms.
+        var outside: [String] = []
+        for source in sources {
+            let labelOnly = results.filter { $0.testCase.source == source && !$0.testCase.withID && !$0.testCase.inHeadline }
+            if !labelOnly.isEmpty { outside.append(summary(source, labelOnly)) }
+        }
+        for source in sources {
+            let withID = results.filter { $0.testCase.source == source && $0.testCase.withID }
+            if !withID.isEmpty { outside.append(summary("\(source) +id", withID)) }
+        }
+        if !outside.isEmpty {
+            lines.append("not in the headline:")
+            lines.append(contentsOf: outside)
+        }
+        lines.append("harmful = wrong and confident enough to fill without asking")
+        lines.append("+id = the same field with its DOM id passed as fieldName, as capture could read it")
+
+        let positives = headline.filter { !$0.testCase.expect.isEmpty && $0.outcome == .correct }
         let silent = positives.filter { $0.prediction.score >= MatchThresholds.autoInsert }.count
         lines.append("of \(positives.count) correct answers, \(silent) fill without asking (\(percent(silent, positives.count)))")
 
+        if let line = idComparison(results) {
+            lines.append("")
+            lines.append(line)
+        }
+
+        lines.append("")
+        lines.append(calibration(headline))
+        lines.append("")
+        lines.append(families(headline))
+
         // Confusion pairs, dev only.
         var pairs: [String: Int] = [:]
-        for result in results where !result.holdout && result.outcome != .correct {
+        for result in headline where !result.holdout && result.outcome != .correct {
             let expected = result.testCase.expect.first.map {
                 result.testCase.expect.count > 1 ? "\($0)+" : $0
             } ?? "nothing"
@@ -277,7 +325,7 @@ final class MatcherEvalTests: XCTestCase {
         if !pairs.isEmpty {
             lines.append("")
             lines.append("top confusions (dev, expected → got)")
-            for (pair, count) in pairs.sorted(by: { ($0.value, $1.key) > ($1.value, $0.key) }).prefix(20) {
+            for (pair, count) in pairs.sorted(by: { ($0.value, $1.key) > ($1.value, $0.key) }).prefix(30) {
                 lines.append("  \(pad(count, 4))  \(pair)")
             }
         }
@@ -288,13 +336,14 @@ final class MatcherEvalTests: XCTestCase {
         }
 
         // Every dev failure, with what fired, grouped by source.
-        let failures = results.filter { !$0.holdout && $0.outcome != .correct }
+        let failures = headline.filter { !$0.holdout && $0.outcome != .correct }
         if !failures.isEmpty {
             lines.append("")
             lines.append("dev failures (\(failures.count))")
             for result in failures.sorted(by: { ($0.testCase.source, $0.testCase.id) < ($1.testCase.source, $1.testCase.id) }) {
                 let expected = result.testCase.expect.isEmpty ? "nothing" : result.testCase.expect.joined(separator: "|")
                 lines.append("  [\(result.outcome.rawValue)] \(result.testCase.id)")
+                lines.append("      \(describeInput(result.testCase))")
                 lines.append("      want \(expected), got \(describe(result.prediction))")
                 for evidence in trace(result.testCase).prefix(4) {
                     lines.append("      · \(evidence.key) \(String(format: "%.2f", evidence.score)) — \(evidence.reason)")
@@ -306,6 +355,79 @@ final class MatcherEvalTests: XCTestCase {
         return lines.joined(separator: "\n")
     }
 
+    /// What reading the field's id would change: the cases it fixes, and the
+    /// ones it breaks. The breaks are the risk, so the dev ones are listed.
+    private static func idComparison(_ results: [Result]) -> String? {
+        let labelOnly = Dictionary(
+            results.filter { !$0.testCase.withID && $0.testCase.fieldName != nil }.map { ($0.testCase.id, $0) },
+            uniquingKeysWith: { first, _ in first }
+        )
+        let pairs = results.filter(\.testCase.withID).compactMap { withID in
+            labelOnly[withID.testCase.id].map { (labelOnly: $0, withID: withID) }
+        }
+        guard !pairs.isEmpty else { return nil }
+
+        func counts(_ subset: [(labelOnly: Result, withID: Result)]) -> (fixes: Int, breaks: Int) {
+            (subset.filter { $0.labelOnly.outcome != .correct && $0.withID.outcome == .correct }.count,
+             subset.filter { $0.labelOnly.outcome == .correct && $0.withID.outcome != .correct }.count)
+        }
+        let dev = pairs.filter { !$0.withID.holdout }
+        let (devFixes, devBreaks) = counts(dev)
+        let (holdoutFixes, holdoutBreaks) = counts(pairs.filter(\.withID.holdout))
+        var lines = ["+id vs label-only on \(pairs.count) cases with an id: dev fixes \(devFixes) · breaks \(devBreaks)"
+            + " · holdout fixes \(holdoutFixes) · breaks \(holdoutBreaks)"]
+        let broken = dev.filter { $0.labelOnly.outcome == .correct && $0.withID.outcome != .correct }
+        for pair in broken.prefix(15) {
+            lines.append("  broken: \(pair.withID.testCase.id) [id \(pair.withID.testCase.fieldName ?? "")]: "
+                + "\(describe(pair.labelOnly.prediction)) → \(describe(pair.withID.prediction))")
+        }
+        return lines.joined(separator: "\n")
+    }
+
+    /// How often a prediction at each score is right. Everything at or above
+    /// `autoInsert` fills without asking, so a low bucket up there is harm.
+    private static func calibration(_ results: [Result]) -> String {
+        let edges = [MatchThresholds.confirm, 0.40, MatchThresholds.autoInsert, 0.70, 0.85, 0.90, 0.95]
+        var lines = ["calibration (headline predictions by score)", "  score        n  right  wrong  precision"]
+        let predicted = results.filter { $0.prediction.key != nil }
+        for (index, low) in edges.enumerated() {
+            let high = index + 1 < edges.count ? edges[index + 1] : .infinity
+            let bucket = predicted.filter { $0.prediction.score >= low && $0.prediction.score < high }
+            let right = bucket.filter { $0.outcome == .correct }.count
+            let range = String(format: "%.2f", low) + (high.isFinite ? String(format: "–%.2f", high) : "+    ")
+            lines.append("  " + range.padding(toLength: 10, withPad: " ", startingAt: 0)
+                + pad(bucket.count, 5) + pad(right, 7) + pad(bucket.count - right, 7) + "   " + percent(right, bucket.count))
+        }
+        return lines.joined(separator: "\n")
+    }
+
+    /// Which piece of evidence won each prediction, grouped with the quoted
+    /// text elided: `phone_mobile ← Chromium PHONE in …`. A family that is
+    /// often wrong is a candidate for asking instead of filling.
+    private static func families(_ results: [Result]) -> String {
+        struct Tally { var fired = 0, right = 0, wrong = 0, silentWrong = 0 }
+        var tallies: [String: Tally] = [:]
+        for result in results {
+            guard let key = result.prediction.key,
+                  let winner = trace(result.testCase).first(where: { $0.key == key })
+            else { continue }
+            let reason = winner.reason.replacingOccurrences(of: #""[^"]*""#, with: "…", options: .regularExpression)
+            var tally = tallies["\(key) ← \(reason)", default: Tally()]
+            tally.fired += 1
+            if result.outcome == .correct { tally.right += 1 } else { tally.wrong += 1 }
+            if result.harmful { tally.silentWrong += 1 }
+            tallies["\(key) ← \(reason)"] = tally
+        }
+        var lines = ["rule families (headline, winning evidence, most wrong first)",
+                     "  fired  right  wrong  silent-wrong  precision  family"]
+        let sorted = tallies.sorted { ($0.value.wrong, $0.value.fired, $1.key) > ($1.value.wrong, $1.value.fired, $0.key) }
+        for (family, tally) in sorted.prefix(25) {
+            lines.append("  " + pad(tally.fired, 5) + pad(tally.right, 7) + pad(tally.wrong, 7) + pad(tally.silentWrong, 14)
+                + "   " + percent(tally.right, tally.fired).padding(toLength: 9, withPad: " ", startingAt: 0) + "  " + family)
+        }
+        return lines.joined(separator: "\n")
+    }
+
     private static func comparison(_ results: [Result], snapshot: Snapshot) -> String {
         var shared = 0
         var correctBefore = 0
@@ -314,7 +436,7 @@ final class MatcherEvalTests: XCTestCase {
         var regressed: [String] = []
         var added = 0
         for result in results {
-            guard let before = snapshot.cases[result.testCase.id] else {
+            guard let before = snapshot.cases[result.testCase.key] else {
                 added += 1
                 continue
             }
@@ -326,15 +448,28 @@ final class MatcherEvalTests: XCTestCase {
             if !beforeCorrect, nowCorrect { fixed += 1 }
             if beforeCorrect, !nowCorrect {
                 let split = result.holdout ? " [holdout — don't tune on it]" : ""
-                regressed.append("  \(result.testCase.id): \(describe(before)) → \(describe(result.prediction))\(split)")
+                regressed.append("  \(result.testCase.key): \(describe(before)) → \(describe(result.prediction))\(split)")
             }
         }
         var line = "vs snapshot: \(percent(correctBefore, shared)) → \(percent(correctNow, shared)) on \(shared) shared cases"
+            + " (every source and mode)"
             + " · fixed \(fixed) · regressed \(regressed.count)"
         if added > 0 { line += " · \(added) new case(s) not in the snapshot" }
         // Regressions are listed even for holdout cases: each one fails the test,
         // so each one has to be findable.
         return ([line] + regressed.sorted()).joined(separator: "\n")
+    }
+
+    /// The text a case gives the matcher, for reading a failure without
+    /// opening the fixture.
+    private static func describeInput(_ testCase: Case) -> String {
+        var parts: [String] = []
+        if let label = testCase.label { parts.append("label \"\(label)\"") }
+        if let placeholder = testCase.placeholder { parts.append("placeholder \"\(placeholder)\"") }
+        if let help = testCase.help { parts.append("help \"\(help)\"") }
+        if let heading = testCase.heading { parts.append("heading \"\(heading)\"") }
+        if let fieldName = testCase.fieldName { parts.append("id \"\(fieldName)\"") }
+        return parts.isEmpty ? "(no text)" : parts.joined(separator: " · ")
     }
 
     private static func trace(_ testCase: Case) -> [LocalMatcher.Evidence] {
@@ -374,18 +509,32 @@ final class MatcherEvalTests: XCTestCase {
 
     /// One fixture file per source, reported separately. `handwritten` is kept
     /// apart because it was written by the same hand that tunes the rules.
-    private static let sources = ["form", "regression", "handwritten", "browser"]
+    /// The `chromium*` sources are real forms from Chromium's autofill test
+    /// data; see the fixture README for how they were extracted and labelled.
+    private static let sources = ["form", "regression", "handwritten", "browser", "chromium", "chromium-repro", "chromium-i18n"]
+
+    /// Measured and ratcheted, but left out of the headline: the matcher is
+    /// English-only by design, and this source measures what that costs.
+    static let outsideHeadline: Set<String> = ["chromium-i18n"]
 
     static func loadCases() throws -> [Case] {
         let decoder = JSONDecoder()
-        return try sources.flatMap { source in
+        let cases = try sources.flatMap { source in
             let url = fixtureDirectory.appendingPathComponent("\(source).json")
+            guard FileManager.default.fileExists(atPath: url.path) else { return [Case]() }
             return try decoder.decode([Case].self, from: Data(contentsOf: url)).map { testCase in
                 var testCase = testCase
                 testCase.source = source
                 return testCase
             }
         }
+        // Every case that knows its field's id runs a second time with it.
+        let withID = cases.filter { $0.fieldName != nil }.map { testCase in
+            var testCase = testCase
+            testCase.withID = true
+            return testCase
+        }
+        return cases + withID
     }
 
     private static func loadSnapshot() throws -> Snapshot {
@@ -398,7 +547,7 @@ final class MatcherEvalTests: XCTestCase {
             // Three decimals: enough to see a score move, few enough to keep
             // the diff about keys rather than floating-point noise.
             let score = (result.prediction.score * 1000).rounded() / 1000
-            cases[result.testCase.id] = Prediction(key: result.prediction.key, score: score)
+            cases[result.testCase.key] = Prediction(key: result.prediction.key, score: score)
         }
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]

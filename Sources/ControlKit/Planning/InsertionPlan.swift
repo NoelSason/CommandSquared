@@ -38,11 +38,23 @@ public enum InsertionPlan {
     /// Synthesized keystrokes sit *above* the clipboard deliberately: they work in
     /// web and Electron content where accessibility writes silently no-op, and
     /// they never touch the pasteboard.
-    public static func strategies(fieldIsEmpty: Bool, allowClipboard: Bool) -> [InsertionStrategy] {
+    ///
+    /// Web content never gets `.axValue`. Setting a web field's whole value
+    /// writes past the page's own input handling: React, Vue and Angular keep
+    /// their own copy of the value and never hear about it, so the page shows
+    /// the text and still validates and submits the field as empty. That is
+    /// "Please enter a valid phone number" with the number sitting right there.
+    /// Inserting at the caret and typing both go through the page's editing,
+    /// which is what its handlers listen to.
+    public static func strategies(
+        fieldIsEmpty: Bool,
+        allowClipboard: Bool,
+        inWebContent: Bool = false
+    ) -> [InsertionStrategy] {
         var ladder: [InsertionStrategy] = [.axSelectedText]
         // Setting the whole value replaces rather than inserts, so it is only safe
         // when there is nothing to destroy.
-        if fieldIsEmpty { ladder.append(.axValue) }
+        if fieldIsEmpty, !inWebContent { ladder.append(.axValue) }
         ladder.append(.unicodeEvents)
         if allowClipboard { ladder.append(.clipboard) }
         return ladder

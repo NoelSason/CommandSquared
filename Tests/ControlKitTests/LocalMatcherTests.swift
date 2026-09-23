@@ -246,6 +246,204 @@ extension LocalMatcherTests {
     }
 }
 
+/// Rules added against Chromium's real-form corpus (matcher eval round 2).
+extension LocalMatcherTests {
+    private func heading(_ label: String?, heading: String, placeholder: String? = nil) -> FieldContext {
+        var context = context(label: label, placeholder: placeholder, nearby: [heading])
+        context.heading = heading
+        return context
+    }
+
+    /// "Email address" under a "Billing information" heading filled the
+    /// billing street: the "address" in it read as a street address.
+    func testAnEmailAddressIsNotAStreetAddress() {
+        let ranked = matcher.match(heading("Email Address:", heading: "Billing Information"), fillable: allKeys)
+        XCTAssertEqual(ranked.first?.key, "email_personal")
+        XCTAssertFalse(ranked.contains { $0.key.hasSuffix("_street_1") })
+        // A street address in the same section is still one.
+        XCTAssertEqual(top(heading("Address:", heading: "Billing Information"))?.key, "billing_street_1")
+    }
+
+    /// An immigration form's "Date of issue" (dd/mm/yyyy) filled the card
+    /// expiry: "mm yy" hides inside a full date format.
+    func testADateWithADayIsNotACardExpiry() {
+        for (label, placeholder) in [("Date of issue", "dd/mm/yyyy o ddmmyy"), ("Expiration date", "dd/mm/yyyy")] {
+            let ranked = matcher.match(context(label: label, placeholder: placeholder), fillable: allKeys)
+            XCTAssertFalse(ranked.contains { $0.key == "card_exp" }, "label: \(label)")
+        }
+        XCTAssertEqual(top(context(label: "Expiration date", placeholder: "MM/YY"))?.key, "card_exp")
+    }
+
+    /// A field with no label of its own, as table-layout forms deliver it: the
+    /// label cell right above it, then the section.
+    private func labelCell(_ cell: String, section: String) -> FieldContext {
+        var context = context(nearby: [cell, section])
+        context.heading = cell
+        return context
+    }
+
+    /// "Delivery Address" sat above the phone boxes and the gift message and
+    /// made every one of them a street.
+    func testABareAddressInAHeadingNamesTheSectionNotTheField() {
+        let ranked = matcher.match(heading("Ext.", heading: "Delivery Address"), fillable: allKeys)
+        XCTAssertFalse(ranked.contains { $0.key.hasSuffix("_street_1") })
+        // The label cell of a label-less field is its label, and still counts.
+        XCTAssertEqual(top(labelCell("*Address:", section: "Shipping"))?.key, "home_street_1")
+    }
+
+    /// "City:" in the cell beside the box is the field's label; "Billing
+    /// Address" above it is the section, and says which city.
+    func testALabelCellTakesItsScopeFromTheSectionAboveIt() {
+        XCTAssertEqual(top(labelCell("City:", section: "Billing Address"))?.key, "billing_city")
+        XCTAssertEqual(top(labelCell("Zip Code", section: "Shipping Address"))?.key, "home_postal")
+        // An email's label cell is still an email, whatever the section.
+        XCTAssertEqual(top(labelCell("Email Address*", section: "1 Billing Address"))?.key, "email_personal")
+    }
+
+    /// Split phone boxes filled the whole number into the exchange box.
+    func testAPieceOfAPhoneNumberIsNotTheWholeNumber() {
+        for label in [
+            "Primary telephone number, exchange.",
+            "Primary telephone number, last four digits.",
+            "Enter three number exchange for your phone number.",
+            "Area Code",
+            "Ext.",
+        ] {
+            let ranked = matcher.match(context(label: label, nearby: ["Phone:"]), fillable: allKeys)
+            XCTAssertFalse(ranked.contains { $0.key == "phone_mobile" }, "label: \(label)")
+        }
+        // Naming the area code to ask for it along with the number is the whole number.
+        XCTAssertEqual(top(context(label: "Phone (with area code)"))?.key, "phone_mobile")
+        // "Ext" is a whole word, not the start of `extraDetails`.
+        XCTAssertEqual(top(context(label: "extra details phone mobile number"))?.key, "phone_mobile")
+    }
+
+    /// Nearby text vetoes what it suggests: the box under "Gift Card Number"
+    /// is a gift card's, the one under "Work Phone:" a work number.
+    func testNearbyTextVetoesItsOwnSuggestions() {
+        let gift = matcher.match(labelCell("Gift Card Number", section: "Payment"), fillable: allKeys)
+        XCTAssertFalse(gift.contains { $0.key == "card_number" })
+        let work = matcher.match(labelCell("Work Phone:", section: "Contact"), fillable: allKeys)
+        XCTAssertFalse(work.contains { $0.key == "phone_mobile" })
+        // Without the veto word, the same nearby text still suggests the key.
+        XCTAssertEqual(top(labelCell("Card Number", section: "Payment"))?.key, "card_number")
+        // And nearby text never vetoes what the field's own label says.
+        XCTAssertEqual(top(context(label: "Phone", nearby: ["Search"]))?.key, "phone_mobile")
+    }
+
+    /// The vault holds a mobile and two personal emails, none of them work ones.
+    func testWorkContactDetailsAreNotTheUsers() {
+        for label in ["Work email", "workEmail", "Business/Other Phone Number:", "Office phone number"] {
+            let ranked = matcher.match(context(label: label), fillable: allKeys)
+            XCTAssertFalse(ranked.contains { ["phone_mobile", "email_personal", "email_school"].contains($0.key) }, "label: \(label)")
+        }
+        // A list of kinds that happens to include "work" is still the user's phone.
+        XCTAssertEqual(top(context(label: "Phone (home, work or mobile)"))?.key, "phone_mobile")
+    }
+
+    /// Chromium's company pattern is `business|organization`; an organisation's
+    /// phone or address is how to reach it, not its name.
+    func testAnOrganisationsContactDetailsAreNotItsName() {
+        for label in ["Business/Other Phone Number:", "Organization Address 1", "Company phone"] {
+            let ranked = matcher.match(context(label: label), fillable: allKeys)
+            XCTAssertFalse(ranked.contains { $0.key == "current_org" }, "label: \(label)")
+        }
+        XCTAssertEqual(top(context(label: "Business name"))?.key, "current_org")
+    }
+
+    /// The vault holds one phone; an alternate-phone box sits beside the main one.
+    func testAnAlternatePhoneIsNotTheMainNumber() {
+        for label in ["Alternate Phone", "Alternative Number:", "Secondary phone"] {
+            let ranked = matcher.match(context(label: label), fillable: allKeys)
+            XCTAssertFalse(ranked.contains { $0.key == "phone_mobile" }, "label: \(label)")
+        }
+        let cell = matcher.match(labelCell("Alternate Phone:", section: "Contact"), fillable: allKeys)
+        XCTAssertFalse(cell.contains { $0.key == "phone_mobile" })
+        // The user has two emails, so an alternate email is still theirs.
+        XCTAssertNotNil(matcher.match(context(label: "Alternate email address"), fillable: allKeys).first { $0.key.hasPrefix("email_") })
+    }
+
+    /// `urls[0]` and "Profile links" are one of the user's three links. Which
+    /// one is a question, so Control asks rather than misses, and never fills.
+    func testALinkFieldThatDoesNotSayWhichAsksAmongTheUsersLinks() {
+        for name in ["urls[0]", "personal.profileLinks[1].link", "platformUrls.0.url", "user[profile_social_accounts][][url]"] {
+            let ranked = matcher.match(VaultImporter.context(forFieldName: name), fillable: allKeys)
+            XCTAssertEqual(ranked.first?.key, "linkedin_url", name)
+            XCTAssertLessThan(ranked.first?.score ?? 1, MatchThresholds.autoInsert, name)
+            XCTAssertGreaterThanOrEqual(ranked.first?.score ?? 0, MatchThresholds.confirm, name)
+            XCTAssertEqual(Set(ranked.prefix(3).map(\.key)), ["linkedin_url", "website_url", "github_url"], name)
+        }
+        // A link that says what it is for is not one of the user's.
+        for name in ["oauth_application[url]", "SITE_URL", "privacyPolicyUrl", "currentUser.instagramLink", "destination-url"] {
+            let ranked = matcher.match(VaultImporter.context(forFieldName: name), fillable: allKeys)
+            XCTAssertFalse(ranked.contains { $0.key.hasSuffix("_url") }, name)
+        }
+    }
+
+    /// The candidate on a job application, the driver on a car booking: a
+    /// person's role before "name" is the user in that role.
+    func testAPersonsRoleBeforeNameIsTheUsersFullName() {
+        for name in ["candidateName", "legal.legalAcknowledgmentName", "tripPreferencesRequests[0].carTripPreferencesRequest.driverName"] {
+            XCTAssertEqual(matcher.match(VaultImporter.context(forFieldName: name), fillable: allKeys).first?.key, "full_name", name)
+        }
+        XCTAssertEqual(top(context(label: "Applicant name"))?.key, "full_name")
+        // Objects have names too, and a system's sender is not the user.
+        for name in ["project-name", "repository-name", "SMTP_SENDER_NAME"] {
+            let ranked = matcher.match(VaultImporter.context(forFieldName: name), fillable: allKeys)
+            XCTAssertFalse(ranked.contains { $0.key == "full_name" }, name)
+        }
+        // A part of the name still wants that part.
+        XCTAssertEqual(top(context(label: "Candidate first name"))?.key, "given_name")
+    }
+
+    /// Another person's name, email or phone must never get the user's own.
+    func testAFieldAboutSomeoneElseGetsNoneOfTheUsersDetails() {
+        let personal: (ScoredKey) -> Bool = { LocalMatcher.isPersonal($0.key) }
+        for label in ["Emergency contact name", "Minor's Date of Birth:", "Enter email addresses", "Reference phone"] {
+            XCTAssertFalse(matcher.match(context(label: label), fillable: allKeys).contains(where: personal), label)
+        }
+        // The section says whose it is.
+        XCTAssertFalse(matcher.match(heading("First Name *", heading: "Parent/Guardian Information"), fillable: allKeys)
+            .contains(where: personal))
+        // Field names count people from zero: the first passenger is the user.
+        for name in ["frontierPassengers[1].Name.First", "additionalGuests.0.firstName"] {
+            XCTAssertFalse(matcher.match(VaultImporter.context(forFieldName: name), fillable: allKeys).contains(where: personal), name)
+        }
+        XCTAssertEqual(matcher.match(VaultImporter.context(forFieldName: "frontierPassengers[0].Name.First"), fillable: allKeys).first?.key,
+                       "given_name")
+        // A parent's address is the permanent address, and a guest checkout is the user's.
+        XCTAssertEqual(top(context(label: "Parent's home address"))?.key, "home_street_1")
+        XCTAssertEqual(top(heading("Email address", heading: "Guest Checkout"))?.key, "email_personal")
+    }
+
+    /// The last year at school is the graduation year.
+    func testTheEndYearOfAnEducationEntryIsTheGraduationYear() {
+        for name in ["education-35--lastYearAttended-dateSectionYear-input", "appEducation.colleges[0].endYYYY"] {
+            XCTAssertEqual(matcher.match(VaultImporter.context(forFieldName: name), fillable: allKeys).first?.key, "grad_year", name)
+        }
+        // The section can say it's about school.
+        XCTAssertEqual(top(heading("End year", heading: "Education"))?.key, "grad_year")
+        // Without school, an end year is anyone's.
+        XCTAssertFalse(matcher.match(heading("End year", heading: "Work experience"), fillable: allKeys).contains { $0.key == "grad_year" })
+    }
+
+    /// The vault stores two address lines; "Address Line 3" read as the street.
+    func testAThirdAddressLineHasNoKey() {
+        for label in ["Address Line 3 (optional)", "Address Line 4:", "Billing address line 3 (Optional)"] {
+            XCTAssertFalse(matcher.match(context(label: label), fillable: allKeys).contains { $0.key.contains("_street_") }, label)
+        }
+        XCTAssertEqual(top(context(label: "Address Line 2"))?.key, "home_street_2")
+    }
+
+    /// "Card's nickname e.g. My Visa" is a label for the card.
+    func testAThingsNicknameIsNotWhatTheUserGoesBy() {
+        for label in ["Card's nickname e.g. My Visa, Corporate card, etc", "Address nickname", "Card Nickname (optional)"] {
+            XCTAssertFalse(matcher.match(context(label: label), fillable: allKeys).contains { $0.key == "preferred_name" }, label)
+        }
+        XCTAssertEqual(top(context(label: "Nickname"))?.key, "preferred_name")
+    }
+}
+
 final class MatchHintsTests: XCTestCase {
     private let matcher = LocalMatcher()
     private let allKeys = Set(VaultSchema.builtIn.map(\.key))

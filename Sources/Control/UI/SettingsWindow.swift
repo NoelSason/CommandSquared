@@ -96,6 +96,7 @@ private struct SettingsView: View {
             content
                 .padding(16)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                .clipped()
         }
         .frame(minWidth: 560, minHeight: 480)
     }
@@ -132,10 +133,19 @@ private struct SettingsView: View {
         switch section {
         case .details: DetailsTab(vault: vault)
         case .snippets: SnippetsTab(vault: vault)
-        case .trigger: ShortcutTab(preferences: preferences, onTriggerChanged: onTriggerChanged)
-        case .matching: MatchingTab(preferences: preferences)
-        case .privacy: PrivacyTab(preferences: preferences)
+        case .trigger: scrolling { ShortcutTab(preferences: preferences, onTriggerChanged: onTriggerChanged) }
+        case .matching: scrolling { MatchingTab(preferences: preferences) }
+        case .privacy: scrolling { PrivacyTab(preferences: preferences) }
         case .memory: MemoryTab(cache: cache, vault: vault)
+        }
+    }
+
+    /// For panes that don't scroll themselves. Without it a pane taller than
+    /// the window overflows, and SwiftUI centres the overflow — which pushed the
+    /// tab bar up under the title bar and the bottom of Matching off-screen.
+    private func scrolling(@ViewBuilder _ pane: () -> some View) -> some View {
+        ScrollView {
+            pane().frame(maxWidth: .infinity, alignment: .topLeading)
         }
     }
 }

@@ -97,6 +97,15 @@ enum ChromiumMatching {
         }
     }
 
+    /// The vetoes one piece of text carries on its own, with the type that
+    /// raised each. Lowercased raw text, as `patternNearbyParts` gives it.
+    static func vetoes(in text: String) -> [(type: ChromiumFieldType, veto: Veto)] {
+        compiled.compactMap { pattern in
+            guard let veto = veto(for: pattern.source.type), pattern.matches(text) else { return nil }
+            return (pattern.source.type, veto)
+        }
+    }
+
     /// Types that name an address component. Which address — home, campus or
     /// billing — is Control's call, from the section heading.
     static func addressComponent(for hit: Hit) -> LocalMatcher.AddressComponent? {

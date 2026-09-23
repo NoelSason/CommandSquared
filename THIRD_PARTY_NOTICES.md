@@ -39,3 +39,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 A binary distribution must reproduce this notice. The app's acknowledgements carry it
 (added with the release work).
+
+## Chromium autofill heuristics test data
+
+`Tests/ControlKitTests/Fixtures/MatcherEval/chromium.json`, `chromium-repro.json` and
+`chromium-i18n.json` contain field labels, placeholders, titles, nearby text and element ids
+extracted from Chromium's `components/test/data/autofill/heuristics/input/*.html` at commit
+`7c4a2eb3203b43eb1c934ac6181c6790c84d69bd`. The pages themselves are not included; the
+expected keys are Control's own labels, not Chromium's. Same BSD-3-Clause license and
+copyright notice as above. Test data only: nothing from it ships in the app.

@@ -88,6 +88,25 @@ public extension FieldContext {
             .filter { !$0.isEmpty }
     }
 
+    /// For a field with no label of its own, the text right above it: its
+    /// label, as in the "City:" cell of a table-layout form. `NearbyTextPolicy`
+    /// can't tell that apart from a section heading, so it arrives as
+    /// `heading` and first in `nearbyText`.
+    var labelCell: String? {
+        let hasOwnLabel = [label, placeholder, helpText].contains {
+            !($0 ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        }
+        guard !hasOwnLabel, let heading, heading == nearbyText.first else { return nil }
+        return heading
+    }
+
+    /// The heading of the section the field is in. For a field with no label
+    /// of its own, `heading` is its label cell, and the section is the next
+    /// text up: that is where "Billing address" is.
+    var sectionHeading: String? {
+        labelCell == nil ? heading : nearbyText.dropFirst().first
+    }
+
     // MARK: Text for Chromium's patterns
 
     /// Label, placeholder and help text for `ChromiumPatterns`: lowercased, one

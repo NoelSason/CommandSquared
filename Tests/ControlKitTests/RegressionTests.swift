@@ -162,6 +162,16 @@ final class RegressionTests: XCTestCase {
         )
     }
 
+    /// "Please enter a valid phone number", with the number in the box: the
+    /// value was set through accessibility, and the page's form never saw it.
+    func testAWebFieldsValueIsNeverSetBehindThePagesBack() {
+        let web = InsertionPlan.strategies(fieldIsEmpty: true, allowClipboard: true, inWebContent: true)
+        XCTAssertFalse(web.contains(.axValue))
+        XCTAssertEqual(web, [.axSelectedText, .unicodeEvents, .clipboard])
+        // Native text fields have no page behind them, and keep the value write.
+        XCTAssertTrue(InsertionPlan.strategies(fieldIsEmpty: true, allowClipboard: true, inWebContent: false).contains(.axValue))
+    }
+
     func testSensitiveValuesNeverReachThePasteboard() {
         let ladder = InsertionPlan.strategies(fieldIsEmpty: true, allowClipboard: false)
         XCTAssertFalse(ladder.contains(.clipboard))

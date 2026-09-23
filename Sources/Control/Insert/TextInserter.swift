@@ -29,7 +29,8 @@ enum TextInserter {
         let before = AX.rawValue(element, kAXValueAttribute)
         let ladder = InsertionPlan.strategies(
             fieldIsEmpty: before?.isEmpty ?? true,
-            allowClipboard: allowClipboard
+            allowClipboard: allowClipboard,
+            inWebContent: BrowserURLReader.isInsideWebArea(element)
         )
 
         for strategy in ladder {

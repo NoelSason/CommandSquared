@@ -99,9 +99,8 @@ public struct LocalMatcher: Sendable {
             ChromiumMatching.veto(for: hit.type).map { (type: hit.type, veto: $0) }
         }
 
-        func isVetoed(_ key: String) -> Bool {
-            if key == "date_of_birth", Self.namesPartOfADate(own) { return true }
-            return vetoes.contains { type, veto in
+        func covered(_ key: String, by vetoes: [(type: ChromiumFieldType, veto: ChromiumMatching.Veto)]) -> Bool {
+            vetoes.contains { type, veto in
                 // Inside a payment form, "Verification code" is the card's.
                 // Chromium parses card fields before one-time codes for the
                 // same reason.
@@ -110,8 +109,39 @@ public struct LocalMatcher: Sendable {
             }
         }
 
-        func offer(_ key: String, _ score: Double, _ reason: @autoclosure () -> String) {
+        // A field about another person — an emergency contact, a guardian, the
+        // second passenger — takes none of the user's own details. The section
+        // counts as well as the label: "First name" under "Parent/Guardian
+        // Information" is the guardian's.
+        let aboutSomeoneElse = Self.mentions(own, Self.otherPersonWords)
+            || [context.labelCell, context.sectionHeading].compactMap { $0 }
+                .contains { Self.mentions(FieldContext.normalize($0), Self.otherPersonWords) }
+            || Self.namesALaterPerson(context.fieldName)
+
+        func isVetoed(_ key: String) -> Bool {
+            if key == "date_of_birth", Self.namesPartOfADate(own) { return true }
+            if key == "phone_mobile", Self.namesAPhonePiece(own) { return true }
+            if Self.personalContactKeys.contains(key), Self.namesWorkContact(own) { return true }
+            if aboutSomeoneElse, Self.isPersonal(key) { return true }
+            return covered(key, by: vetoes)
+        }
+
+        // Nearby text can't veto what the field's own label says, but it does
+        // veto what it suggests itself: "Gift card number" above a box is a
+        // gift card's number, and "Work phone:" a work number, though neither
+        // is the field's label. Each piece of nearby text answers only for the
+        // evidence it produced.
+        let nearbyParts = context.nearbyText.map { (raw: FieldContext.lowercasedCollapsingWhitespace($0), words: FieldContext.normalize($0)) }
+            .filter { !$0.words.isEmpty }
+        var nearbyVetoes: [String: [(type: ChromiumFieldType, veto: ChromiumMatching.Veto)]] = [:]
+        for part in nearbyParts where nearbyVetoes[part.raw] == nil {
+            nearbyVetoes[part.raw] = ChromiumMatching.vetoes(in: part.raw)
+        }
+
+        /// `nearby` is the piece of nearby text the evidence came from, if any.
+        func offer(_ key: String, _ score: Double, _ reason: @autoclosure () -> String, from nearby: String? = nil) {
             guard fillable.contains(key), !isVetoed(key) else { return }
+            if let nearby, covered(key, by: nearbyVetoes[nearby] ?? []) { return }
             evidence.append(Evidence(key: key, score: score, reason: reason()))
         }
 
@@ -120,8 +150,35 @@ public struct LocalMatcher: Sendable {
         for rule in Self.rules {
             if let phrase = rule.matchingPhrase(in: own, vetoedBy: own) {
                 offer(rule.key, rule.confidence, "phrase \"\(phrase)\" in label")
-            } else if let phrase = rule.matchingPhrase(in: all, vetoedBy: own) {
-                offer(rule.key, rule.confidence * Self.nearbyWeight, "phrase \"\(phrase)\" in nearby text")
+            } else if let (part, phrase) = nearbyParts.lazy.compactMap({ part in
+                rule.matchingPhrase(in: part.words, vetoedBy: own + " | " + part.words).map { (part, $0) }
+            }).first {
+                offer(rule.key, rule.confidence * Self.nearbyWeight, "phrase \"\(phrase)\" in nearby text", from: part.raw)
+            }
+        }
+
+        // A person's role before "name" is the user in that role: the candidate
+        // on a job application, the driver on a car booking. Objects never get
+        // here, so `project-name` and `repository-name` stay unmatched.
+        if Self.namesAPersonInARole(own), !Self.mentions(own, Self.roleNameExclusions) {
+            offer("full_name", 0.90, "a person's role before \"name\"")
+        }
+
+        // The end of a stint at school is the year the user graduates, or
+        // expects to: "Last year attended", `colleges[0].endYYYY`. The section
+        // can supply the "school" half, as it supplies an address's scope.
+        let educationText = own + " | " + (context.sectionHeading.map(FieldContext.normalize) ?? "")
+        if Self.mentions(own, Self.endYearPhrases), Self.mentions(educationText, Self.educationWords) {
+            offer("grad_year", 0.93, "end year of a stint at school")
+        }
+
+        // A link field that says nothing about which link — `urls[0]`,
+        // `profileLinks[1].link`, "Other links" — is one of the user's three.
+        // Which one is a guess, so it asks, with the likeliest first, rather
+        // than leave the picker empty. It never fills on its own.
+        if Self.isUnqualifiedLink(own) {
+            for (key, score) in Self.unqualifiedLinkKeys {
+                offer(key, score, "link field that doesn't say which")
             }
         }
 
@@ -136,14 +193,19 @@ public struct LocalMatcher: Sendable {
             guard let key = ChromiumMatching.keys[hit.type] else { continue }
             if key == "full_name", namesAPart { continue }
             if Self.chromiumKeyVetoes[key, default: []].contains(where: { Self.contains(own, $0) }) { continue }
+            if key == "current_org", Self.namesOrganisationContact(own) { continue }
             if key.hasPrefix("card_"), !inPaymentContext { continue }
             let score = ChromiumMatching.rescale(hit.score)
             if hit.own {
                 offer(key, score, "Chromium \(hit.type.rawValue) in \"\(hit.text)\"")
             } else {
-                offer(key, score * Self.nearbyWeight, "Chromium \(hit.type.rawValue) in nearby \"\(hit.text)\"")
+                let words = FieldContext.normalize(hit.text)
+                if Self.chromiumKeyVetoes[key, default: []].contains(where: { Self.contains(words, $0) }) { continue }
+                offer(key, score * Self.nearbyWeight, "Chromium \(hit.type.rawValue) in nearby \"\(hit.text)\"", from: hit.text)
             }
         }
+
+        let emailInLabel = chromium.contains { $0.type == .email && $0.own } || Self.mentions(own, Self.emailTokens)
 
         // Scoped components: "City" alone is meaningless, "City" under a "Billing
         // address" heading is not. Resolve the component, then the scope. When a
@@ -151,12 +213,31 @@ public struct LocalMatcher: Sendable {
         // 2" is line 2, not the generic "address" it also contains.
         let ownComponents = [Self.addressComponent(in: own)]
             + chromium.filter(\.own).map(ChromiumMatching.addressComponent(for:))
-        let nearbyComponents = [Self.addressComponent(in: all)]
-            + chromium.filter { !$0.own }.map(ChromiumMatching.addressComponent(for:))
+        // A bare "address" nearby names a section, not this field: "Delivery
+        // address" sits above the phone boxes and the gift message too. It
+        // counts only as the field's own label cell.
+        let nearbyComponents = ([Self.addressComponent(in: all)]
+            + chromium.filter { !$0.own }.map(ChromiumMatching.addressComponent(for:)))
+            .filter { $0 != .streetGeneric }
+            + [context.labelCell.map(FieldContext.normalize).flatMap { cell in
+                // The label cell is the field's label, so an "Email address"
+                // there is an email's address, as it is in `usable` below.
+                Self.addressComponent(in: cell).flatMap { $0 == .streetGeneric && Self.mentions(cell, Self.emailTokens) ? nil : $0 }
+            }]
         // A country *code* is a dialling or ISO code, not the country's name.
         let isCountryCode = Self.mentions(own, ["country code"])
+        // "Email address" is an address, but not a street one. Chromium never
+        // meets this: it types a field as an email before it looks for an
+        // address. Without it, "Email address" under a "Billing information"
+        // heading filled the billing street.
+        // Line 3 and beyond have no key. They'd otherwise read as the
+        // generic "address" they also contain, and fill the street.
+        let isALaterLine = Self.mentions(own, Self.laterLineWords)
         func usable(_ components: [AddressComponent?]) -> [AddressComponent] {
-            components.compactMap { $0 }.filter { !($0 == .country && isCountryCode) }
+            components.compactMap { $0 }.filter {
+                !($0 == .country && isCountryCode) && !($0 == .streetGeneric && emailInLabel)
+                    && !(isALaterLine && [.street1, .street2, .streetGeneric].contains($0))
+            }
         }
         let ownComponent = usable(ownComponents).min()
         if let component = ownComponent ?? usable(nearbyComponents).min() {
@@ -164,7 +245,7 @@ public struct LocalMatcher: Sendable {
             // capture found no heading at all does any scope word nearby count —
             // otherwise the "Permanent address" section above would claim the
             // campus fields below it.
-            let headingScope = context.heading.map { Self.addressScope(in: FieldContext.normalize($0)) }
+            let headingScope = context.sectionHeading.map { Self.addressScope(in: FieldContext.normalize($0)) }
             let scope = Self.addressScope(in: own) ?? (headingScope ?? Self.addressScope(in: all))
             let weight = ownComponent == nil ? Self.nearbyWeight : 1
             let why = "address \(component.suffix), scope \(scope?.prefix ?? "none")"
@@ -176,7 +257,6 @@ public struct LocalMatcher: Sendable {
             }
         }
 
-        let emailInLabel = chromium.contains { $0.type == .email && $0.own } || Self.mentions(own, Self.emailTokens)
         let emailNearby = chromium.contains { $0.type == .email } || Self.mentions(all, Self.emailTokens)
         if emailInLabel || emailNearby {
             // An email field in the section is not evidence that *this* field
@@ -252,7 +332,10 @@ public struct LocalMatcher: Sendable {
 
     static let rules: [Rule] = [
         // Names — specific before general, with a hard veto on login handles.
-        Rule(key: "preferred_name", phrases: ["preferred name", "preferred first name", "goes by", "go by", "nickname", "chosen name", "known as"], confidence: 0.95),
+        // A card's or an address's nickname is a label for that thing, not
+        // the name the user goes by.
+        Rule(key: "preferred_name", phrases: ["preferred name", "preferred first name", "goes by", "go by", "nickname", "chosen name", "known as"], confidence: 0.95,
+             excluding: ["card", "address", "account"]),
         Rule(key: "given_name", phrases: ["first name", "given name", "forename", "legal first"], confidence: 0.95, excluding: ["preferred", "last", "user"]),
         Rule(key: "family_name", phrases: ["last name", "surname", "family name", "legal last"], confidence: 0.95, excluding: ["user"]),
         Rule(key: "middle_name", phrases: ["middle name", "middle initial"], confidence: 0.95),
@@ -270,7 +353,7 @@ public struct LocalMatcher: Sendable {
 
         // Contact
         Rule(key: "phone_mobile", phrases: ["phone", "mobile number", "cell", "telephone", "contact number"], confidence: 0.92,
-             excluding: ["work phone", "office phone", "emergency"] + phonePartWords),
+             excluding: ["work phone", "office phone", "emergency"] + otherPhoneWords),
 
         // Education
         Rule(key: "university", phrases: ["university", "college", "school name", "institution", "current school", "where do you study", "school"], confidence: 0.88, excluding: ["email", "high school"]),
@@ -295,8 +378,10 @@ public struct LocalMatcher: Sendable {
         Rule(key: "card_number", phrases: ["card number", "credit card number", "debit card number"], confidence: 0.95),
         Rule(key: "card_cvv", phrases: ["cvv", "cvc", "security code", "card code", "csc"], confidence: 0.95),
         Rule(key: "card_exp", phrases: ["expiration", "expiry", "exp date", "mm yy", "mm yyyy", "valid thru", "card exp", "cc exp"], confidence: 0.93,
-             // A box for just the month or just the year wants that part.
-             excluding: ["month", "year"]),
+             // A box for just the month or just the year wants that part. And
+             // a card expiry never has a day: "dd/mm/yyyy" is a calendar date
+             // that happens to contain "mm yy".
+             excluding: ["month", "year"] + dayWords),
         Rule(key: "card_name", phrases: ["name on card", "cardholder", "card holder"], confidence: 0.95),
     ]
 
@@ -307,16 +392,131 @@ public struct LocalMatcher: Sendable {
     static let chromiumKeyVetoes: [String: [String]] = [
         "given_name": ["preferred"],
         "full_name": ["card", "company", "organization", "school", "university", "file", "domain", "event", "product", "nick"],
-        "phone_mobile": ["work phone", "office phone", "emergency"] + phonePartWords,
-        "card_exp": ["month", "year"],
+        "phone_mobile": ["work phone", "office phone", "emergency"] + otherPhoneWords,
+        "card_exp": ["month", "year"] + dayWords,
         // "Organization industry", "Company size": about the organisation, not its name.
         "current_org": ["industry"],
     ]
 
-    /// A field for one piece of a number — `phonePart2`, a country-code picker —
-    /// wants that piece, and the whole number in it is wrong. Chromium tells
-    /// these apart by field order; one field at a time, the words are the tell.
-    static let phonePartWords = ["part", "country code", "phone code", "phone country", "extension"]
+    /// A work number or a work address is not the user's own: the vault holds a
+    /// mobile and two personal emails. The qualifier has to come right before
+    /// what it qualifies ("Business/Other Phone Number", `workEmail`), and the
+    /// word between may not be "or": "Phone (home, work or mobile)" is a list
+    /// of kinds, and still the user's phone.
+    static let personalContactKeys: Set<String> = ["phone_mobile", "email_personal", "email_school"]
+
+    private static let workContact = try! NSRegularExpression(
+        pattern: #"\b(?:work|office|business)(?: (?!or\b|and\b)\w+)? (?:phone|telephone|tel|mobile|cell|number|email|e mail)\b"#
+    )
+
+    static func namesWorkContact(_ text: String) -> Bool {
+        workContact.firstMatch(in: text, range: NSRange(text.startIndex..., in: text)) != nil
+    }
+
+    /// An organisation's phone, email or address is how to reach it, not its
+    /// name: "Business/Other Phone Number", "Organization Address 1". Chromium's
+    /// company pattern is just `business|organization`, which catches both. As
+    /// with `namesWorkContact`, the organisation word comes first, so a field
+    /// id like `mailingAddress_company` is still the company.
+    private static let organisationContact = try! NSRegularExpression(
+        pattern: #"\b(?:company|business|organi[sz]ation|employer)(?: \w+)? (?:phone|telephone|fax|email|e mail|address|number)\b"#
+    )
+
+    static func namesOrganisationContact(_ text: String) -> Bool {
+        organisationContact.firstMatch(in: text, range: NSRange(text.startIndex..., in: text)) != nil
+    }
+
+    /// The vault holds one phone. A form that asks for an alternate one has
+    /// already asked for the main one, and that's where the number goes.
+    /// (Alternate *emails* are fine: the user has two.)
+    static let otherPhoneWords = ["alternate", "alternative", "secondary"]
+
+    /// Words for someone other than the user. "Parent" is deliberately absent:
+    /// a student's parents' address is their permanent address. So is a bare
+    /// "guest" ("Guest checkout" is the user) and "recipient" (a ship-to
+    /// recipient usually is too).
+    static let otherPersonWords = [
+        "emergency", "reference", "referee", "guardian", "beneficiary", "spouse", "minor",
+        "invite", "additional guest", "other guest", "add guest", "guests", "tribute", "honoree",
+        "gift recipient", "friend s", "friends", "co applicant", "cosigner", "co signer",
+        "dependent", "email addresses",
+    ]
+
+    /// `passengers[1]`, `additionalTravelers.2.name`: a list of people where the
+    /// user is the first. Field names count from zero; labels ("Passenger 1")
+    /// count from one, so only the raw field name is read.
+    private static let laterPerson = try! NSRegularExpression(
+        pattern: #"(?:passenger|traveler|traveller|guest|attendee|occupant|rider)s?(?:\[|\.|_|-)0*[1-9]"#,
+        options: .caseInsensitive
+    )
+
+    static func namesALaterPerson(_ fieldName: String?) -> Bool {
+        guard let fieldName else { return false }
+        return laterPerson.firstMatch(in: fieldName, range: NSRange(fieldName.startIndex..., in: fieldName)) != nil
+    }
+
+    /// The keys that hold the user's own person: names, contact, birth date,
+    /// addresses. Not their school, job or links, which a form about someone
+    /// else doesn't ask for.
+    static func isPersonal(_ key: String) -> Bool {
+        ["given_name", "middle_name", "family_name", "full_name", "preferred_name", "pronouns",
+         "date_of_birth", "email_personal", "email_school", "phone_mobile"].contains(key)
+            || addressKeySuffixes.contains { key.hasSuffix("_" + $0) }
+    }
+
+    /// Roles the user fills a form in. Someone else's roles (emergency contact,
+    /// guardian, an additional driver) are vetoed separately.
+    private static let roleName = try! NSRegularExpression(
+        pattern: #"\b(?:candidate|applicant|student|patient|attendee|registrant|driver|traveler|traveller|member|subscriber|signer|signatory|legal)(?: \w+)? name\b"#
+    )
+
+    /// A part of the name, or a name that isn't a person's.
+    static let roleNameExclusions = ["first", "last", "middle", "preferred", "user", "company", "organization", "school", "file", "card"]
+
+    static func namesAPersonInARole(_ text: String) -> Bool {
+        roleName.firstMatch(in: text, range: NSRange(text.startIndex..., in: text)) != nil
+    }
+
+    /// The year something ended. With an education word, the graduation year.
+    static let endYearPhrases = ["last year attended", "end year", "end yyyy", "end date year",
+                                 "completion year", "year of completion", "year completed"]
+    static let educationWords = ["education", "school", "college", "university", "degree", "academic"]
+
+    /// Words that say a field wants a link without saying whose or which.
+    static let linkWords: Set<String> = ["url", "urls", "link", "links"]
+    static let genericLinkQualifiers: Set<String> = [
+        "profile", "profiles", "social", "account", "accounts", "platform", "platforms",
+        "personal", "optional", "other", "your", "my", "web", "value", "user", "additional",
+    ]
+    /// All below `MatchThresholds.autoInsert`: which link is a question, not a fact.
+    static let unqualifiedLinkKeys: [(String, Double)] = [("linkedin_url", 0.45), ("website_url", 0.42), ("github_url", 0.40)]
+
+    static func isUnqualifiedLink(_ text: String) -> Bool {
+        let words = text.split(separator: " ").map(String.init).filter { $0 != "|" }
+        guard words.contains(where: linkWords.contains) else { return false }
+        return words.allSatisfy { linkWords.contains($0) || genericLinkQualifiers.contains($0) || $0.allSatisfy(\.isNumber) }
+    }
+
+    /// The day in a date format. A card expiry has none.
+    static let dayWords = ["dd", "day"]
+
+    /// A field for one piece of a number — `phonePart2`, a country-code picker,
+    /// "Primary telephone number, exchange", "last four digits" — wants that
+    /// piece, and the whole number in it is wrong. Chromium tells these apart by
+    /// field order; one field at a time, the words are the tell.
+    static let phonePartWords = [
+        "part", "country code", "phone code", "phone country", "extension",
+        "area", "exchange", "prefix", "suffix", "subscriber", "last four", "last 4", "first three",
+    ]
+
+    /// "Phone (with area code)" names a piece to say it wants the whole number.
+    static let wholeNumberPhrases = ["with area code", "including area code", "incl area code"]
+
+    static func namesAPhonePiece(_ text: String) -> Bool {
+        let rest = wholeNumberPhrases.reduce(" " + text) { $0.replacingOccurrences(of: " " + $1, with: " ") }
+        // "Ext." is a whole word; as a prefix it would catch `extraDetails`.
+        return mentions(rest, phonePartWords) || (rest + " ").contains(" ext ")
+    }
 
     // MARK: Scoped address handling
 
@@ -360,6 +560,10 @@ public struct LocalMatcher: Sendable {
 
         static func < (lhs: Self, rhs: Self) -> Bool { lhs.rawValue < rhs.rawValue }
     }
+
+    /// The third address line and beyond. The vault stores two.
+    static let laterLineWords = ["address line 3", "address line 4", "address line 5", "address 3", "address 4",
+                                 "line 3", "line 4", "line 5", "address3", "address4", "line3", "line4"]
 
     /// The component half of every address key: `home_city`, `billing_postal`.
     static let addressKeySuffixes = ["street_1", "street_2", "city", "state", "postal", "country"]
