@@ -129,5 +129,9 @@
 {"id": "regression.name.appEducation.colleges[0].endYYYY", "input": "fieldName", "label": "appEducation.colleges[0].endYYYY", "expect": ["grad_year"]},
 {"id": "regression.name.knownTravelerNumber", "input": "fieldName", "label": "knownTravelerNumber", "expect": ["known_traveler_number"]},
 {"id": "regression.name.travelers[0].ktn", "input": "fieldName", "label": "travelers[0].ktn", "expect": ["known_traveler_number"]},
-{"id": "regression.name.travelers[1].knownTravelerNumber", "input": "fieldName", "label": "travelers[1].knownTravelerNumber", "expect": []}
+{"id": "regression.name.travelers[1].knownTravelerNumber", "input": "fieldName", "label": "travelers[1].knownTravelerNumber", "expect": []},
+{"id": "regression.where-did-you-grow-up", "input": "label", "label": "Where did you grow up Required question", "expect": ["home_city"], "note": "Google Forms appends \"Required question\" to the label. Asks rather than fills."},
+{"id": "regression.hometown", "input": "label", "label": "Hometown", "expect": ["home_city"]},
+{"id": "regression.where-are-you-from", "input": "label", "label": "Where are you from?", "expect": ["home_city"]},
+{"id": "regression.parents-grow-up", "input": "label", "label": "Where did your parents grow up?", "expect": []}
 ]

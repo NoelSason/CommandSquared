@@ -13,7 +13,17 @@ final class ToastPresenter {
     private var activityMonitors: [Any] = []
     private var appSwitchObserver: NSObjectProtocol?
 
-    func show(title: String, detail: String, symbol: String, tone: ToastTone, near anchor: NSRect?, footnote: String? = nil) {
+    /// - Parameter duration: how long it stays when nothing happens. Longer for
+    ///   "working on it", which the result replaces; any activity still clears it.
+    func show(
+        title: String,
+        detail: String,
+        symbol: String,
+        tone: ToastTone,
+        near anchor: NSRect?,
+        footnote: String? = nil,
+        duration: Duration = .milliseconds(1800)
+    ) {
         dismissTask?.cancel()
 
         let view = ToastView(title: title, detail: detail, symbol: symbol, tone: tone, footnote: footnote)
@@ -32,7 +42,7 @@ final class ToastPresenter {
         watchForActivity()
 
         dismissTask = Task { [weak self] in
-            try? await Task.sleep(for: .milliseconds(1800))
+            try? await Task.sleep(for: duration)
             guard !Task.isCancelled else { return }
             self?.dismiss()
         }

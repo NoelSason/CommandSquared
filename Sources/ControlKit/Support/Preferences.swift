@@ -1,9 +1,9 @@
 import Foundation
 import Observation
 
-/// User-facing settings. Everything here is non-secret; the Jev API key is the one
-/// exception and lives in the Keychain under its own service, reachable through
-/// `jevAPIKey`.
+/// User-facing settings. Everything here is non-secret except the Jev and Claude
+/// API keys and the "About you" text for drafting, which live in the Keychain
+/// under their own service.
 @MainActor
 @Observable
 public final class Preferences {
@@ -20,10 +20,22 @@ public final class Preferences {
         static let autoInsertEnabled = "autoInsertEnabled"
         static let confirmedCategories = "confirmedCategories"
         static let onboardingCompleted = "onboardingCompleted"
+        static let draftAnswersEnabled = "draftAnswersEnabled"
+        static let learnFromAnswers = "learnFromAnswers"
+        static let usageByMonth = "usageByMonth"
+        static let reuseAnswers = "reuseAnswers"
     }
 
     /// Keychain account for the API key.
     private static let apiKeyAccount = "jev_api_key"
+    private static let claudeKeyAccount = "claude_api_key"
+    private static let aboutYouAccount = "about_you"
+    private static let learnedFactsAccount = "learned_facts"
+    private static let savedAnswersAccount = "saved_answers"
+    /// The least recently used go first past this.
+    public static let maxSavedAnswers = 200
+    /// Oldest go first past this. Every draft carries the whole list.
+    public static let maxLearnedFacts = 150
 
     /// Where the Jev key lives: its own service, stored on this Mac only.
     ///
@@ -50,6 +62,8 @@ public final class Preferences {
             Key.hotKeyCode: 9,               // V
             Key.hotKeyModifiers: 1_310_720,  // NSEvent .control | .command
             Key.jevEnabled: true,
+            Key.draftAnswersEnabled: true,
+            Key.reuseAnswers: true,
             Key.inlineSuggestions: true,
             Key.autoInsertEnabled: true,
             Key.confirmedCategories: [VaultCategory.payment.rawValue],
@@ -237,6 +251,220 @@ public final class Preferences {
             Log.app.info("Moved the Jev key to its own keychain service.")
         } catch {
             Log.app.error("Could not move the Jev key: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
+    // MARK: Long answers
+
+    /// Draft answers to open-ended questions. Takes effect only once a Claude
+    /// key and some "About you" text are saved too; see `canDraftAnswers`.
+    public var draftAnswersEnabled: Bool {
+        get { defaults.bool(forKey: Key.draftAnswersEnabled) }
+        set { defaults.set(newValue, forKey: Key.draftAnswersEnabled) }
+    }
+
+    /// Non-nil when the last read or write of the Claude key or the "About you"
+    /// text failed, for the same reason as `jevKeyError`.
+    public private(set) var draftSettingsError: String?
+
+    public var claudeAPIKey: String {
+        get { readSetting(Self.claudeKeyAccount, what: "the Claude key") }
+        set { writeSetting(newValue, Self.claudeKeyAccount, what: "the Claude key") }
+    }
+
+    /// What the user has told Control about themselves, for drafting.
+    ///
+    /// Unlike a vault value this *does* leave the Mac — to Claude, with the
+    /// question, each time a draft is asked for — so it is not a vault field. It
+    /// lives with the settings, on this Mac only, and survives "Clear and start
+    /// over", which is about saved details.
+    public var aboutYou: String {
+        get { readSetting(Self.aboutYouAccount, what: "your About you text") }
+        set { writeSetting(newValue, Self.aboutYouAccount, what: "your About you text") }
+    }
+
+    /// Only looks, like `hasJevKey`, so the settings view can call it freely.
+    public var hasClaudeKey: Bool { settingsAccounts.contains(Self.claudeKeyAccount) }
+    public var hasAboutYou: Bool { settingsAccounts.contains(Self.aboutYouAccount) }
+
+    public var canDraftAnswers: Bool {
+        guard draftAnswersEnabled else { return false }
+        let stored = settingsAccounts
+        return stored.contains(Self.claudeKeyAccount) && stored.contains(Self.aboutYouAccount)
+    }
+
+    /// Remember things from answers typed into form questions, for future
+    /// drafts. Off until the user turns it on: it sends what they typed.
+    public var learnFromAnswers: Bool {
+        get { defaults.bool(forKey: Key.learnFromAnswers) }
+        set { defaults.set(newValue, forKey: Key.learnFromAnswers) }
+    }
+
+    /// Learning needs everything drafting needs, since it feeds drafting.
+    public var canLearnFromAnswers: Bool { learnFromAnswers && canDraftAnswers }
+
+    /// What Control has learned, oldest first. Kept like "About you": in the
+    /// Keychain, on this Mac only, apart from saved details.
+    public var learnedFacts: [LearnedFact] {
+        get {
+            let stored = readSetting(Self.learnedFactsAccount, what: "what Control has learned")
+            guard !stored.isEmpty else { return [] }
+            do {
+                return try JSONDecoder().decode([LearnedFact].self, from: Data(stored.utf8))
+            } catch {
+                draftSettingsError = "Couldn't read what Control has learned: \(error.localizedDescription)"
+                return []
+            }
+        }
+        set {
+            let kept = Array(newValue.suffix(Self.maxLearnedFacts))
+            guard !kept.isEmpty else {
+                writeSetting("", Self.learnedFactsAccount, what: "what Control has learned")
+                return
+            }
+            do {
+                let data = try JSONEncoder().encode(kept)
+                writeSetting(String(decoding: data, as: UTF8.self), Self.learnedFactsAccount, what: "what Control has learned")
+            } catch {
+                draftSettingsError = "Couldn't save what Control has learned: \(error.localizedDescription)"
+            }
+        }
+    }
+
+    // MARK: Saved answers
+
+    /// Use a saved answer when a question asks the same thing again, instead
+    /// of drafting a new one.
+    public var reuseAnswers: Bool {
+        get { defaults.bool(forKey: Key.reuseAnswers) }
+        set { defaults.set(newValue, forKey: Key.reuseAnswers) }
+    }
+
+    /// Answers Control drafted, as the user left them. The user's own writing,
+    /// so kept like "About you": in the Keychain, on this Mac only.
+    public var savedAnswers: [SavedAnswer] {
+        get {
+            let stored = readSetting(Self.savedAnswersAccount, what: "your saved answers")
+            guard !stored.isEmpty else { return [] }
+            do {
+                return try JSONDecoder().decode([SavedAnswer].self, from: Data(stored.utf8))
+            } catch {
+                draftSettingsError = "Couldn't read your saved answers: \(error.localizedDescription)"
+                return []
+            }
+        }
+        set {
+            let kept = Array(newValue.sorted { $0.updatedAt < $1.updatedAt }.suffix(Self.maxSavedAnswers))
+            guard !kept.isEmpty else {
+                writeSetting("", Self.savedAnswersAccount, what: "your saved answers")
+                return
+            }
+            do {
+                let data = try JSONEncoder().encode(kept)
+                writeSetting(String(decoding: data, as: UTF8.self), Self.savedAnswersAccount, what: "your saved answers")
+            } catch {
+                draftSettingsError = "Couldn't save your answers: \(error.localizedDescription)"
+            }
+        }
+    }
+
+    /// Records the final text of an answer. An answer already saved under this
+    /// id takes the new text, and learns the question's wording if it's new.
+    public func saveAnswer(id: UUID, question: String, text: String, site: String?, at date: Date = Date()) {
+        let text = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { return }
+        var library = savedAnswers
+        if let index = library.firstIndex(where: { $0.id == id }) {
+            library[index].text = text
+            library[index].updatedAt = date
+            let wording = AnswerLibrary.comparable(question)
+            if !question.isEmpty, !library[index].questions.contains(where: { AnswerLibrary.comparable($0) == wording }) {
+                library[index].questions.append(question)
+            }
+        } else {
+            library.append(SavedAnswer(id: id, questions: question.isEmpty ? [] : [question], text: text,
+                                       site: site, updatedAt: date))
+        }
+        savedAnswers = library
+    }
+
+    // MARK: What it costs
+
+    /// One month's use of Claude: drafts written, answers checked, and an
+    /// estimate of what they cost at list price.
+    public struct MonthlyUsage: Codable, Sendable, Equatable {
+        public var drafts = 0
+        public var answersChecked = 0
+        public var dollars = 0.0
+
+        public init(drafts: Int = 0, answersChecked: Int = 0, dollars: Double = 0) {
+            self.drafts = drafts
+            self.answersChecked = answersChecked
+            self.dollars = dollars
+        }
+    }
+
+    public enum UsageKind: Sendable {
+        case draft
+        case answerCheck
+    }
+
+    /// Counts and costs only; never what was written.
+    public func recordUsage(_ kind: UsageKind, dollars: Double, on date: Date = Date()) {
+        var ledger = usageLedger
+        let month = Self.monthKey(for: date)
+        var entry = ledger[month] ?? MonthlyUsage()
+        switch kind {
+        case .draft: entry.drafts += 1
+        case .answerCheck: entry.answersChecked += 1
+        }
+        entry.dollars += dollars
+        ledger[month] = entry
+        // A year is plenty to look back on.
+        for key in ledger.keys.sorted().dropLast(12) { ledger.removeValue(forKey: key) }
+        if let data = try? JSONEncoder().encode(ledger) { defaults.set(data, forKey: Key.usageByMonth) }
+    }
+
+    public func usage(in date: Date = Date()) -> MonthlyUsage {
+        usageLedger[Self.monthKey(for: date)] ?? MonthlyUsage()
+    }
+
+    private var usageLedger: [String: MonthlyUsage] {
+        guard let data = defaults.data(forKey: Key.usageByMonth) else { return [:] }
+        return (try? JSONDecoder().decode([String: MonthlyUsage].self, from: data)) ?? [:]
+    }
+
+    static func monthKey(for date: Date) -> String {
+        let parts = Calendar.current.dateComponents([.year, .month], from: date)
+        return String(format: "%04d-%02d", parts.year ?? 0, parts.month ?? 0)
+    }
+
+    private var settingsAccounts: Set<String> {
+        (try? Keychain.storedAccounts(service: settingsService)) ?? []
+    }
+
+    private func readSetting(_ account: String, what: String) -> String {
+        do {
+            return try Keychain.get(account, service: settingsService) ?? ""
+        } catch {
+            draftSettingsError = "Couldn't read \(what): \(error.localizedDescription)"
+            Log.app.error("Could not read \(account, privacy: .public): \(error.localizedDescription, privacy: .public)")
+            return ""
+        }
+    }
+
+    /// Blank means remove, so "is there one" stays a question about presence.
+    private func writeSetting(_ value: String, _ account: String, what: String) {
+        do {
+            if value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                try Keychain.delete(account, service: settingsService)
+            } else {
+                try Keychain.set(value, for: account, sensitive: false, deviceOnly: true, service: settingsService)
+            }
+            draftSettingsError = nil
+        } catch {
+            draftSettingsError = "Couldn't save \(what): \(error.localizedDescription)"
+            Log.app.error("Could not store \(account, privacy: .public): \(error.localizedDescription, privacy: .public)")
         }
     }
 }

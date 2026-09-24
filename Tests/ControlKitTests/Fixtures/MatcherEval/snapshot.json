@@ -15414,6 +15414,10 @@
       "key" : "gpa",
       "score" : 0.95
     },
+    "regression.hometown" : {
+      "key" : "home_city",
+      "score" : 0.5
+    },
     "regression.hyphenated-email" : {
       "key" : "email_personal",
       "score" : 0.72
@@ -15578,6 +15582,9 @@
     "regression.name.user[profile_social_accounts][][url]" : {
       "key" : "linkedin_url",
       "score" : 0.45
+    },
+    "regression.parents-grow-up" : {
+      "score" : 0
     },
     "regression.permanent-zip" : {
       "key" : "home_postal",
@@ -15817,6 +15824,14 @@
     },
     "regression.username" : {
       "score" : 0
+    },
+    "regression.where-are-you-from" : {
+      "key" : "home_city",
+      "score" : 0.5
+    },
+    "regression.where-did-you-grow-up" : {
+      "key" : "home_city",
+      "score" : 0.5
     }
   }
 }

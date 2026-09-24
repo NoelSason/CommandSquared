@@ -60,6 +60,32 @@ public enum InsertionPlan {
         return ladder
     }
 
+    /// The ladder for a draft arriving in pieces, tried on the first piece;
+    /// whichever rung works is then used for the rest.
+    ///
+    /// Only rungs that insert at the caret. Setting the whole value leaves the
+    /// caret wherever the app decides, and the next piece could land in front
+    /// of the last. Pasting every few words would churn the user's clipboard;
+    /// when nothing else works the draft is gathered and pasted once at the end.
+    public static let streaming: [InsertionStrategy] = [.axSelectedText, .unicodeEvents]
+
+    /// Whether a field holding a draft still holds exactly what Control put
+    /// there, so the next piece may follow it.
+    ///
+    /// False the moment the user types, deletes or pastes in the middle of a
+    /// draft: the pieces after that would go wherever their caret now is.
+    /// Whitespace is compared loosely, since editors differ in how they report
+    /// line breaks and runs of spaces. `nil` is a field that doesn't report its
+    /// value, and there is nothing to compare.
+    public static func draftIsIntact(inserted: String, current: String?) -> Bool {
+        guard let current else { return true }
+        return collapsingWhitespace(current) == collapsingWhitespace(inserted)
+    }
+
+    private static func collapsingWhitespace(_ text: String) -> String {
+        text.split(whereSeparator: \.isWhitespace).joined(separator: " ")
+    }
+
     /// Whether a write that reported success has actually shown up.
     ///
     /// `before == nil` means the field never reports its value, so there is

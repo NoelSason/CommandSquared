@@ -56,6 +56,69 @@ request, and it sends:
 Jev answers with a key. The value is looked up locally afterward.
 `JevDecodingTests.testRequestCarriesNoVaultValues` pins this.
 
+### Long-answer drafts
+
+The one other thing that leaves the Mac, and only once it is set up (Settings → *Long
+answers*: a Claude key and some "About you" text). When the trigger lands in an empty,
+multi-line field whose label reads as an open question — "Tell us about a project you're
+proud of", "Why us?", anything with a word limit — and neither the cache nor the local rules
+have a confident answer, `AnswerDrafter` asks Claude (`claude-sonnet-5`, adaptive thinking
+at low effort) for a first draft and streams it into the field a few words at a time. Before
+every piece Control checks the field still has focus and still holds exactly the draft so far,
+and stops if not; pressing the trigger again stops it too. What was written stays. It sends:
+
+- the "About you" text, marked for prompt caching so the next question on the same form is cheap
+- the field's label, help text, placeholder and label cell, and nearby text capped as for Jev
+- the page's host and window title, which usually names the organisation asking
+- up to 4,000 characters of the page's own static text, often the role's description
+  (`PageTextReader`); nothing inside a form control or an editable region is read, so no
+  typed or filled-in value is ever part of it
+- drafts Control wrote for other questions on the same site in the last two hours, so each
+  answer tells a different story; kept in memory only
+
+`AnswerDrafter` has no access to the vault. A question only in the placeholder ("What's on
+your mind?") never counts, so chat boxes are left alone; see `LongAnswerPolicy`. A draft
+costs one to two cents, and settings show a running monthly estimate.
+
+Pressing the trigger again within three minutes, on a box still holding the untouched draft,
+clears it and writes a different one, shown the old draft as what to move away from. Tapping
+the double-tap modifier three times drafts into any empty box. When a draft is done the toast
+gives its word count, and warns when it's over a limit the question states (`LengthLimit`).
+
+### Saved answers
+
+Every answer Control drafts is saved when the user moves on from the box, as they left it:
+an edited draft is saved edited (`AnswerWatcher`, `Preferences.saveAnswer`). Before drafting,
+`FillController` looks for one to reuse instead:
+
+- the same wording (ignoring case, punctuation and Google Forms' "Required question") is found
+  locally, with no network call
+- a reworded question goes to Jev as a `choice` over up to 12 earlier questions
+  (`AnswerReuse`), and only a pick at 0.75 confidence or above is reused. **Jev sees question
+  text only, never an answer**, the same boundary as field matching
+- an answer is skipped if it breaks the new box's length limit, would put paragraphs in a
+  single-line box, or was already used on the same form
+
+A reused answer goes in at once, and pressing the trigger again replaces it with a fresh
+draft. Saved answers live in the Keychain on this Mac, listed and deletable in settings.
+
+### Learning from answers
+
+Off until turned on (Settings → *Long answers* → *Learn from your answers*). `AnswerWatcher`
+notices when the user has finished answering a form question: they typed into another
+field, clicked away, switched apps, or left the field for 20 seconds. It never writes to a
+field. The answer then goes to Claude (`claude-haiku-4-5`) only if every local check passes:
+
+- the field's own label reads as a question (`LongAnswerPolicy`), and it isn't a password field
+- the question isn't demographic, legal, salary, health or a security question (`AnswerLearner.shouldConsider`)
+- the answer is prose, not a link, a code or a number
+- the app or site isn't turned off, and the answer isn't a saved detail or an untouched Control draft
+
+Haiku sees the question, the answer, the host, the "About you" text and the facts already
+learned, and replies with up to three short facts or `NONE`. Facts are kept in the Keychain
+on this Mac, listed and deletable in settings, and ride along with "About you" in every
+draft. A ceiling of 40 calls an hour guards against anything firing in a loop.
+
 Two hard blocks run before matching: a focused element with subrole `AXSecureTextField` is
 refused outright, and so is anything on the user's app/domain denylist.
 

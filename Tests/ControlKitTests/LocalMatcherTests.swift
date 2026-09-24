@@ -88,6 +88,18 @@ final class LocalMatcherTests: XCTestCase {
         XCTAssertEqual(result?.key, "current_org")
     }
 
+    func testWhereYouGrewUpAsksWithTheHomeCityFirst() {
+        for label in ["Where did you grow up Required question", "Hometown", "Where are you from?"] {
+            let ranked = matcher.match(context(label: label), fillable: allKeys)
+            XCTAssertEqual(ranked.first?.key, "home_city", label)
+            XCTAssertEqual(Array(ranked.prefix(3).map(\.key)), ["home_city", "home_state", "home_country"], label)
+            let score = ranked.first?.score ?? 0
+            XCTAssertTrue(score >= MatchThresholds.confirm && score < MatchThresholds.autoInsert,
+                          "\(label): where they grew up may not be where they live, so it asks")
+        }
+        XCTAssertNil(top(context(label: "Where did your parents grow up?")), "someone else's hometown")
+    }
+
     func testBareNameFillsFullNameAndOffersAlternatives() {
         // "Name" on its own is ambiguous, but guessing then learning beats asking:
         // it fills the likeliest reading and leaves the others a press away.

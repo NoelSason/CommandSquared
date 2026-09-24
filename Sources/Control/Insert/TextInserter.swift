@@ -32,7 +32,29 @@ enum TextInserter {
             allowClipboard: allowClipboard,
             inWebContent: BrowserURLReader.isInsideWebArea(element)
         )
+        return await climb(ladder, text: text, element: element, before: before)
+    }
 
+    /// Adds one piece of a draft at the caret, trying only the given rungs —
+    /// `InsertionPlan.streaming` for the first piece, then whichever of those
+    /// worked. See `InsertionPlan.streaming` for why the ladder is shorter.
+    static func append(
+        _ text: String,
+        into element: AXUIElement,
+        using ladder: [InsertionStrategy]
+    ) async -> InsertionStrategy? {
+        guard !text.isEmpty else { return nil }
+        await waitForModifierRelease()
+        let before = AX.rawValue(element, kAXValueAttribute)
+        return await climb(ladder, text: text, element: element, before: before)
+    }
+
+    private static func climb(
+        _ ladder: [InsertionStrategy],
+        text: String,
+        element: AXUIElement,
+        before: String?
+    ) async -> InsertionStrategy? {
         for strategy in ladder {
             // A write from an earlier rung may only just have arrived. Typing on
             // top of one still in flight is how the value lands twice.

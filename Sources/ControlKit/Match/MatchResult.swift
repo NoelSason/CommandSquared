@@ -51,6 +51,9 @@ public enum FillDecision: Sendable, Equatable {
     case confirm(MatchResult)
     /// No usable guess. Show the full searchable picker, optionally explaining why.
     case choose(ranked: [ScoredKey], hint: String?)
+    /// An open-ended question, not a request for a saved detail. Write a first
+    /// draft from what the user has told Control about themselves.
+    case draft
     /// Refused before matching ran.
     case blocked(BlockReason)
 }

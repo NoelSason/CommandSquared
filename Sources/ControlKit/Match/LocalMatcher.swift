@@ -182,6 +182,18 @@ public struct LocalMatcher: Sendable {
             }
         }
 
+        // "Where did you grow up?", "Hometown": the answer is a place, and the
+        // home address is the likeliest one on file. Where the user lives now
+        // needn't be where they grew up, so this asks, home city first, and
+        // never fills on its own. A parent's hometown is theirs, though a
+        // parent's *address* is the user's permanent one, so family words stop
+        // only this rule, not the address rules.
+        if Self.mentions(own, Self.hometownPhrases), !Self.mentions(own, Self.familyWords) {
+            for (key, score) in Self.hometownKeys {
+                offer(key, score, "asks where the user is from")
+            }
+        }
+
         // Chromium's patterns, for the types that name a key outright. Control's
         // own vetoes still apply: "Emergency contact phone" is somebody else's.
         //
@@ -509,6 +521,14 @@ public struct LocalMatcher: Sendable {
     ]
     /// All below `MatchThresholds.autoInsert`: which link is a question, not a fact.
     static let unqualifiedLinkKeys: [(String, Double)] = [("linkedin_url", 0.45), ("website_url", 0.42), ("github_url", 0.40)]
+
+    static let hometownPhrases = [
+        "grow up", "grew up", "hometown", "where are you from", "where you are from",
+        "where you re from", "where were you raised", "where are you originally from",
+    ]
+    static let familyWords = ["parent", "mother", "father", "mom", "dad", "sibling", "brother", "sister", "grandparent"]
+    /// All below `MatchThresholds.autoInsert`, for the same reason as links.
+    static let hometownKeys: [(String, Double)] = [("home_city", 0.50), ("home_state", 0.42), ("home_country", 0.36)]
 
     static func isUnqualifiedLink(_ text: String) -> Bool {
         let words = text.split(separator: " ").map(String.init).filter { $0 != "|" }

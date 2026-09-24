@@ -1,7 +1,8 @@
 import Foundation
 
 /// Runs the three matching tiers in order and turns the outcome into a decision
-/// the UI can act on: cache → local rules → Jev.
+/// the UI can act on: cache → local rules → Jev. An open-ended question, when
+/// drafting is set up, stops after the local rules and is drafted instead.
 ///
 /// Every exit path is safe by construction — a network failure, a low-confidence
 /// answer, and an unrecognised field all land on the picker, never on a wrong
@@ -53,6 +54,14 @@ public final class MatchCoordinator {
                 looksSensitive: LocalMatcher.looksSensitive(context)
             )
             return gate(result, context: context)
+        }
+
+        // An open-ended question wants writing, not a saved detail. It goes
+        // after the cache and the rules, so a snippet the user once picked for
+        // this field, or a confident rule, still wins — and before Jev, whose
+        // answer would only be thrown away.
+        if preferences.canDraftAnswers, LongAnswerPolicy.isOpenEndedQuestion(context) {
+            return .draft
         }
 
         // Tier 2 — Jev, for everything the rules could not settle.

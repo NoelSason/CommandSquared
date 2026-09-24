@@ -13,6 +13,8 @@ struct PickerRow: Identifiable, Equatable {
     let score: Double
     /// Set when the value comes from a different profile than the active one.
     var inheritedFrom: String?
+    /// Drawn before the label, for rows that aren't a saved detail.
+    var symbol: String?
 
     var id: String { key }
 }
@@ -164,6 +166,11 @@ private struct PickerRowView: View {
         HStack(spacing: 8) {
             VStack(alignment: .leading, spacing: 1) {
                 HStack(spacing: 5) {
+                    if let symbol = row.symbol {
+                        Image(systemName: symbol)
+                            .font(.system(size: 11))
+                            .foregroundStyle(Color.accentColor)
+                    }
                     Text(row.label)
                         .font(.system(size: 13, weight: .medium))
                     if row.sensitive {

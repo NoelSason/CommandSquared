@@ -31,7 +31,7 @@ final class SettingsWindowController {
                 onTriggerChanged: onTriggerChanged
             )
             let window = NSWindow(
-                contentRect: NSRect(x: 0, y: 0, width: 620, height: 560),
+                contentRect: NSRect(x: 0, y: 0, width: 660, height: 560),
                 styleMask: [.titled, .closable, .resizable],
                 backing: .buffered,
                 defer: false
@@ -62,7 +62,7 @@ private struct SettingsView: View {
     /// `TabView`, which macOS puts in the window toolbar and folds into a `>>`
     /// overflow menu once six tabs no longer fit.
     enum Section: String, CaseIterable, Identifiable {
-        case details, snippets, trigger, matching, privacy, memory
+        case details, snippets, answers, trigger, matching, privacy, memory
 
         var id: String { rawValue }
 
@@ -70,6 +70,7 @@ private struct SettingsView: View {
             switch self {
             case .details: "Your details"
             case .snippets: "Snippets"
+            case .answers: "Long answers"
             case .trigger: "Trigger"
             case .matching: "Matching"
             case .privacy: "Privacy"
@@ -81,6 +82,7 @@ private struct SettingsView: View {
             switch self {
             case .details: "person.text.rectangle"
             case .snippets: "text.quote"
+            case .answers: "text.append"
             case .trigger: "command"
             case .matching: "wand.and.stars"
             case .privacy: "hand.raised"
@@ -98,7 +100,7 @@ private struct SettingsView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .clipped()
         }
-        .frame(minWidth: 560, minHeight: 480)
+        .frame(minWidth: 620, minHeight: 480)
     }
 
     private var tabBar: some View {
@@ -133,6 +135,7 @@ private struct SettingsView: View {
         switch section {
         case .details: DetailsTab(vault: vault)
         case .snippets: SnippetsTab(vault: vault)
+        case .answers: scrolling { AnswersTab(preferences: preferences) }
         case .trigger: scrolling { ShortcutTab(preferences: preferences, onTriggerChanged: onTriggerChanged) }
         case .matching: scrolling { MatchingTab(preferences: preferences) }
         case .privacy: scrolling { PrivacyTab(preferences: preferences) }
@@ -380,6 +383,302 @@ private struct VaultFieldRow: View {
     }
 }
 
+// MARK: Long answers
+
+private struct AnswersTab: View {
+    @Bindable var preferences: Preferences
+    @State private var about = ""
+    @State private var savedAbout = ""
+    @State private var apiKey = ""
+    @State private var hasKey = false
+    @State private var testing = false
+    @State private var status: (ok: Bool, message: String)?
+
+    @State private var facts: [LearnedFact] = []
+    @State private var importError: String?
+    @State private var saved: [SavedAnswer] = []
+
+    /// One saved answer by id, or all of them.
+    private func forgetAnswer(_ id: UUID?) {
+        preferences.savedAnswers = id.map { id in saved.filter { $0.id != id } } ?? []
+        saved = preferences.savedAnswers
+    }
+    @State private var monthUsage = Preferences.MonthlyUsage()
+
+    /// Billed to the user's own key, so it's worth seeing.
+    private var usageSummary: String {
+        let usage = monthUsage
+        guard usage.drafts + usage.answersChecked > 0 else { return "Nothing used this month yet." }
+        var parts: [String] = []
+        if usage.drafts > 0 { parts.append("\(usage.drafts) draft\(usage.drafts == 1 ? "" : "s")") }
+        if usage.answersChecked > 0 {
+            parts.append("\(usage.answersChecked) answer\(usage.answersChecked == 1 ? "" : "s") checked")
+        }
+        let cost = usage.dollars < 0.01 ? "under a cent" : "about " + usage.dollars.formatted(.currency(code: "USD"))
+        return "This month: " + parts.joined(separator: " and ") + ", " + cost + "."
+    }
+
+    private var aboutStatus: String {
+        if aboutIsDirty { return "Not saved" }
+        if savedAbout.isEmpty { return "Empty" }
+        return "Saved · \(LengthLimit.wordCount(savedAbout).formatted()) words"
+    }
+
+    /// Adds a document's text to the box, below what's there. Not saved until
+    /// the user has looked it over and pressed Save.
+    private func addFromFile() {
+        importError = nil
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = DocumentText.types
+        panel.allowsMultipleSelection = false
+        panel.message = "Choose a resume, bio, or notes about yourself."
+        NSApp.activate()
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        guard let text = DocumentText.read(url) else {
+            importError = "Couldn't read any text in \(url.lastPathComponent)."
+            return
+        }
+        let current = about.trimmingCharacters(in: .whitespacesAndNewlines)
+        about = current.isEmpty ? text : current + "\n\n" + text
+    }
+
+    private var aboutIsDirty: Bool { about != savedAbout }
+
+    /// One fact by id, or all of them.
+    private func forget(_ id: UUID?) {
+        preferences.learnedFacts = id.map { id in facts.filter { $0.id != id } } ?? []
+        facts = preferences.learnedFacts
+    }
+
+    /// Three taps only exist when the trigger is a double tap.
+    private var tripleTapModifier: String? {
+        switch preferences.triggerMode {
+        case .doubleCommand: "⌘"
+        case .doubleControl: "⌃"
+        case .chord: nil
+        }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 6) {
+                Toggle("Draft answers to open-ended questions", isOn: $preferences.draftAnswersEnabled)
+                Text("In a question like “Tell us about a project you're proud of,” press your shortcut and Control writes a first draft in your voice from what you've told it below. Read it over before you send it.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.tertiary)
+                    .fixedSize(horizontal: false, vertical: true)
+                if let modifier = tripleTapModifier {
+                    Text("To get a draft in any empty box, even one Control doesn't recognize as a question, tap \(modifier) three times.")
+                        .font(.system(size: 11))
+                        .foregroundStyle(.tertiary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+
+            Divider()
+
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Text("About you")
+                        .font(.system(size: 12, weight: .medium))
+                    Spacer()
+                    Text(aboutStatus)
+                        .font(.system(size: 11))
+                        .foregroundStyle(aboutIsDirty ? Color.orange : Color.secondary)
+                    Button("Add from a file…") { addFromFile() }
+                    Button("Save") { saveAbout() }
+                        .disabled(!aboutIsDirty)
+                        .keyboardShortcut("s", modifiers: .command)
+                }
+                TextEditor(text: $about)
+                    .font(.system(size: 12))
+                    .frame(height: 220)
+                    .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.secondary.opacity(0.25)))
+                if let importError {
+                    Label(importError, systemImage: "exclamationmark.triangle.fill")
+                        .font(.system(size: 11))
+                        .foregroundStyle(.orange)
+                }
+                Text("Your background, projects, experience, and what you care about. A resume is a good start. Describe how you write, or paste a few paragraphs you wrote yourself, and drafts will sound like you.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.tertiary)
+            }
+
+            Divider()
+
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("Claude key")
+                        .font(.system(size: 12))
+                        .frame(width: 70, alignment: .leading)
+                    SecureField(hasKey ? "Saved" : "Not set", text: $apiKey)
+                        .textFieldStyle(.roundedBorder)
+                        .onSubmit(saveKey)
+                    Button("Save", action: saveKey)
+                        .disabled(apiKey.trimmingCharacters(in: .whitespaces).isEmpty)
+                    Button("Test") { Task { await testKey() } }
+                        .disabled(!hasKey || testing)
+                }
+                if let status {
+                    Label(status.message, systemImage: status.ok ? "checkmark.circle.fill" : "xmark.circle.fill")
+                        .font(.system(size: 11))
+                        .foregroundStyle(status.ok ? Color.green : Color.orange)
+                } else if hasKey {
+                    Label("A key is saved.", systemImage: "checkmark.circle.fill")
+                        .font(.system(size: 11))
+                        .foregroundStyle(.green)
+                }
+                if let error = preferences.draftSettingsError {
+                    Label(error, systemImage: "exclamationmark.triangle.fill")
+                        .font(.system(size: 11))
+                        .foregroundStyle(.orange)
+                }
+                Text(usageSummary)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                Text("When you ask for a draft, the question and what you've written above are sent to Claude to write it. Your saved details never are.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.tertiary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Divider()
+
+            VStack(alignment: .leading, spacing: 8) {
+                Toggle("Reuse your earlier answers", isOn: $preferences.reuseAnswers)
+                Text("Every answer Control drafts is kept here as you left it, edits included. When a question asks the same thing again, on any form, Control fills in that answer instead of writing a new one. Press your shortcut again for a fresh draft.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.tertiary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                HStack {
+                    Text(saved.isEmpty ? "No saved answers yet." : "Saved answers (\(saved.count))")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(saved.isEmpty ? .tertiary : .primary)
+                    Spacer()
+                    if !saved.isEmpty {
+                        Button("Forget all") { forgetAnswer(nil) }
+                    }
+                }
+                ForEach(saved.sorted { $0.updatedAt > $1.updatedAt }) { answer in
+                    HStack(alignment: .top, spacing: 8) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("“\(answer.questions.first ?? "Untitled question")”")
+                                .font(.system(size: 12, weight: .medium))
+                                .lineLimit(1)
+                            if answer.questions.count > 1 {
+                                Text("Also answered \(answer.questions.count - 1) other wording\(answer.questions.count == 2 ? "" : "s")")
+                                    .font(.system(size: 10))
+                                    .foregroundStyle(.tertiary)
+                            }
+                            Text(answer.text)
+                                .font(.system(size: 11))
+                                .foregroundStyle(.secondary)
+                                .lineLimit(2)
+                        }
+                        Spacer()
+                        Button { forgetAnswer(answer.id) } label: {
+                            Image(systemName: "xmark.circle.fill").foregroundStyle(.tertiary)
+                        }
+                        .buttonStyle(.plain)
+                        .help("Forget this answer")
+                    }
+                    .padding(.vertical, 3)
+                }
+            }
+
+            Divider()
+
+            VStack(alignment: .leading, spacing: 8) {
+                Toggle("Learn from your answers", isOn: $preferences.learnFromAnswers)
+                Text("When you answer a question on a form, like “What's a fun fact about you?”, Control notes anything worth remembering and uses it in future drafts. To decide, the question and your answer are sent to Claude. Answers to demographic, salary, health and password questions never are.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.tertiary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                HStack {
+                    Text(facts.isEmpty ? "Nothing learned yet." : "Learned about you (\(facts.count))")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(facts.isEmpty ? .tertiary : .primary)
+                    Spacer()
+                    if !facts.isEmpty {
+                        Button("Forget all") { forget(nil) }
+                    }
+                }
+                ForEach(facts.reversed()) { fact in
+                    HStack(alignment: .top, spacing: 8) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(fact.text)
+                                .font(.system(size: 12))
+                                .fixedSize(horizontal: false, vertical: true)
+                            Text(["From “\(fact.question)”", fact.site].compactMap { $0 }.joined(separator: " · "))
+                                .font(.system(size: 10))
+                                .foregroundStyle(.tertiary)
+                                .lineLimit(1)
+                        }
+                        Spacer()
+                        Button { forget(fact.id) } label: {
+                            Image(systemName: "xmark.circle.fill").foregroundStyle(.tertiary)
+                        }
+                        .buttonStyle(.plain)
+                        .help("Forget this")
+                    }
+                    .padding(.vertical, 3)
+                }
+            }
+        }
+        .onAppear {
+            savedAbout = preferences.aboutYou
+            about = savedAbout
+            hasKey = preferences.hasClaudeKey
+            facts = preferences.learnedFacts
+            saved = preferences.savedAnswers
+            monthUsage = preferences.usage()
+        }
+        // New facts and new use can arrive while this pane is open.
+        .task {
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(4))
+                let current = preferences.learnedFacts
+                if current != facts { facts = current }
+                let answers = preferences.savedAnswers
+                if answers != saved { saved = answers }
+                monthUsage = preferences.usage()
+            }
+        }
+        .onDisappear {
+            // Leaving the pane shouldn't throw away a long paste.
+            if aboutIsDirty { saveAbout() }
+        }
+    }
+
+    private func saveAbout() {
+        preferences.aboutYou = about
+        savedAbout = preferences.aboutYou
+    }
+
+    private func saveKey() {
+        let trimmed = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        preferences.claudeAPIKey = trimmed
+        apiKey = ""
+        hasKey = preferences.hasClaudeKey
+        status = preferences.draftSettingsError.map { (false, $0) }
+    }
+
+    /// Actually calls Claude, like the Jev test: this reports what happened.
+    private func testKey() async {
+        testing = true
+        defer { testing = false }
+        do {
+            try await ClaudeClient(apiKey: preferences.claudeAPIKey).checkConnection()
+            status = (true, "Connected — Claude answered.")
+        } catch {
+            status = (false, error.localizedDescription)
+        }
+    }
+}
+
 // MARK: Shortcut
 
 private struct ShortcutTab: View {
@@ -512,7 +811,7 @@ private struct MatchingTab: View {
 
             VStack(alignment: .leading, spacing: 8) {
                 Toggle("Finish what you start typing", isOn: $preferences.inlineSuggestionsEnabled)
-                Text("Begin typing a detail Control knows and it completes the rest. Tab to keep it, carry on typing to ignore it, tap ⌘ twice for a different one. Only ever in labelled form fields — never in spreadsheets, editors, or messages.")
+                Text("Begin typing a detail Control knows and it shows the rest beside the field. Press Tab or your shortcut to fill it in, or keep typing to ignore it. Nothing you type is changed until you do. Only ever in labelled form fields, never in spreadsheets, editors, or messages.")
                     .font(.system(size: 11))
                     .foregroundStyle(.tertiary)
             }

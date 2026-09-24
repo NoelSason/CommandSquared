@@ -26,6 +26,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let hotkey = HotkeyManager()
     private let doubleTap = DoubleTapMonitor()
     private let suggester: InlineSuggester
+    private let answerWatcher: AnswerWatcher
 
     private var menuBar: MenuBarController?
     private var settingsWindow: SettingsWindowController?
@@ -37,8 +38,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let cache = MatchCache()
         self.vault = vault
         self.cache = cache
-        fillController = FillController(vault: vault, cache: cache, preferences: preferences)
+        let fill = FillController(vault: vault, cache: cache, preferences: preferences)
+        fillController = fill
         suggester = InlineSuggester(vault: vault, cache: cache, preferences: preferences)
+        answerWatcher = AnswerWatcher(vault: vault, preferences: preferences,
+                                      isOwnDraft: { fill.isOwnDraft($0) })
         super.init()
     }
 
@@ -65,9 +69,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         hotkey.onFire = { [weak self] in self?.fire() }
         doubleTap.onFire = { [weak self] in self?.fire() }
+        doubleTap.onTripleFire = { [weak self] in
+            guard let self else { return }
+            Task { await self.fillController.handleDraftHotkey() }
+        }
+        // Only worth delaying every double for when a triple can do something.
+        doubleTap.wantsTripleTap = { [weak self] in self?.preferences.canDraftAnswers ?? false }
         fillController.suggester = suggester
+        fillController.answerWatcher = answerWatcher
         installTrigger()
         installSuggester()
+        answerWatcher.start()
 
         if OnboardingFlow.showsAtLaunch(
             completed: preferences.onboardingCompleted,

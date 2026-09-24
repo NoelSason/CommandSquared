@@ -17,6 +17,9 @@ final class FillController {
     /// Set by the app delegate. When a typed-ahead suggestion is on screen, the
     /// trigger cycles it instead of starting a fresh fill.
     weak var suggester: InlineSuggester?
+    /// Set by the app delegate. Told about every draft, so the text the user
+    /// finally leaves in the box is what gets saved.
+    weak var answerWatcher: AnswerWatcher?
 
     /// When the inspector window is open the hotkey captures instead of filling,
     /// so the capture layer can be validated without anything being typed.
@@ -48,12 +51,18 @@ final class FillController {
     // MARK: Entry point
 
     func handleHotkey() async {
+        // A press while a draft is being written stops it, wherever focus is.
+        if let draftTask {
+            draftStopRequested = true
+            draftTask.cancel()
+            return
+        }
         guard !picker.isVisible else { return }
         if let practiceHandler, await practiceHandler() { return }
         // Control's own windows are not something to fill, and reading them
         // through the Accessibility API from Control itself can hang.
         guard !NSRunningApplication.current.isActive else { return }
-        if suggester?.cycle() == true { return }
+        if await suggester?.acceptFromTrigger() == true { return }
         corrections.stop()
 
         guard AX.isTrusted else {
@@ -76,12 +85,58 @@ final class FillController {
                 onInspect?(field.context, AXFieldReader.debugDump(field.element))
                 return
             }
+            if await redraftIfRepeat(field) { return }
             // Highlighted text containing {placeholders} is a template, and the
             // user is asking for it to be filled in — not for this field to be
             // matched against the vault.
             if await expandSelection(field) { return }
             if await cycleIfRepeat(field) { return }
             await fill(field)
+        }
+    }
+
+    /// The trigger tapped three times: write an answer in this box, whatever
+    /// it looks like. The same draft as a recognised question gets, minus the
+    /// guessing — so it still needs drafting set up, an empty box, and a field
+    /// Control is allowed to touch.
+    func handleDraftHotkey() async {
+        if let draftTask {
+            draftStopRequested = true
+            draftTask.cancel()
+            return
+        }
+        guard !picker.isVisible, !NSRunningApplication.current.isActive else { return }
+        corrections.stop()
+
+        guard AX.isTrusted else {
+            toast.show(title: "Control needs Accessibility access", detail: "Open Control's settings to grant it.",
+                       symbol: "exclamationmark.triangle.fill", tone: .warning, near: nil)
+            return
+        }
+        guard preferences.canDraftAnswers else {
+            toast.show(title: "Long answers aren't set up", detail: "Add your details in Control's settings.",
+                       symbol: "pencil.line", tone: .warning, near: nil)
+            return
+        }
+
+        switch await AXFieldReader.readFocusedField() {
+        case let .failure(reason):
+            toast.show(title: reason.message, detail: "", symbol: "exclamationmark.circle", tone: .warning, near: nil)
+
+        case let .success(field):
+            let anchor = AX.frame(field.element)
+            if field.context.isSecureField {
+                toast.show(title: BlockReason.secureField.message, detail: "", symbol: "hand.raised.fill",
+                           tone: .warning, near: anchor)
+            } else if preferences.isDenied(field.context) {
+                toast.show(title: BlockReason.deniedApp.message, detail: "", symbol: "hand.raised.fill",
+                           tone: .warning, near: anchor)
+            } else if !field.context.isEmpty {
+                toast.show(title: "Clear the box first", detail: "A draft never goes on top of what's there.",
+                           symbol: "pencil.line", tone: .warning, near: anchor)
+            } else {
+                await draftAnswer(field, anchor: anchor)
+            }
         }
     }
 
@@ -184,7 +239,7 @@ final class FillController {
         let result: MatchResult
         switch await coordinator.decide(for: context) {
         case let .insert(match), let .confirm(match): result = match
-        case .choose, .blocked: return nil
+        case .choose, .blocked, .draft: return nil
         }
         guard let field = vault.field(for: result.key), !field.sensitive else { return nil }
         do {
@@ -224,14 +279,407 @@ final class FillController {
             )
 
         case let .choose(ranked, hint):
+            // Nothing matched a multi-line box: most likely a question the
+            // policy didn't recognise, so a draft is the likelier pick.
+            let likelyQuestion = LongAnswerPolicy.multiLineRoles.contains(field.context.role ?? "")
             presentPicker(
                 field: field,
                 anchor: anchor,
                 ranked: pickerList(startingWith: ranked.map(\.key)),
-                preselected: ranked.first?.key,
+                preselected: likelyQuestion && canOfferDraft(for: field) ? Self.draftRowKey : ranked.first?.key,
                 hint: hint
             )
+
+        case .draft:
+            await draftAnswer(field, anchor: anchor)
         }
+    }
+
+    // MARK: Long answers
+
+    /// Why a draft stopped before it finished.
+    private enum DraftStop {
+        case byUser
+        case focusMoved
+        /// The text in the box is no longer exactly what Control put there.
+        case fieldChanged
+        case couldNotInsert
+    }
+
+    /// The draft being written, if any. A second press of the trigger stops it.
+    private var draftTask: Task<Void, Never>?
+    private var draftStopRequested = false
+    /// Drafts written recently, so the next question on the same form tells a
+    /// different story, and learning from answers can tell Control's writing
+    /// from the user's.
+    private var history = DraftHistory()
+    /// The last draft and the box it went in, for "press again for a
+    /// different one". Kept for partial drafts too: stopping one and pressing
+    /// again is the same request.
+    private var lastDraftField: (element: AXUIElement, text: String, at: Date, savedAnswer: UUID, reused: Bool)?
+    /// How long after a draft a press on the same, untouched box means
+    /// "a different one" rather than "fill this".
+    private static let redraftWindow: TimeInterval = 180
+
+    /// Whether this text is a draft Control wrote, untouched. An edited draft
+    /// is the user's writing and doesn't count.
+    func isOwnDraft(_ text: String) -> Bool {
+        let drafts = history.entries.map(\.text) + [lastDraftField?.text].compactMap { $0 }
+        return drafts.contains { InsertionPlan.draftIsIntact(inserted: $0, current: text) }
+    }
+
+    /// Writes a first draft into an open-ended question, word by word as it
+    /// streams in. Nothing from the vault goes into it; see `AnswerDrafter` for
+    /// what does.
+    /// - Parameter savedAnswer: the saved answer this draft becomes. A fresh
+    ///   draft gets a new one; "press again" keeps the one it replaces.
+    private func draftAnswer(
+        _ field: FocusedField,
+        anchor: NSRect?,
+        previousDraft: String? = nil,
+        savedAnswer: UUID? = nil
+    ) async {
+        draftStopRequested = false
+        let task = Task {
+            await self.writeDraft(field, anchor: anchor, previousDraft: previousDraft, savedAnswer: savedAnswer ?? UUID())
+        }
+        draftTask = task
+        await task.value
+        draftTask = nil
+    }
+
+    private func writeDraft(_ field: FocusedField, anchor: NSRect?, previousDraft: String?, savedAnswer: UUID) async {
+        toast.show(title: previousDraft == nil ? "Writing a draft…" : "Writing a different draft…", detail: "",
+                   symbol: "pencil.line", tone: .success, near: anchor, footnote: "Press again to stop",
+                   duration: .seconds(45))
+
+        let site = DraftHistory.site(for: field.context)
+
+        // Asked before? Use what was written then, as the user left it. Not
+        // when they've just asked for something different.
+        if previousDraft == nil, preferences.reuseAnswers, let saved = await reusableAnswer(for: field, site: site) {
+            guard !draftStopRequested else { return reportDraftStop(.byUser, wroteSomething: false, anchor: anchor) }
+            return await useSavedAnswer(saved, in: field, site: site, anchor: anchor)
+        }
+        var client = ClaudeClient(apiKey: preferences.claudeAPIKey)
+        let preferences = self.preferences
+        let model = client.model
+        client.onUsage = { usage in
+            Task { @MainActor in preferences.recordUsage(.draft, dollars: usage.dollars(for: model)) }
+        }
+        let drafter = AnswerDrafter(client: client)
+        let pieces = drafter.draft(
+            for: field.context,
+            pageTitle: windowTitle(of: field.app),
+            aboutYou: preferences.aboutYou,
+            learned: preferences.learnedFacts,
+            otherAnswers: history.others(on: site, excluding: field.context.signature),
+            previousDraft: previousDraft,
+            pageText: PageTextReader.excerpt(around: field.element)
+        )
+
+        var chunker = DraftChunker()
+        var inserted = ""
+        // Whatever made it into the field, however the draft ended.
+        defer {
+            if !inserted.isEmpty {
+                lastDraftField = (field.element, inserted, Date(), savedAnswer, false)
+                answerWatcher?.watchDraft(field.element, context: field.context, savedAnswer: savedAnswer, text: inserted)
+            }
+        }
+        var ladder = InsertionPlan.streaming
+        var gathered: String?
+
+        do {
+            // Leaving this loop early — any `return` — cancels the request.
+            for try await delta in pieces {
+                if let stop = await place(chunker.feed(delta), in: field, inserted: &inserted,
+                                          ladder: &ladder, gathered: &gathered) {
+                    return reportDraftStop(stop, wroteSomething: !inserted.isEmpty, anchor: anchor)
+                }
+            }
+            if draftStopRequested {
+                return reportDraftStop(.byUser, wroteSomething: !inserted.isEmpty, anchor: anchor)
+            }
+            if let stop = await place(chunker.finish(), in: field, inserted: &inserted,
+                                      ladder: &ladder, gathered: &gathered) {
+                return reportDraftStop(stop, wroteSomething: !inserted.isEmpty, anchor: anchor)
+            }
+        } catch {
+            if draftStopRequested || error is CancellationError {
+                return reportDraftStop(.byUser, wroteSomething: !inserted.isEmpty, anchor: anchor)
+            }
+            toast.show(title: inserted.isEmpty ? "Couldn't write a draft" : "The draft stopped partway",
+                       detail: error.localizedDescription, symbol: "xmark.circle", tone: .warning, near: anchor)
+            Log.match.error("Drafting failed after \(inserted.count) characters: \(error.localizedDescription, privacy: .public)")
+            return
+        }
+
+        // Nothing but a paste worked here, so the draft was gathered instead.
+        if let gathered {
+            guard TextInserter.isStillFocused(field.element) else {
+                return reportDraftStop(.focusMoved, wroteSomething: false, anchor: anchor)
+            }
+            guard InsertionPlan.draftIsIntact(inserted: "", current: AX.rawValue(field.element, kAXValueAttribute)) else {
+                return reportDraftStop(.fieldChanged, wroteSomething: false, anchor: anchor)
+            }
+            guard let strategy = await TextInserter.insert(gathered, into: field.element, allowClipboard: true) else {
+                return reportDraftStop(.couldNotInsert, wroteSomething: false, anchor: anchor)
+            }
+            ladder = [strategy]
+            inserted = gathered
+        }
+
+        guard !inserted.isEmpty else {
+            toast.show(title: "Couldn't write a draft", detail: ClaudeError.empty.localizedDescription,
+                       symbol: "xmark.circle", tone: .warning, near: anchor)
+            return
+        }
+
+        // Length only: the answer is the user's writing, not something to log.
+        Log.insert.info("Drafted \(inserted.count) characters via \(ladder.first?.rawValue ?? "?", privacy: .public).")
+        history.record(DraftHistory.Entry(
+            question: Self.question(of: field.context),
+            text: inserted,
+            site: site,
+            field: field.context.signature,
+            savedAnswer: savedAnswer
+        ))
+        reportDraftWritten(inserted, limit: LengthLimit.find(in: field.context), near: AX.frame(field.element))
+    }
+
+    // MARK: Saved answers
+
+    static func question(of context: FieldContext) -> String {
+        LongAnswerPolicy.question(in: context) ?? context.label ?? context.labelCell ?? ""
+    }
+
+    /// A saved answer to this question, if there is one that fits this box and
+    /// hasn't already been used on this form. The same wording is found here;
+    /// a reworded question is Jev's call, and only question text goes to Jev.
+    private func reusableAnswer(for field: FocusedField, site: String) async -> SavedAnswer? {
+        let question = Self.question(of: field.context)
+        let usedHere = Set(history.others(on: site, excluding: field.context.signature).compactMap(\.savedAnswer))
+        let library = preferences.savedAnswers.filter {
+            !usedHere.contains($0.id) && AnswerLibrary.fits($0.text, in: field.context)
+        }
+        guard !question.isEmpty, !library.isEmpty else { return nil }
+
+        if let exact = AnswerLibrary.exactMatch(for: question, in: library) { return exact }
+
+        guard preferences.jevEnabled, !preferences.jevAPIKey.isEmpty else { return nil }
+        let candidates = AnswerLibrary.candidates(for: question, in: library)
+        do {
+            let answers = try await JevClient(apiKey: preferences.jevAPIKey).decide(
+                state: AnswerReuse.state(question: question, site: field.context.domain),
+                questions: AnswerReuse.questions(for: candidates)
+            )
+            return AnswerReuse.pick(answers, from: candidates)
+        } catch {
+            // No match is the safe answer: a fresh draft follows.
+            Log.match.error("Couldn't compare with saved answers: \(error.localizedDescription, privacy: .public)")
+            return nil
+        }
+    }
+
+    private func useSavedAnswer(_ saved: SavedAnswer, in field: FocusedField, site: String, anchor: NSRect?) async {
+        guard TextInserter.isStillFocused(field.element) else {
+            return reportDraftStop(.focusMoved, wroteSomething: false, anchor: anchor)
+        }
+        guard InsertionPlan.draftIsIntact(inserted: "", current: AX.rawValue(field.element, kAXValueAttribute)) else {
+            return reportDraftStop(.fieldChanged, wroteSomething: false, anchor: anchor)
+        }
+        guard await TextInserter.insert(saved.text, into: field.element, allowClipboard: true) != nil else {
+            return reportDraftStop(.couldNotInsert, wroteSomething: false, anchor: anchor)
+        }
+
+        lastDraftField = (field.element, saved.text, Date(), saved.id, true)
+        history.record(DraftHistory.Entry(question: Self.question(of: field.context), text: saved.text, site: site,
+                                          field: field.context.signature, savedAnswer: saved.id))
+        answerWatcher?.watchDraft(field.element, context: field.context, savedAnswer: saved.id, text: saved.text)
+        Log.insert.info("Reused a saved answer (\(saved.text.count) characters).")
+        toast.show(title: "Used your earlier answer", detail: "From “\(saved.questions.first ?? "an earlier question")”",
+                   symbol: "clock.arrow.circlepath", tone: .success, near: AX.frame(field.element),
+                   footnote: "Press again for a new draft", duration: .seconds(3))
+    }
+
+    /// Says how long the draft came out, and warns when it's over a limit the
+    /// question states. The model is told the limit; this checks it kept to it.
+    private func reportDraftWritten(_ text: String, limit: LengthLimit?, near anchor: NSRect?) {
+        let words = LengthLimit.wordCount(text)
+        let footnote = "Press again for a different draft"
+        if let limit, limit.isExceeded(by: text) {
+            let unit = limit.unit == .words ? "words" : "characters"
+            toast.show(title: "Draft written, but it's long",
+                       detail: "\(limit.count(text)) \(unit), over the \(limit.value)-\(unit.dropLast()) limit",
+                       symbol: "exclamationmark.triangle.fill", tone: .warning, near: anchor, footnote: footnote,
+                       duration: .seconds(4))
+            return
+        }
+        toast.show(title: "Draft written", detail: "\(words) words. Read it over before you send it.",
+                   symbol: "checkmark.circle.fill", tone: .success, near: anchor, footnote: footnote,
+                   duration: .seconds(3))
+    }
+
+    // MARK: A different draft
+
+    /// A press on a box still holding exactly the draft Control just wrote
+    /// asks for a different one: clear it, and draft again with the old one
+    /// shown as what to move away from.
+    private func redraftIfRepeat(_ field: FocusedField) async -> Bool {
+        guard let last = lastDraftField,
+              Date().timeIntervalSince(last.at) < Self.redraftWindow,
+              AX.same(last.element, field.element),
+              let current = AX.rawValue(field.element, kAXValueAttribute),
+              InsertionPlan.draftIsIntact(inserted: last.text, current: current),
+              preferences.canDraftAnswers
+        else { return false }
+
+        let anchor = AX.frame(field.element)
+        guard await clearDraft(in: field.element) else {
+            toast.show(title: "Couldn't clear the draft", detail: "Delete it by hand and try again.",
+                       symbol: "xmark.circle", tone: .warning, near: anchor)
+            return true
+        }
+
+        var context = field.context
+        context.isEmpty = true
+        // A new draft in place of a reused answer is a new answer; in place of
+        // a draft, it's the same answer, rewritten.
+        await draftAnswer(FocusedField(element: field.element, context: context, app: field.app),
+                          anchor: anchor, previousDraft: last.text, savedAnswer: last.reused ? nil : last.savedAnswer)
+        return true
+    }
+
+    /// Empties a box holding a draft, most precise method first, checking the
+    /// box after each. Never deletes past what's there: the backspace fallback
+    /// only runs with the caret at the end.
+    private func clearDraft(in element: AXUIElement) async -> Bool {
+        await TextInserter.waitForModifierRelease()
+        guard let before = AX.rawValue(element, kAXValueAttribute) else { return false }
+        if before.isEmpty { return true }
+
+        // Select everything, then replace the selection with nothing.
+        var all = CFRange(location: 0, length: before.utf16.count)
+        if let range = AXValueCreate(.cfRange, &all), AX.set(element, kAXSelectedTextRangeAttribute, range) {
+            if AX.set(element, kAXSelectedTextAttribute, "" as CFTypeRef), await becomesEmpty(element) { return true }
+            // The selection took but the write didn't: one Delete clears it.
+            await TextInserter.deleteBackwards(count: 1)
+            if await becomesEmpty(element) { return true }
+        }
+
+        // Last resort, one character at a time, and only from the end.
+        guard let remaining = AX.rawValue(element, kAXValueAttribute), caretIsAtEnd(of: element, in: remaining)
+        else { return false }
+        await TextInserter.deleteBackwards(count: remaining.count)
+        return await becomesEmpty(element, within: .seconds(2))
+    }
+
+    private func becomesEmpty(_ element: AXUIElement, within timeout: Duration = .milliseconds(300)) async -> Bool {
+        let deadline = ContinuousClock.now.advanced(by: timeout)
+        while true {
+            if (AX.rawValue(element, kAXValueAttribute) ?? "x").isEmpty { return true }
+            guard ContinuousClock.now < deadline else { return false }
+            try? await Task.sleep(for: .milliseconds(15))
+        }
+    }
+
+    private func caretIsAtEnd(of element: AXUIElement, in value: String) -> Bool {
+        guard let raw = AX.copy(element, kAXSelectedTextRangeAttribute),
+              CFGetTypeID(raw) == AXValueGetTypeID()
+        else { return false }
+        var range = CFRange()
+        guard AXValueGetValue(raw as! AXValue, .cfRange, &range) else { return false }
+        return range.length == 0 && range.location == value.utf16.count
+    }
+
+    /// Puts one piece of the draft in the field, or says why it has to stop.
+    ///
+    /// Checked before every piece, because typing goes wherever focus is: the
+    /// user can click away, type, or ask it to stop at any point in a stream
+    /// that runs for several seconds.
+    private func place(
+        _ piece: String,
+        in field: FocusedField,
+        inserted: inout String,
+        ladder: inout [InsertionStrategy],
+        gathered: inout String?
+    ) async -> DraftStop? {
+        if draftStopRequested { return .byUser }
+        guard !piece.isEmpty else { return nil }
+        if gathered != nil {
+            gathered?.append(piece)
+            return nil
+        }
+
+        guard TextInserter.isStillFocused(field.element) else { return .focusMoved }
+        guard await draftSettles(in: field.element, to: inserted) else { return .fieldChanged }
+
+        guard let strategy = await TextInserter.append(piece, into: field.element, using: ladder) else {
+            // Only the first piece may fall back to gathering: nothing is in
+            // the field yet, so the whole draft can still go in as one paste.
+            guard inserted.isEmpty else { return .couldNotInsert }
+            gathered = piece
+            return nil
+        }
+        ladder = [strategy]
+        inserted += piece
+        return nil
+    }
+
+    /// Whether the field holds exactly the draft so far. Typed pieces can still
+    /// be landing when the next one is ready, so this waits briefly before
+    /// deciding the user changed something.
+    private func draftSettles(in element: AXUIElement, to inserted: String) async -> Bool {
+        let deadline = ContinuousClock.now.advanced(by: .milliseconds(500))
+        while true {
+            if InsertionPlan.draftIsIntact(inserted: inserted, current: AX.rawValue(element, kAXValueAttribute)) {
+                return true
+            }
+            guard ContinuousClock.now < deadline else { return false }
+            try? await Task.sleep(for: .milliseconds(10))
+        }
+    }
+
+    private func reportDraftStop(_ stop: DraftStop, wroteSomething: Bool, anchor: NSRect?) {
+        let kept = wroteSomething ? "What's written so far stays." : "Nothing was added."
+        let (title, detail) = switch stop {
+        case .byUser: ("Draft stopped", kept)
+        case .focusMoved: ("Focus moved", kept)
+        case .fieldChanged: ("Draft stopped", "The text box changed while it was being written.")
+        case .couldNotInsert: ("Couldn't keep typing here", kept)
+        }
+        toast.show(title: title, detail: detail, symbol: "stop.circle", tone: .warning, near: anchor)
+        Log.insert.info("Draft stopped (\(String(describing: stop), privacy: .public)).")
+    }
+
+    // MARK: Drafting on request
+
+    /// Not a vault key: vault keys are snake_case words, and this can't be one.
+    private static let draftRowKey = "control.draft-answer"
+
+    private static let draftRow = PickerRow(
+        key: draftRowKey,
+        label: "Write an answer",
+        category: "Draft",
+        preview: "A first draft from what you've told Control",
+        sensitive: false,
+        score: 0,
+        symbol: "pencil.line"
+    )
+
+    /// The picker offers a draft for any empty box once drafting is set up,
+    /// so a question the policy didn't recognise is one pick away. An answer
+    /// is never drafted on top of text.
+    private func canOfferDraft(for field: FocusedField) -> Bool {
+        preferences.canDraftAnswers && field.context.isEmpty && !field.context.isSecureField
+    }
+
+    /// The front window's title: in a browser, the page title, which usually
+    /// names the organization asking ("Application for … at …").
+    private func windowTitle(of app: NSRunningApplication) -> String? {
+        let appElement = AXUIElementCreateApplication(app.processIdentifier)
+        return AX.element(appElement, kAXFocusedWindowAttribute).flatMap { AX.string($0, kAXTitleAttribute) }
     }
 
     private func presentPicker(
@@ -241,7 +689,8 @@ final class FillController {
         preselected: String?,
         hint: String?
     ) {
-        let rows = pickerRows(for: ranked)
+        var rows = pickerRows(for: ranked)
+        if canOfferDraft(for: field) { rows.insert(Self.draftRow, at: 0) }
         guard !rows.isEmpty else {
             toast.show(title: BlockReason.emptyVault.message, detail: "", symbol: "tray", tone: .warning, near: anchor)
             return
@@ -255,6 +704,13 @@ final class FillController {
             near: anchor,
             onCommit: { [weak self] key in
                 guard let self else { return }
+                if key == Self.draftRowKey {
+                    Task {
+                        await self.restoreFocusIfNeeded(field)
+                        await self.draftAnswer(field, anchor: anchor)
+                    }
+                    return
+                }
                 // A deliberate pick ends the cycle. Pressing again means "show me
                 // the list again", not "try the next one".
                 self.preferences.rememberProfile(self.vault.activeProfileID, for: field.context)

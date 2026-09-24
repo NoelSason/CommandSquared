@@ -3,36 +3,52 @@ import ApplicationServices
 import ControlKit
 import Foundation
 
-/// Completes a field as you type, the way an address bar does.
+/// Offers to complete a field as you type, the way an address bar does — and
+/// never touches the field until you say so.
 ///
-/// The completion is inserted as *selected* text rather than drawn as grey ghost
-/// text, because the pixels inside another app's text field are not ours to draw
-/// on. Selection carries the same meaning and behaves correctly for free:
+/// The suggestion is shown in a small hint beside the field. Nothing is written
+/// while you type:
 ///
-///   - keep typing        → the selection is replaced, as with any selected text
-///   - Tab, Return, click → focus leaves and the completion stays, i.e. accepted
-///   - Delete             → the selection is removed, i.e. rejected
-///   - ⌘⌘                 → cycle to the next candidate
+///   - keep typing  → the hint goes, and a fresh one may follow your next pause
+///   - Tab          → the suggestion is filled in (Tab is taken only while the
+///                    hint is up; see `TabInterceptor`)
+///   - the trigger  → the same, for when Tab can't be taken
 ///
-/// That last point is why this works at all. A global event monitor can observe
-/// keystrokes but cannot swallow them, so Tab could never have been intercepted.
-/// Selected-text completion needs no interception: every key already does the
-/// right thing.
+/// An earlier version wrote each suggestion into the field as selected text
+/// while the user was still typing. Writing the whole value into a field
+/// someone is typing into races their next keystroke, and in web forms it also
+/// goes behind the page's back — so correctly typed text came out mangled.
 @MainActor
 final class InlineSuggester {
+    /// What is on offer: the field, what it held when the offer was made, and
+    /// the stored value that would complete it.
+    private struct Offer {
+        let element: AXUIElement
+        let typed: String
+        let value: String
+        /// Where the typed text ends inside `value`; see `CompletionMatcher`.
+        let matchEnd: Int
+    }
+
+    /// Long enough to read the hint and decide; short enough that a Tab much
+    /// later still means "next field".
+    private static let offerLifetime: Duration = .seconds(8)
+
     private var keyMonitor: Any?
+    private var dismissMonitor: Any?
+    private var appSwitchObserver: NSObjectProtocol?
     private var debounce: Task<Void, Never>?
+    private var expiry: Task<Void, Never>?
 
     /// The element we last computed candidates for, so the expensive context read
     /// happens once per field rather than once per keystroke.
     private var cachedElement: AXUIElement?
     private var cachedContext: FieldContext?
     private var candidates: [String] = []
-    private var candidateIndex = 0
+    private var offer: Offer?
 
-    /// What we last wrote, so our own edit is not mistaken for the user's.
-    private var suggestedValue: String?
-    private var typedPrefix: String?
+    private let hint = SuggestionHintPresenter()
+    private let tab = TabInterceptor()
 
     private let vault: VaultStore
     private let cache: MatchCache
@@ -43,14 +59,18 @@ final class InlineSuggester {
         self.vault = vault
         self.cache = cache
         self.preferences = preferences
+        tab.onTab = { [weak self] in
+            Task { await self?.accept(viaTab: true) }
+        }
     }
 
-    var hasActiveSuggestion: Bool { suggestedValue != nil }
+    var hasActiveSuggestion: Bool { offer != nil }
 
     // MARK: Lifecycle
 
     func start() {
         stop()
+        tab.install()
         keyMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
             MainActor.assumeIsolated { self?.keyPressed(event) }
         }
@@ -61,28 +81,23 @@ final class InlineSuggester {
         keyMonitor = nil
         debounce?.cancel()
         debounce = nil
-        clearState()
-    }
-
-    private func clearState() {
+        withdraw()
+        tab.uninstall()
         cachedElement = nil
         cachedContext = nil
         candidates = []
-        candidateIndex = 0
-        suggestedValue = nil
-        typedPrefix = nil
     }
 
     // MARK: Typing
 
     private func keyPressed(_ event: NSEvent) {
-        // Any modifier chord is a command, not typing.
-        guard event.modifierFlags.intersection([.command, .control, .option]).isEmpty else {
-            suggestedValue = nil
-            return
-        }
-
+        // Whatever was on offer was for the text before this key.
+        withdraw()
         debounce?.cancel()
+
+        // Any modifier chord is a command, not typing.
+        guard event.modifierFlags.intersection([.command, .control, .option]).isEmpty else { return }
+
         debounce = Task { [weak self] in
             try? await Task.sleep(for: SuggestionPolicy.idleBeforeSuggesting)
             guard !Task.isCancelled else { return }
@@ -90,25 +105,23 @@ final class InlineSuggester {
         }
     }
 
+    /// Works out an offer and shows it. Reads the field; never writes to it.
     private func suggest() async {
         guard AX.isTrusted else { return }
         let systemWide = AXUIElementCreateSystemWide()
         guard let element = AX.element(systemWide, kAXFocusedUIElementAttribute) else {
-            clearState()
+            cachedElement = nil
             return
         }
 
-        let typed = (AX.rawValue(element, kAXValueAttribute) ?? "")
-        // Our own completion still sitting there — leave it alone.
-        guard typed != suggestedValue else { return }
+        let typed = AX.rawValue(element, kAXValueAttribute) ?? ""
 
         if cachedElement == nil || !AX.same(cachedElement!, element) {
             await rebuildCandidates(for: element)
+            // The user may have typed again while the field was being read.
+            guard !Task.isCancelled else { return }
         }
-        guard let context = cachedContext, !candidates.isEmpty else {
-            suggestedValue = nil
-            return
-        }
+        guard let context = cachedContext, !candidates.isEmpty else { return }
 
         // Whether this field may be completed at all is decided in ControlKit.
         if let refusal = SuggestionPolicy.refusal(
@@ -118,13 +131,13 @@ final class InlineSuggester {
             caretAtEnd: caretIsAtEnd(of: element, length: typed.count)
         ) {
             Log.match.debug("No suggestion: \(refusal.rawValue, privacy: .public)")
-            suggestedValue = nil
             return
         }
 
-        typedPrefix = typed
-        candidateIndex = 0
-        offerCandidate(at: 0, into: element, typed: typed)
+        guard let offer = firstOffer(in: element, typed: typed, context: context),
+              AX.rawValue(element, kAXValueAttribute) == typed
+        else { return }
+        present(offer)
     }
 
     /// Only suggest when the caret sits at the end with nothing selected —
@@ -158,58 +171,124 @@ final class InlineSuggester {
         )
     }
 
-    // MARK: Cycling
-
-    /// Called when the trigger fires while a suggestion is on screen.
-    @discardableResult
-    func cycle() -> Bool {
-        guard suggestedValue != nil,
-              let element = cachedElement,
-              let typed = typedPrefix,
-              !candidates.isEmpty
-        else { return false }
-
-        for offset in 1 ... candidates.count {
-            let index = (candidateIndex + offset) % candidates.count
-            if offerCandidate(at: index, into: element, typed: typed) {
-                candidateIndex = index
-                return true
-            }
-        }
-        return false
-    }
-
-    // MARK: Writing the completion
-
-    @discardableResult
-    private func offerCandidate(at index: Int, into element: AXUIElement, typed: String) -> Bool {
-        guard candidates.indices.contains(index), let context = cachedContext else { return false }
-
-        for offset in 0 ..< candidates.count {
-            let candidate = candidates[(index + offset) % candidates.count]
-            // An unreadable value is simply not suggested; nothing is inserted
-            // unless the user accepts a suggestion that did read.
+    /// The best candidate whose stored value continues what was typed. An
+    /// unreadable value is simply not offered.
+    private func firstOffer(in element: AXUIElement, typed: String, context: FieldContext) -> Offer? {
+        for candidate in candidates {
             guard let value = try? vault.resolvedValue(for: candidate, context: context),
                   !value.isEmpty,
                   let matchEnd = CompletionMatcher.matchEnd(of: typed, in: value)
             else { continue }
-
-            // The whole stored value goes in — scheme and all — and only the part
-            // beyond what was typed is selected. Typing "githu" therefore yields a
-            // real https URL rather than a bare hostname.
-            let completion = value
-            guard AX.set(element, kAXValueAttribute, completion as CFTypeRef) else { return false }
-
-            var range = CFRange(location: matchEnd, length: completion.count - matchEnd)
-            if let selection = AXValueCreate(.cfRange, &range) {
-                AX.set(element, kAXSelectedTextRangeAttribute, selection)
-            }
-
-            suggestedValue = completion
-            candidateIndex = (index + offset) % candidates.count
-            Log.match.debug("Suggested \(candidate, privacy: .public) inline.")
-            return true
+            return Offer(element: element, typed: typed, value: value, matchEnd: matchEnd)
         }
-        return false
+        return nil
+    }
+
+    // MARK: The hint
+
+    private func present(_ offer: Offer) {
+        self.offer = offer
+        if tab.isAvailable { tab.arm() }
+        hint.show(
+            value: offer.value,
+            key: tab.isAvailable ? "Tab" : triggerKey,
+            near: AX.frame(offer.element)
+        )
+
+        // Clicking, scrolling or switching away means the user has moved on.
+        dismissMonitor = NSEvent.addGlobalMonitorForEvents(
+            matching: [.leftMouseDown, .rightMouseDown, .scrollWheel]
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.withdraw() }
+        }
+        appSwitchObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.withdraw() }
+        }
+        expiry = Task { [weak self] in
+            try? await Task.sleep(for: Self.offerLifetime)
+            guard !Task.isCancelled else { return }
+            self?.withdraw()
+        }
+    }
+
+    /// Takes the offer down, and gives Tab back.
+    private func withdraw() {
+        offer = nil
+        tab.disarm()
+        hint.hide()
+        expiry?.cancel()
+        expiry = nil
+        if let dismissMonitor { NSEvent.removeMonitor(dismissMonitor) }
+        dismissMonitor = nil
+        if let appSwitchObserver { NSWorkspace.shared.notificationCenter.removeObserver(appSwitchObserver) }
+        appSwitchObserver = nil
+    }
+
+    /// The trigger, as the hint names it when Tab can't be taken.
+    private var triggerKey: String {
+        switch preferences.triggerMode {
+        case .doubleCommand: "⌘⌘"
+        case .doubleControl: "⌃⌃"
+        case .chord: preferences.triggerDescription
+        }
+    }
+
+    // MARK: Filling
+
+    /// Called when the trigger fires. With a suggestion showing, the trigger
+    /// fills it in; otherwise it's an ordinary fill.
+    func acceptFromTrigger() async -> Bool {
+        guard offer != nil else { return false }
+        await accept(viaTab: false)
+        return true
+    }
+
+    /// Fills the offer in — only if the field is still the one it was made for
+    /// and still holds exactly what it did. A Tab that can't be used is put back.
+    private func accept(viaTab: Bool) async {
+        guard let offer else {
+            if viaTab { TabInterceptor.repostTab() }
+            return
+        }
+        withdraw()
+
+        let systemWide = AXUIElementCreateSystemWide()
+        guard let focused = AX.element(systemWide, kAXFocusedUIElementAttribute),
+              AX.same(focused, offer.element),
+              AX.rawValue(offer.element, kAXValueAttribute) == offer.typed
+        else {
+            if viaTab { TabInterceptor.repostTab() }
+            return
+        }
+
+        let text = replaceTyped(offer) ? offer.value : String(offer.value.dropFirst(offer.matchEnd))
+        guard let strategy = await TextInserter.insert(text, into: offer.element, allowClipboard: true) else {
+            Log.insert.error("Couldn't fill an accepted suggestion.")
+            return
+        }
+        Log.insert.info("Filled a suggestion via \(strategy.rawValue, privacy: .public).")
+    }
+
+    /// Whether to put the whole stored value in place of what was typed, so
+    /// "githu" becomes the full https URL and "NOEL" takes the stored case.
+    ///
+    /// Only when the typed text can be selected and the selection reads back:
+    /// otherwise the rest of the value goes in after the caret, which is always
+    /// safe. A plain prefix never needs replacing.
+    private func replaceTyped(_ offer: Offer) -> Bool {
+        guard !offer.value.hasPrefix(offer.typed) else { return false }
+
+        var wanted = CFRange(location: 0, length: offer.typed.utf16.count)
+        guard let selection = AXValueCreate(.cfRange, &wanted),
+              AX.set(offer.element, kAXSelectedTextRangeAttribute, selection),
+              let current = AX.copy(offer.element, kAXSelectedTextRangeAttribute),
+              CFGetTypeID(current) == AXValueGetTypeID()
+        else { return false }
+
+        var range = CFRange()
+        guard AXValueGetValue(current as! AXValue, .cfRange, &range) else { return false }
+        return range.location == wanted.location && range.length == wanted.length
     }
 }
